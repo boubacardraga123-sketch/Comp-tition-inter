@@ -956,7 +956,7 @@
       </div>
       <div class="landing-divider"></div>
       <div class="landing-stat">
-        <div class="landing-stat-num">158+</div>
+        <div class="landing-stat-num">370+</div>
         <div class="landing-stat-lbl">Questions</div>
       </div>
       <div class="landing-divider"></div>
@@ -1020,6 +1020,18 @@
       <div id="s-dashboard" class="admin-section active">
         <div class="section-title">📊 TABLEAU DE BORD</div>
         <div class="stats-bar" id="dash-stats"></div>
+
+        <!-- RÉPONSES EN DIRECT -->
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-weight:700;color:var(--gold);font-family:'Orbitron',sans-serif;font-size:0.9rem;letter-spacing:1px;">⚡ RÉPONSES EN DIRECT</div>
+            <button class="btn btn-outline btn-sm" onclick="clearLiveAnswers()">🗑 Effacer</button>
+          </div>
+          <div id="dash-live" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;">
+            <div style="color:var(--silver);font-size:0.85rem;text-align:center;padding:20px;">En attente des joueurs…</div>
+          </div>
+        </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="card">
             <div style="font-weight:700;margin-bottom:12px;color:var(--accent);">🏅 Top 5 Joueurs</div>
@@ -1899,6 +1911,8 @@ function autoExpire(q){
   quizAnswers.push(false);
   showFeedback(false, 'Temps écoulé ! ⏰', q.correct);
   document.getElementById('q-next-btn').style.display='block';
+  // Envoyer au tableau de bord admin (temps écoulé)
+  pushLiveAnswer(currentPlayer.name, q, -1, false);
 }
 
 function selectOption(idx){
@@ -1920,6 +1934,8 @@ function selectOption(idx){
   });
   showFeedback(correct, correct?'✅ Bonne réponse !':'❌ Mauvaise réponse', q.correct);
   document.getElementById('q-next-btn').style.display='block';
+  // Envoyer la réponse au tableau de bord admin
+  pushLiveAnswer(currentPlayer.name, q, idx, correct);
 }
 
 function showFeedback(ok, msg, correctIdx){
@@ -2001,6 +2017,75 @@ function savePlayerState(){
     d.players[idx].completedLevels = currentPlayer.completedLevels;
     saveData(d);
   }
+}
+
+// ════════════════════════════════════════
+// RÉPONSES EN DIRECT (admin dashboard)
+// ════════════════════════════════════════
+const _liveAnswers = [];   // stockage en mémoire (session courante)
+
+function pushLiveAnswer(playerName, q, chosenIdx, correct){
+  const letters = ['A','B','C','D'];
+  const lv = LEVELS.find(l=>l.id===currentLevelId);
+  const ptsGagnes = correct ? (lv ? lv.pts : 0) : 0;
+  const ptsTotal = currentPlayer ? (currentPlayer.score || 0) : 0;
+  _liveAnswers.unshift({
+    playerName,
+    question: q.text,
+    matiere: q.matiere || '—',
+    niveau: lv ? lv.name : '—',
+    chosen: chosenIdx >= 0 ? letters[chosenIdx] : '⏰',
+    correct,
+    correctLetter: letters[q.correct],
+    ptsGagnes,
+    ptsTotal,
+    time: new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+  });
+  // Garder max 50 entrées
+  if(_liveAnswers.length > 50) _liveAnswers.pop();
+  renderLiveAnswers();
+}
+
+function renderLiveAnswers(){
+  const el = document.getElementById('dash-live');
+  if(!el) return;
+  if(!_liveAnswers.length){
+    el.innerHTML='<div style="color:var(--silver);font-size:0.85rem;text-align:center;padding:20px;">En attente des joueurs…</div>';
+    return;
+  }
+  el.innerHTML = _liveAnswers.map(a=>`
+    <div style="
+      display:flex;align-items:center;gap:10px;
+      padding:8px 12px;border-radius:10px;
+      background:${a.correct?'rgba(0,230,118,0.08)':'rgba(255,23,68,0.08)'};
+      border-left:3px solid ${a.correct?'var(--green)':'var(--red)'};
+      font-size:0.82rem;
+    ">
+      <span style="font-size:1rem;">${a.correct?'✅':'❌'}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;color:#E0E8FF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ${a.playerName}
+          <span style="font-weight:400;color:var(--silver);font-size:0.75rem;margin-left:6px;">${a.niveau} · ${a.matiere}</span>
+        </div>
+        <div style="color:var(--silver);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${a.question}">
+          ${a.question.length>55?a.question.slice(0,55)+'…':a.question}
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-weight:700;color:${a.correct?'var(--green)':'var(--red)'};">
+          ${a.chosen} ${!a.correct?'<span style="color:var(--silver);font-weight:400;">(bonne:'+a.correctLetter+')</span>':''}
+        </div>
+        ${a.correct?`<div style="color:var(--gold);font-size:0.75rem;font-weight:700;">+${a.ptsGagnes} pts</div>`:''}
+        <div style="color:var(--accent);font-size:0.72rem;font-weight:600;">Total : ${a.ptsTotal} pts</div>
+        <div style="color:var(--silver);font-size:0.7rem;">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function clearLiveAnswers(){
+  _liveAnswers.length = 0;
+  renderLiveAnswers();
 }
 
 // ════════════════════════════════════════
@@ -2568,6 +2653,285 @@ function loadSampleQuestions(){
     {text:"Qu'est-ce que le droit international humanitaire ?", options:["Les règles qui protègent les victimes des conflits armés","Les lois fiscales internationales","Les règles du commerce mondial","Les droits des immigrants"], correct:0, level:5, matiere:"Éducation Civique"},
     {text:"Quelle institution judiciaire internationale juge les crimes contre l'humanité ?", options:["ONU","INTERPOL","Cour Pénale Internationale (CPI)","Cour d'Appel de Paris"], correct:2, level:5, matiere:"Éducation Civique"},
 
+    // ════════════════════════════════════════════════════════════════
+    // NOUVELLES QUESTIONS — NIVEAU 1 : PRIMAIRE (CP–CM2)
+    // ════════════════════════════════════════════════════════════════
+
+    // -- Mathématiques Primaire supplémentaires --
+    {text:"Combien vaut 9 × 7 ?", options:["56","62","63","72"], correct:2, level:1, matiere:"Mathématiques"},
+    {text:"Quel est le double de 45 ?", options:["80","85","90","95"], correct:2, level:1, matiere:"Mathématiques"},
+    {text:"Combien de minutes y a-t-il dans 2 heures ?", options:["100","110","120","130"], correct:2, level:1, matiere:"Mathématiques"},
+    {text:"Quel est le résultat de 256 + 374 ?", options:["620","630","640","650"], correct:1, level:1, matiere:"Mathématiques"},
+    {text:"Combien vaut la moitié de 96 ?", options:["46","48","50","52"], correct:1, level:1, matiere:"Mathématiques"},
+    {text:"Un triangle a combien de côtés ?", options:["2","3","4","5"], correct:1, level:1, matiere:"Mathématiques"},
+    {text:"Combien font 1000 − 237 ?", options:["763","773","763","753"], correct:0, level:1, matiere:"Mathématiques"},
+    {text:"Quel est le chiffre des dizaines dans 583 ?", options:["5","8","3","0"], correct:1, level:1, matiere:"Mathématiques"},
+    {text:"Quelle est l'aire d'un carré de côté 7 cm ?", options:["28 cm²","42 cm²","49 cm²","56 cm²"], correct:2, level:1, matiere:"Mathématiques"},
+    {text:"Combien de grammes y a-t-il dans 2 kilogrammes ?", options:["200 g","1000 g","2000 g","500 g"], correct:2, level:1, matiere:"Mathématiques"},
+    {text:"Quel nombre suit 999 ?", options:["998","1000","1001","990"], correct:1, level:1, matiere:"Mathématiques"},
+    {text:"Combien vaut 4/5 de 100 ?", options:["60","70","80","90"], correct:2, level:1, matiere:"Mathématiques"},
+
+    // -- Français Primaire supplémentaires --
+    {text:"Quel est le masculin de 'reine' ?", options:["roi","prince","duc","seigneur"], correct:0, level:1, matiere:"Français"},
+    {text:"Quel est le pluriel de 'oeil' ?", options:["oeils","oeilles","yeux","oeillets"], correct:2, level:1, matiere:"Français"},
+    {text:"Dans 'Le soleil brille', quel est le verbe ?", options:["Le","soleil","brille","aucun"], correct:2, level:1, matiere:"Français"},
+    {text:"Quel est le synonyme de 'rapide' ?", options:["lent","vite","grand","fort"], correct:1, level:1, matiere:"Français"},
+    {text:"Quel est le contraire de 'propre' ?", options:["beau","sale","petit","neuf"], correct:1, level:1, matiere:"Français"},
+    {text:"Combien de lettres y a-t-il dans l'alphabet français ?", options:["24","25","26","27"], correct:2, level:1, matiere:"Français"},
+    {text:"Lequel de ces mots est un nom commun ?", options:["courir","beau","maison","vite"], correct:2, level:1, matiere:"Français"},
+    {text:"Quel est le féminin de 'boulanger' ?", options:["boulangère","boulangeuse","boulagère","boulangesse"], correct:0, level:1, matiere:"Français"},
+    {text:"Quel est le temps de 'Il mange' ?", options:["Futur","Passé composé","Présent","Imparfait"], correct:2, level:1, matiere:"Français"},
+    {text:"Que signifie le suffixe '-eur' dans 'chanteur' ?", options:["Celui qui chante","Lieu où l'on chante","Manière de chanter","Action de chanter"], correct:0, level:1, matiere:"Français"},
+
+    // -- Sciences Naturelles Primaire --
+    {text:"De quoi une plante a-t-elle besoin pour pousser ?", options:["Seulement de l'eau","Eau, lumière et sels minéraux","Seulement la lumière","Seulement la terre"], correct:1, level:1, matiere:"Biologie"},
+    {text:"Quel animal pond des œufs ET allaite ses petits ?", options:["Le crocodile","L'ornithorynque","La vache","Le serpent"], correct:1, level:1, matiere:"Biologie"},
+    {text:"Quel organe permet à l'homme de respirer ?", options:["Le cœur","Le foie","Les poumons","Les reins"], correct:2, level:1, matiere:"Biologie"},
+    {text:"Les végétaux fabriquent leur nourriture grâce à :", options:["La respiration","La photosynthèse","La digestion","La transpiration"], correct:1, level:1, matiere:"Biologie"},
+    {text:"Quel est le petit de la vache ?", options:["Veau","Agneau","Poulain","Chevreau"], correct:0, level:1, matiere:"Biologie"},
+    {text:"Quel animal est un mammifère ?", options:["Aigle","Crocodile","Baleine","Serpent"], correct:2, level:1, matiere:"Biologie"},
+    {text:"La Guinée est connue pour ses grandes réserves de :", options:["Pétrole","Diamants","Bauxite","Charbon"], correct:2, level:1, matiere:"Géographie"},
+
+    // -- Histoire Guinée Primaire supplémentaires --
+    {text:"Comment s'appelle la monnaie utilisée en Guinée ?", options:["Franc CFA","Euro","Franc guinéen","Dalasi"], correct:2, level:1, matiere:"Histoire"},
+    {text:"Quel est le nom complet du pays 'Guinée' ?", options:["République de Guinée","Guinée Équatoriale","Guinée-Bissau","Guinée Française"], correct:0, level:1, matiere:"Histoire"},
+    {text:"Quel grand empire médiéval africain précéda l'Empire du Mali ?", options:["Empire du Ghana","Empire Songhaï","Empire Kanem","Empire du Bénin"], correct:0, level:1, matiere:"Histoire"},
+    {text:"Quelle ville est la deuxième plus grande ville de Guinée ?", options:["Kindia","Labé","Kankan","Nzérékoré"], correct:2, level:1, matiere:"Géographie"},
+    {text:"Le mont Nimba culmine à environ :", options:["1000 m","1200 m","1752 m","2000 m"], correct:2, level:1, matiere:"Géographie"},
+
+    // -- Éducation Civique Primaire supplémentaires --
+    {text:"Quel est le premier devoir d'un élève à l'école ?", options:["Jouer","Travailler sérieusement","Manger","Dormir"], correct:1, level:1, matiere:"Éducation Civique"},
+    {text:"Que doit-on faire quand on trouve un objet perdu appartenant à autrui ?", options:["Le garder","Le vendre","Le remettre au propriétaire ou aux autorités","Le jeter"], correct:2, level:1, matiere:"Éducation Civique"},
+    {text:"Lequel de ces gestes protège l'environnement ?", options:["Brûler les ordures","Jeter les déchets dans la rivière","Planter des arbres","Couper les forêts"], correct:2, level:1, matiere:"Éducation Civique"},
+    {text:"Quel est le symbole de la République de Guinée sur son hymne ?", options:["La Liberté","La Marseillaise","Liberté (hymne national guinéen)","Africa"], correct:2, level:1, matiere:"Éducation Civique"},
+    {text:"Que représente le jaune dans le drapeau guinéen ?", options:["Le soleil et les richesses du sol","La justice","Le peuple","La mer"], correct:0, level:1, matiere:"Éducation Civique"},
+
+    // ════════════════════════════════════════════════════════════════
+    // NOUVELLES QUESTIONS — NIVEAU 2 : COLLÈGE (7ème–9ème)
+    // ════════════════════════════════════════════════════════════════
+
+    // -- Mathématiques Collège supplémentaires --
+    {text:"Quel est le résultat de (−3) × (−5) ?", options:["−15","−8","15","8"], correct:2, level:2, matiere:"Mathématiques"},
+    {text:"Résous : 2x + 6 = 18. Quelle est la valeur de x ?", options:["4","5","6","7"], correct:2, level:2, matiere:"Mathématiques"},
+    {text:"Comment s'appelle un triangle dont les trois côtés sont égaux ?", options:["Scalène","Isocèle","Équilatéral","Rectangle"], correct:2, level:2, matiere:"Mathématiques"},
+    {text:"Quelle est la formule de l'aire d'un cercle de rayon r ?", options:["2πr","πr²","πr","2πr²"], correct:1, level:2, matiere:"Mathématiques"},
+    {text:"Quel est le PPCM de 4 et 6 ?", options:["8","10","12","24"], correct:2, level:2, matiere:"Mathématiques"},
+    {text:"Combien vaut 2⁵ ?", options:["10","16","32","64"], correct:2, level:2, matiere:"Mathématiques"},
+    {text:"Si un article coûte 15 000 GNF et qu'on applique une TVA de 20 %, quel est le prix final ?", options:["16 000 GNF","17 000 GNF","18 000 GNF","20 000 GNF"], correct:2, level:2, matiere:"Mathématiques"},
+    {text:"Quelle est la valeur absolue de −13 ?", options:["−13","0","13","26"], correct:2, level:2, matiere:"Mathématiques"},
+    {text:"Dans la proportion 3/4 = x/12, que vaut x ?", options:["7","8","9","10"], correct:2, level:2, matiere:"Mathématiques"},
+    {text:"Quelle est la moyenne de 10, 14, 16, 20 ?", options:["14","15","16","17"], correct:1, level:2, matiere:"Mathématiques"},
+
+    // -- Physique-Chimie Collège supplémentaires --
+    {text:"Quel est le symbole chimique du sodium ?", options:["So","Na","Sd","Nm"], correct:1, level:2, matiere:"Physique-Chimie"},
+    {text:"Quel est le symbole chimique de l'oxygène ?", options:["Ox","Oz","O","Om"], correct:2, level:2, matiere:"Physique-Chimie"},
+    {text:"Quelle est la formule chimique de l'eau ?", options:["HO","H2O","H2O2","HO2"], correct:1, level:2, matiere:"Physique-Chimie"},
+    {text:"Quel état de la matière n'a pas de forme propre ni de volume propre ?", options:["Solide","Liquide","Gaz","Plasma"], correct:2, level:2, matiere:"Physique-Chimie"},
+    {text:"Quelle force attire les objets vers le centre de la Terre ?", options:["La magnétique","La gravitation","La friction","L'élasticité"], correct:1, level:2, matiere:"Physique-Chimie"},
+    {text:"L'unité de mesure de l'intensité électrique est :", options:["Volt","Watt","Ampère","Ohm"], correct:2, level:2, matiere:"Physique-Chimie"},
+    {text:"Quel instrument mesure la température ?", options:["Baromètre","Thermomètre","Manomètre","Hygromètre"], correct:1, level:2, matiere:"Physique-Chimie"},
+    {text:"À quelle température l'eau bout-elle à la pression atmosphérique normale ?", options:["90°C","95°C","100°C","110°C"], correct:2, level:2, matiere:"Physique-Chimie"},
+    {text:"Quel type de circuit permet à tous les appareils de fonctionner même si l'un est défaillant ?", options:["Circuit en série","Circuit en parallèle","Circuit mixte","Circuit fermé"], correct:1, level:2, matiere:"Physique-Chimie"},
+    {text:"Un acide versé dans une solution basique donne une réaction appelée :", options:["Oxydation","Neutralisation","Précipitation","Combustion"], correct:1, level:2, matiere:"Physique-Chimie"},
+
+    // -- Biologie Collège supplémentaires --
+    {text:"Quel type de vaisseaux transportent le sang du cœur vers les organes ?", options:["Les veines","Les artères","Les capillaires","Les lymphatiques"], correct:1, level:2, matiere:"Biologie"},
+    {text:"Qu'est-ce que la digestion ?", options:["La transformation des aliments en substances assimilables","La production d'énergie","La reproduction des cellules","L'élimination des déchets"], correct:0, level:2, matiere:"Biologie"},
+    {text:"Quel est le rôle principal des globules rouges ?", options:["Défendre contre les infections","Transporter l'oxygène","Produire des hormones","Coaguler le sang"], correct:1, level:2, matiere:"Biologie"},
+    {text:"Comment s'appelle la reproduction qui nécessite deux parents ?", options:["Reproduction asexuée","Reproduction sexuée","Scissiparité","Bourgeonnement"], correct:1, level:2, matiere:"Biologie"},
+    {text:"Quelle vitamine est synthétisée par la peau grâce au soleil ?", options:["Vitamine A","Vitamine B","Vitamine C","Vitamine D"], correct:3, level:2, matiere:"Biologie"},
+    {text:"Quelle maladie est causée par le paludisme (malaria) ?", options:["Un virus","Une bactérie","Un champignon","Un parasite (Plasmodium)"], correct:3, level:2, matiere:"Biologie"},
+    {text:"Quel organe produit la bile ?", options:["Le pancréas","Le rein","Le foie","L'estomac"], correct:2, level:2, matiere:"Biologie"},
+    {text:"Combien de types de dents possède l'adulte humain ?", options:["2","3","4","5"], correct:2, level:2, matiere:"Biologie"},
+
+    // -- Histoire Collège supplémentaires --
+    {text:"Quel empire africain était dirigé par Mansa Moussa, célèbre pour son pèlerinage à La Mecque ?", options:["Empire du Ghana","Empire du Mali","Empire Songhaï","Empire du Kanem"], correct:1, level:2, matiere:"Histoire"},
+    {text:"Qui était Askia Mohamed ?", options:["Un roi du Mali","Un chef de l'Empire Songhaï","Un guerrier peul","Un sultan du Maroc"], correct:1, level:2, matiere:"Histoire"},
+    {text:"Quel événement marqua la fin de l'esclavage dans les colonies françaises ?", options:["La Révolution française de 1789","L'abolition de 1848","La Première Guerre mondiale","L'indépendance de Haïti"], correct:1, level:2, matiere:"Histoire"},
+    {text:"Qui a créé l'Organisation de l'Unité Africaine (OUA) en 1963 ?", options:["Sékou Touré seul","Les chefs d'État africains à Addis-Abeba","Les Nations Unies","La France et l'Angleterre"], correct:1, level:2, matiere:"Histoire"},
+    {text:"Comment s'appelait la résistance de Samory Touré contre les Français ?", options:["La Résistance de l'Ouest","La Résistance du Fouta","L'Empire Wassoulou en guerre","Le Djihad de Samory"], correct:2, level:2, matiere:"Histoire"},
+    {text:"En quelle année la traite des esclaves fut-elle interdite en Grande-Bretagne ?", options:["1787","1807","1848","1865"], correct:1, level:2, matiere:"Histoire"},
+
+    // -- Géographie Collège supplémentaires --
+    {text:"Quelle est la superficie approximative de la Guinée ?", options:["145 000 km²","245 857 km²","350 000 km²","180 000 km²"], correct:1, level:2, matiere:"Géographie"},
+    {text:"Quel est le principal port de la Guinée ?", options:["Port de Kamsar","Port de Conakry","Port de Kindia","Port de Boké"], correct:1, level:2, matiere:"Géographie"},
+    {text:"Quelle région de Guinée est la plus boisée ?", options:["Guinée Maritime","Moyenne Guinée","Haute Guinée","Guinée Forestière"], correct:3, level:2, matiere:"Géographie"},
+    {text:"Quel pays africain est le plus peuplé ?", options:["Afrique du Sud","Éthiopie","Nigéria","Égypte"], correct:2, level:2, matiere:"Géographie"},
+    {text:"Quel est le plus long fleuve du monde ?", options:["L'Amazone","Le Congo","Le Nil","Le Mississippi"], correct:2, level:2, matiere:"Géographie"},
+    {text:"Comment s'appelle la zone climatique où se trouve la Guinée ?", options:["Zone tempérée","Zone tropicale","Zone équatoriale","Zone aride"], correct:1, level:2, matiere:"Géographie"},
+
+    // -- Éducation Civique Collège supplémentaires --
+    {text:"Qu'est-ce que la démocratie ?", options:["Le gouvernement d'un seul homme","Le gouvernement du peuple par le peuple","Le gouvernement des militaires","Le gouvernement des riches"], correct:1, level:2, matiere:"Éducation Civique"},
+    {text:"Quel organe est chargé de rendre la justice en Guinée ?", options:["Le parlement","Le gouvernement","Les tribunaux et cours","L'armée"], correct:2, level:2, matiere:"Éducation Civique"},
+    {text:"Que signifie ONU ?", options:["Organisation Nationale Unie","Organisation des Nations Unies","Office des Nations Unies","Ordre des Nations Unies"], correct:1, level:2, matiere:"Éducation Civique"},
+    {text:"En quelle année a été fondée l'Union Africaine (UA) ?", options:["1963","1991","2001","2010"], correct:2, level:2, matiere:"Éducation Civique"},
+    {text:"Quel document international protège les droits de l'enfant ?", options:["Déclaration universelle des droits de l'homme","Convention des droits de l'enfant (CDE)","Charte africaine","Traité de Lisbonne"], correct:1, level:2, matiere:"Éducation Civique"},
+
+    // -- Anglais Collège --
+    {text:"What is the capital of England?", options:["Manchester","Birmingham","London","Liverpool"], correct:2, level:2, matiere:"Anglais"},
+    {text:"How do you say 'bonjour' in English?", options:["Goodbye","Hello","Please","Thank you"], correct:1, level:2, matiere:"Anglais"},
+    {text:"Which is correct: 'She ____ to school every day.'", options:["go","goes","going","gone"], correct:1, level:2, matiere:"Anglais"},
+    {text:"What does 'beautiful' mean in French?", options:["Grand","Beau/Belle","Petit","Fort"], correct:1, level:2, matiere:"Anglais"},
+    {text:"How many days are in a week?", options:["5","6","7","8"], correct:2, level:2, matiere:"Anglais"},
+
+    // ════════════════════════════════════════════════════════════════
+    // NOUVELLES QUESTIONS — NIVEAU 3 : COLLÈGE SUPÉRIEUR / BREVET
+    // ════════════════════════════════════════════════════════════════
+
+    // -- Mathématiques Niveau 3 supplémentaires --
+    {text:"Quel est le discriminant de l'équation x² − 5x + 6 = 0 ?", options:["1","4","5","6"], correct:0, level:3, matiere:"Mathématiques"},
+    {text:"Quelle est la solution de x² = 25 ?", options:["x = 5","x = −5","x = 5 ou x = −5","x = 25"], correct:2, level:3, matiere:"Mathématiques"},
+    {text:"Comment appelle-t-on deux droites qui ne se coupent jamais ?", options:["Sécantes","Perpendiculaires","Parallèles","Obliques"], correct:2, level:3, matiere:"Mathématiques"},
+    {text:"Quel théorème relie les côtés d'un triangle rectangle ?", options:["Théorème de Thalès","Théorème de Pythagore","Théorème d'Euclide","Théorème de Pascal"], correct:1, level:3, matiere:"Mathématiques"},
+    {text:"Si sin(30°) = 0,5, que vaut cos(60°) ?", options:["0","0,5","1","√2/2"], correct:1, level:3, matiere:"Mathématiques"},
+    {text:"Quelle est la dérivée de f(x) = 3x² ?", options:["3x","6x","9x","x²"], correct:1, level:3, matiere:"Mathématiques"},
+    {text:"Que vaut log₁₀(1000) ?", options:["2","3","4","10"], correct:1, level:3, matiere:"Mathématiques"},
+    {text:"Comment calcule-t-on la moyenne d'une série statistique ?", options:["Valeur centrale","Somme des valeurs divisée par l'effectif total","Valeur la plus fréquente","Valeur maximale − valeur minimale"], correct:1, level:3, matiere:"Mathématiques"},
+    {text:"Quel est le développement de (a + b)² ?", options:["a² + b²","a² + ab + b²","a² + 2ab + b²","2a² + 2b²"], correct:2, level:3, matiere:"Mathématiques"},
+
+    // -- Physique-Chimie Niveau 3 supplémentaires --
+    {text:"Quelle est la loi d'Ohm ?", options:["U = R/I","U = I × R","I = U × R","R = U × I"], correct:1, level:3, matiere:"Physique-Chimie"},
+    {text:"Quel est le nombre de protons dans l'atome d'azote (N) ?", options:["6","7","8","14"], correct:1, level:3, matiere:"Physique-Chimie"},
+    {text:"Quelle est la formule chimique du sel de cuisine ?", options:["KCl","CaCO3","NaCl","MgSO4"], correct:2, level:3, matiere:"Physique-Chimie"},
+    {text:"L'unité de mesure de la résistance électrique est :", options:["Ampère","Volt","Ohm","Watt"], correct:2, level:3, matiere:"Physique-Chimie"},
+    {text:"Quelle est la vitesse de la lumière dans le vide ?", options:["150 000 km/s","200 000 km/s","300 000 km/s","400 000 km/s"], correct:2, level:3, matiere:"Physique-Chimie"},
+    {text:"Qu'est-ce qu'un acide selon Brønsted-Lowry ?", options:["Un donneur de proton (H⁺)","Un accepteur d'électrons","Un donneur d'électrons","Un accepteur de proton"], correct:0, level:3, matiere:"Physique-Chimie"},
+    {text:"Quel gaz est produit lors de la combustion complète du carbone ?", options:["CO","CO2","SO2","NO2"], correct:1, level:3, matiere:"Physique-Chimie"},
+    {text:"Quelle est l'unité de la puissance électrique ?", options:["Joule","Volt","Ampère","Watt"], correct:3, level:3, matiere:"Physique-Chimie"},
+
+    // -- Biologie Niveau 3 supplémentaires --
+    {text:"Quelle molécule porte l'information génétique ?", options:["ARN","ATP","ADN","ADP"], correct:2, level:3, matiere:"Biologie"},
+    {text:"Comment s'appelle la division cellulaire qui produit des cellules sexuelles ?", options:["Mitose","Méiose","Cytokinèse","Amitose"], correct:1, level:3, matiere:"Biologie"},
+    {text:"Quel est le rôle des anticorps ?", options:["Transporter l'oxygène","Neutraliser les agents pathogènes","Produire de l'énergie","Digérer les graisses"], correct:1, level:3, matiere:"Biologie"},
+    {text:"Quel est le nombre de chambres du cœur humain ?", options:["2","3","4","5"], correct:2, level:3, matiere:"Biologie"},
+    {text:"Quel hormone est sécrétée par le pancréas pour réguler la glycémie ?", options:["Adrénaline","Thyroxine","Insuline","Cortisol"], correct:2, level:3, matiere:"Biologie"},
+    {text:"Qu'est-ce que la respiration cellulaire ?", options:["L'acte de respirer par les poumons","La production d'énergie (ATP) à partir du glucose dans les cellules","La photosynthèse inversée","L'absorption d'oxygène par les feuilles"], correct:1, level:3, matiere:"Biologie"},
+
+    // -- Histoire Niveau 3 supplémentaires --
+    {text:"Quel fut le premier État indépendant d'Afrique subsaharienne à l'époque moderne ?", options:["Sénégal","Ghana","Nigéria","Libéria (1847)"], correct:3, level:3, matiere:"Histoire"},
+    {text:"Quelle conférence a mis fin à la Première Guerre mondiale ?", options:["Conférence de Berlin","Conférence de Yalta","Conférence de Versailles (1919)","Conférence de Genève"], correct:2, level:3, matiere:"Histoire"},
+    {text:"Quel mouvement prônait la libération des Noirs et la valorisation de la culture africaine ?", options:["Le socialisme","La Négritude","Le libéralisme","Le nationalisme arabe"], correct:1, level:3, matiere:"Histoire"},
+    {text:"Qui était Aimé Césaire ?", options:["Un président guinéen","Un poète martiniquais co-fondateur de la Négritude","Un général français","Un chef traditionnel africain"], correct:1, level:3, matiere:"Histoire"},
+    {text:"Quelle organisation a remplacé l'OUA en 2001 ?", options:["ONU","CEDEAO","Union Africaine","UEMOA"], correct:2, level:3, matiere:"Histoire"},
+    {text:"Quel accord international de 1994 a libéralisé le commerce mondial ?", options:["Accord de Schengen","Accord de GATT/OMC","Traité de Maastricht","Accord de Paris"], correct:1, level:3, matiere:"Histoire"},
+
+    // -- Géographie Niveau 3 supplémentaires --
+    {text:"Comment s'appelle la grande dépression économique mondiale des années 1930 ?", options:["La Grande Récession","La Grande Dépression","Le Krach de Wall Street","La Crise pétrolière"], correct:1, level:3, matiere:"Géographie"},
+    {text:"Quel est le plus grand désert du monde ?", options:["Le Kalahari","Le Sahara","L'Atacama","Le Gobi"], correct:1, level:3, matiere:"Géographie"},
+    {text:"Quel continent est le plus grand du monde ?", options:["Amérique","Afrique","Asie","Europe"], correct:2, level:3, matiere:"Géographie"},
+    {text:"Quelle ressource naturelle fait de la Guinée l'un des pays les plus riches d'Afrique ?", options:["Le pétrole","La bauxite (aluminium)","Le diamant","Le cuivre"], correct:1, level:3, matiere:"Géographie"},
+    {text:"Quel est le pays le plus grand d'Afrique ?", options:["Soudan","Nigeria","Algérie","RDC"], correct:2, level:3, matiere:"Géographie"},
+
+    // -- Anglais Niveau 3 --
+    {text:"Which tense is used in: 'She has been studying for three hours'?", options:["Simple past","Present perfect continuous","Past continuous","Future perfect"], correct:1, level:3, matiere:"Anglais"},
+    {text:"What does 'persevere' mean?", options:["To give up","To continue despite difficulties","To succeed easily","To rest"], correct:1, level:3, matiere:"Anglais"},
+    {text:"Which country is NOT an English-speaking country?", options:["Canada","Australia","Brazil","New Zealand"], correct:2, level:3, matiere:"Anglais"},
+    {text:"What is the passive form of 'The teacher corrects the test'?", options:["The test corrects the teacher","The test is corrected by the teacher","The test was corrected","The teacher is correcting"], correct:1, level:3, matiere:"Anglais"},
+
+    // ════════════════════════════════════════════════════════════════
+    // NOUVELLES QUESTIONS — NIVEAU 4 : LYCÉE (Seconde–Première)
+    // ════════════════════════════════════════════════════════════════
+
+    // -- Mathématiques Lycée supplémentaires --
+    {text:"Quelle est la limite de (sin x)/x quand x tend vers 0 ?", options:["0","∞","1","−1"], correct:2, level:4, matiere:"Mathématiques"},
+    {text:"Quelle est la dérivée de f(x) = eˣ ?", options:["x·eˣ","eˣ","e^(x−1)","1"], correct:1, level:4, matiere:"Mathématiques"},
+    {text:"Comment appelle-t-on une suite dont chaque terme est obtenu en ajoutant une constante au précédent ?", options:["Suite géométrique","Suite arithmétique","Suite convergente","Suite de Fibonacci"], correct:1, level:4, matiere:"Mathématiques"},
+    {text:"Quel est le résultat de l'intégrale de x dx de 0 à 2 ?", options:["1","2","4","8"], correct:1, level:4, matiere:"Mathématiques"},
+    {text:"Quelle est la formule de la probabilité conditionnelle P(A|B) ?", options:["P(A∩B)/P(A)","P(A∩B)/P(B)","P(A)×P(B)","P(A+B)"], correct:1, level:4, matiere:"Mathématiques"},
+    {text:"Dans un repère orthonormé, l'équation d'un cercle de centre (a,b) et rayon r est :", options:["(x−a)+(y−b)=r","(x−a)²+(y−b)²=r²","x²+y²=r","(x+a)²+(y+b)²=r"], correct:1, level:4, matiere:"Mathématiques"},
+    {text:"Quelle est la solution de l'équation exponentielle eˣ = 7 ?", options:["x = 7","x = ln(7)","x = log(7)","x = e⁷"], correct:1, level:4, matiere:"Mathématiques"},
+    {text:"Combien de solutions réelles possède x² + 4 = 0 ?", options:["0","1","2","Infini"], correct:0, level:4, matiere:"Mathématiques"},
+
+    // -- Physique-Chimie Lycée supplémentaires --
+    {text:"Quelle est la première loi de Newton (principe d'inertie) ?", options:["Tout corps reste au repos ou en mouvement rectiligne uniforme si aucune force ne lui est appliquée","F = ma","Action et réaction sont égales et opposées","L'énergie se conserve"], correct:0, level:4, matiere:"Physique-Chimie"},
+    {text:"Quel est le principe de la conservation de l'énergie ?", options:["L'énergie peut être créée","L'énergie totale d'un système isolé reste constante","L'énergie disparaît lors des transformations","L'énergie ne peut se transformer"], correct:1, level:4, matiere:"Physique-Chimie"},
+    {text:"Quelle est la formule de l'énergie cinétique ?", options:["Ec = mgh","Ec = ½mv²","Ec = mv","Ec = F×d"], correct:1, level:4, matiere:"Physique-Chimie"},
+    {text:"Quelle loi énonce que la pression d'un gaz est proportionnelle à sa température à volume constant ?", options:["Loi de Boyle","Loi de Gay-Lussac","Loi de Charles","Loi d'Avogadro"], correct:1, level:4, matiere:"Physique-Chimie"},
+    {text:"Qu'est-ce que le pH d'une solution ?", options:["La concentration en ions Na⁺","La mesure de l'acidité ou basicité d'une solution","La masse molaire de la solution","La température de la solution"], correct:1, level:4, matiere:"Physique-Chimie"},
+    {text:"Quelle est la configuration électronique du carbone (Z=6) ?", options:["1s²2s²2p¹","1s²2s²2p²","1s²2s²2p³","1s²2s²2p⁴"], correct:1, level:4, matiere:"Physique-Chimie"},
+    {text:"Qu'est-ce qu'une réaction d'oxydoréduction ?", options:["Un échange de protons","Un échange d'électrons entre deux espèces chimiques","Une réaction acido-basique","Une réaction endothermique"], correct:1, level:4, matiere:"Physique-Chimie"},
+    {text:"Quelle est la relation entre la fréquence f et la longueur d'onde λ d'une onde ?", options:["f = λ/v","λ = v/f","v = λ/f","λ = f×v"], correct:1, level:4, matiere:"Physique-Chimie"},
+
+    // -- Biologie Lycée supplémentaires --
+    {text:"Quelle est la structure en double hélice de l'ADN a été découverte par ?", options:["Louis Pasteur et Koch","Watson et Crick","Darwin et Wallace","Mendel et Morgan"], correct:1, level:4, matiere:"Biologie"},
+    {text:"Qu'est-ce que la transcription en biologie moléculaire ?", options:["La traduction du code génétique en protéine","La copie de l'ADN en ARNm","La réplication de l'ADN","La division cellulaire"], correct:1, level:4, matiere:"Biologie"},
+    {text:"Quel est le rôle des mitochondries ?", options:["Produire des protéines","Stocker l'ADN","Produire de l'énergie (ATP) par respiration cellulaire","Synthétiser des lipides"], correct:2, level:4, matiere:"Biologie"},
+    {text:"Qu'est-ce que l'évolution selon Darwin ?", options:["Les espèces sont fixes et immuables","Les espèces évoluent par sélection naturelle","Les espèces évoluent aléatoirement","Dieu crée les espèces"], correct:1, level:4, matiere:"Biologie"},
+    {text:"Quel type de liaison unit les acides aminés dans une protéine ?", options:["Liaison ionique","Liaison covalente simple","Liaison peptidique","Liaison hydrogène"], correct:2, level:4, matiere:"Biologie"},
+    {text:"Qu'est-ce que la sélection naturelle ?", options:["Le choix artificiel de l'homme","La survie et reproduction préférentielle des individus les mieux adaptés","La mutation aléatoire des gènes","L'extinction des espèces"], correct:1, level:4, matiere:"Biologie"},
+
+    // -- Histoire Lycée supplémentaires --
+    {text:"Qu'est-ce que la décolonisation ?", options:["La colonisation d'un nouveau territoire","Le processus par lequel les pays colonisés obtiennent leur indépendance","La domination économique d'un pays","La migration des peuples"], correct:1, level:4, matiere:"Histoire"},
+    {text:"Quelle fut la principale cause de la Seconde Guerre mondiale ?", options:["L'assassinat de François-Ferdinand","La montée du nazisme en Allemagne et l'expansionnisme de Hitler","La crise économique de 1929 seulement","Le traité de Versailles seulement"], correct:1, level:4, matiere:"Histoire"},
+    {text:"Qui fut Nelson Mandela ?", options:["Un dictateur sud-africain","Un anti-apartheid qui devint le premier président noir d'Afrique du Sud","Un militant nigérian","Un chef de guerre congolais"], correct:1, level:4, matiere:"Histoire"},
+    {text:"Quel système politique pratiquait l'apartheid en Afrique du Sud ?", options:["La démocratie","La ségrégation raciale institutionnalisée","Le communisme","Le fédéralisme"], correct:1, level:4, matiere:"Histoire"},
+    {text:"Que fut la Guerre Froide (1947-1991) ?", options:["Une guerre militaire entre USA et URSS","Une tension géopolitique et idéologique entre le bloc occidental et le bloc soviétique","Une guerre commerciale","Une guerre en Asie uniquement"], correct:1, level:4, matiere:"Histoire"},
+    {text:"En quelle année fut proclamée l'indépendance de la Guinée ?", options:["2 octobre 1956","2 octobre 1958","4 novembre 1958","14 juillet 1958"], correct:1, level:4, matiere:"Histoire"},
+
+    // -- Géographie Lycée supplémentaires --
+    {text:"Qu'est-ce que le PIB (Produit Intérieur Brut) ?", options:["La richesse des individus","La valeur totale des biens et services produits dans un pays en un an","Le budget de l'État","Les exportations d'un pays"], correct:1, level:4, matiere:"Géographie"},
+    {text:"Quel phénomène provoque la montée des eaux des océans ?", options:["La déforestation","Le réchauffement climatique et la fonte des glaces","La pollution des mers","Les tremblements de terre"], correct:1, level:4, matiere:"Géographie"},
+    {text:"Qu'est-ce que l'urbanisation ?", options:["La construction de routes","Le mouvement de population des zones rurales vers les villes","La création de forêts","La pollution urbaine"], correct:1, level:4, matiere:"Géographie"},
+    {text:"Quel est le rôle de la CEDEAO ?", options:["Organiser les élections en Afrique","Promouvoir l'intégration économique et politique en Afrique de l'Ouest","Gérer les conflits armés mondiaux","Financer les projets africains"], correct:1, level:4, matiere:"Géographie"},
+    {text:"Qu'est-ce que le taux de fécondité ?", options:["Le nombre d'enfants nés vivants par an","Le nombre moyen d'enfants par femme en âge de procréer","Le taux de mortalité infantile","Le nombre de naissances totales"], correct:1, level:4, matiere:"Géographie"},
+
+    // -- Anglais Lycée --
+    {text:"What is a metaphor?", options:["A direct comparison using 'like' or 'as'","A figure of speech that implies comparison without 'like' or 'as'","A type of rhyme","An exaggeration"], correct:1, level:4, matiere:"Anglais"},
+    {text:"Which sentence is in the future perfect tense?", options:["She will study","She will have finished by noon","She has studied","She studies"], correct:1, level:4, matiere:"Anglais"},
+    {text:"What does 'ambiguous' mean?", options:["Clear and obvious","Having multiple possible meanings","Very important","Simple and direct"], correct:1, level:4, matiere:"Anglais"},
+    {text:"Which African country is English-speaking?", options:["Guinée","Sénégal","Ghana","Côte d'Ivoire"], correct:2, level:4, matiere:"Anglais"},
+
+    // ════════════════════════════════════════════════════════════════
+    // NOUVELLES QUESTIONS — NIVEAU 5 : TERMINALE / BOSS FINAL
+    // ════════════════════════════════════════════════════════════════
+
+    // -- Mathématiques Terminale supplémentaires --
+    {text:"Quel est le résultat de la somme des angles d'un triangle sphérique ?", options:["Inférieure à 180°","Égale à 180°","Supérieure à 180°","Égale à 360°"], correct:2, level:5, matiere:"Mathématiques"},
+    {text:"Quelle est la formule de Taylor d'ordre 1 de f(x) autour de x₀ ?", options:["f(x₀)","f(x₀) + f'(x₀)(x−x₀)","f(x₀)·f'(x₀)","f'(x₀)/f(x₀)"], correct:1, level:5, matiere:"Mathématiques"},
+    {text:"Dans une loi normale N(µ, σ²), environ quel pourcentage des valeurs se trouve dans [µ−2σ, µ+2σ] ?", options:["68 %","90 %","95 %","99 %"], correct:2, level:5, matiere:"Mathématiques"},
+    {text:"Quelle est la primitive de f(x) = 1/x pour x > 0 ?", options:["1/x²","ln(x)","eˣ","−1/x²"], correct:1, level:5, matiere:"Mathématiques"},
+    {text:"Qu'est-ce qu'une matrice carrée d'ordre n ?", options:["Une matrice à n lignes","Une matrice à n lignes et n colonnes","Une matrice à n colonnes","Une matrice de déterminant n"], correct:1, level:5, matiere:"Mathématiques"},
+    {text:"Quel est le nombre complexe i² ?", options:["1","i","−1","0"], correct:2, level:5, matiere:"Mathématiques"},
+    {text:"Quelle est la limite de (1 + 1/n)ⁿ quand n tend vers +∞ ?", options:["1","2","e","π"], correct:2, level:5, matiere:"Mathématiques"},
+
+    // -- Physique-Chimie Terminale supplémentaires --
+    {text:"Quelle est la relation d'Heisenberg en physique quantique ?", options:["E = mc²","Δx·Δp ≥ ℏ/2","F = ma","E = hf"], correct:1, level:5, matiere:"Physique-Chimie"},
+    {text:"Qu'est-ce que la radioactivité ?", options:["L'émission de lumière par les corps chauds","La désintégration spontanée du noyau d'un atome instable","La réaction de fusion nucléaire","L'émission d'électrons par effet photoélectrique"], correct:1, level:5, matiere:"Physique-Chimie"},
+    {text:"Quel est le principe du réacteur nucléaire ?", options:["La fusion de noyaux d'hydrogène","La fission de noyaux d'uranium contrôlée pour produire de la chaleur","La combustion du plutonium","La désintégration radioactive naturelle"], correct:1, level:5, matiere:"Physique-Chimie"},
+    {text:"Qu'est-ce que l'effet photoélectrique expliqué par Einstein ?", options:["La diffraction de la lumière","L'émission d'électrons par un métal éclairé","La réfraction de la lumière","La dispersion de la lumière par un prisme"], correct:1, level:5, matiere:"Physique-Chimie"},
+    {text:"Quelle est la formule d'Einstein reliant masse et énergie ?", options:["F = ma","E = mc²","P = mv","W = Fd"], correct:1, level:5, matiere:"Physique-Chimie"},
+    {text:"Qu'est-ce que la demi-vie d'un élément radioactif ?", options:["Le temps pour que la totalité se désintègre","Le temps pour que la moitié des noyaux se désintègre","Le temps de production de l'élément","La durée de vie d'un atome"], correct:1, level:5, matiere:"Physique-Chimie"},
+    {text:"Quelle est la charge d'un proton ?", options:["Négative","Nulle","Positive","Variable"], correct:2, level:5, matiere:"Physique-Chimie"},
+
+    // -- Biologie Terminale supplémentaires --
+    {text:"Qu'est-ce que l'épigénétique ?", options:["Les mutations de l'ADN","Les modifications héréditaires de l'expression des gènes sans changement de séquence ADN","La duplication du génome","La réparation de l'ADN"], correct:1, level:5, matiere:"Biologie"},
+    {text:"Quel est le rôle de l'ARN de transfert (ARNt) ?", options:["Copier l'ADN","Transporter les acides aminés vers le ribosome lors de la traduction","Réguler la transcription","Dégérer les protéines usagées"], correct:1, level:5, matiere:"Biologie"},
+    {text:"Qu'est-ce que la PCR (Polymerase Chain Reaction) ?", options:["Une technique de séquençage de protéines","Une méthode d'amplification d'une séquence d'ADN in vitro","Un test sanguin","Une méthode d'imagerie médicale"], correct:1, level:5, matiere:"Biologie"},
+    {text:"Comment le VIH attaque-t-il le système immunitaire ?", options:["En détruisant les globules rouges","En infectant et détruisant les lymphocytes T CD4","En bloquant la production d'anticorps","En détruisant les plaquettes"], correct:1, level:5, matiere:"Biologie"},
+    {text:"Quel est le mécanisme de la résistance aux antibiotiques ?", options:["Les bactéries deviennent plus grandes","Des mutations génétiques permettent aux bactéries de neutraliser l'antibiotique","Les antibiotiques cessent d'être produits","Les bactéries s'hibernent"], correct:1, level:5, matiere:"Biologie"},
+
+    // -- Histoire Terminale supplémentaires --
+    {text:"Qu'est-ce que le néocolonialisme ?", options:["Une nouvelle forme de colonisation militaire","Le maintien de la domination économique et politique des anciens colonisateurs sur les pays indépendants","La colonisation spatiale","La politique d'immigration"], correct:1, level:5, matiere:"Histoire"},
+    {text:"Quel accord mit fin à l'apartheid en Afrique du Sud ?", options:["L'accord d'Oslo","Les négociations CODESA (1991-1993)","L'accord de Camp David","Le traité de Pretoria"], correct:1, level:5, matiere:"Histoire"},
+    {text:"Quel était le projet politique du panafricanisme ?", options:["Diviser l'Afrique en petits États","Unir tous les peuples africains dans une identité et politique commune","Rétablir la colonisation","Créer des frontières strictes entre pays africains"], correct:1, level:5, matiere:"Histoire"},
+    {text:"Qui est considéré comme le père du panafricanisme ?", options:["Kwame Nkrumah","Marcus Garvey et W.E.B. Du Bois","Patrice Lumumba","Sékou Touré"], correct:1, level:5, matiere:"Histoire"},
+    {text:"Quel événement a déclenché la crise de Cuba en 1962 ?", options:["L'invasion de la Baie des Cochons","L'installation de missiles soviétiques à Cuba","La révolution cubaine","Le blocus économique américain"], correct:1, level:5, matiere:"Histoire"},
+    {text:"Quelle était la doctrine de la « Politique africaine » de Sékou Touré ?", options:["L'alignement sur l'URSS","L'indépendance totale et le refus de toute tutelle étrangère (non-alignement)","L'intégration à la France","Le développement capitaliste"], correct:1, level:5, matiere:"Histoire"},
+
+    // -- Géographie Terminale supplémentaires --
+    {text:"Qu'est-ce que le développement durable ?", options:["Un développement uniquement économique","Un développement qui répond aux besoins du présent sans compromettre les générations futures","Un développement technologique accéléré","Un développement uniquement agricole"], correct:1, level:5, matiere:"Géographie"},
+    {text:"Quel accord international sur le climat a été signé à Paris en 2015 ?", options:["Protocole de Kyoto","Accord de Montréal","Accord de Paris sur le climat","Convention de Vienne"], correct:2, level:5, matiere:"Géographie"},
+    {text:"Qu'est-ce que la fracture numérique ?", options:["La panne d'un réseau informatique","L'inégalité d'accès aux technologies de l'information entre pays et populations","La coupure des câbles sous-marins","Un bug informatique majeur"], correct:1, level:5, matiere:"Géographie"},
+    {text:"Quel est l'IDH (Indice de Développement Humain) ?", options:["Un indicateur mesurant uniquement le PIB","Un indicateur composite mesurant l'espérance de vie, l'éducation et le revenu","Un indice boursier","Un indicateur de démocratie"], correct:1, level:5, matiere:"Géographie"},
+    {text:"Quels sont les principaux défis de développement de la Guinée ?", options:["Surpopulation et manque de ressources","Gouvernance, valorisation des ressources naturelles et réduction de la pauvreté","Manque de ressources naturelles","Isolement géographique total"], correct:1, level:5, matiere:"Géographie"},
+
+    // -- Anglais Terminale --
+    {text:"What literary device is used in: 'The wind whispered through the trees'?", options:["Simile","Metaphor","Personification","Alliteration"], correct:2, level:5, matiere:"Anglais"},
+    {text:"What is the subjunctive mood used for?", options:["Describing past events","Expressing wishes, hypotheses or doubts","Stating facts","Giving commands only"], correct:1, level:5, matiere:"Anglais"},
+    {text:"What does 'infrastructure' refer to in economics?", options:["The government budget","Basic physical systems of a country like roads, schools and utilities","The financial sector","The agricultural system"], correct:1, level:5, matiere:"Anglais"},
+    {text:"Which of these is an example of indirect speech?", options:["She said: 'I am tired'","She said she was tired","'I am tired,' she said","She said: She was tired"], correct:1, level:5, matiere:"Anglais"},
+    {text:"What is the main theme of Chinua Achebe's 'Things Fall Apart'?", options:["Love and romance in Nigeria","The impact of colonialism on traditional Igbo society","A war story","An economic crisis in Africa"], correct:1, level:5, matiere:"Anglais"},
+
   ];
   const d=getData();
   const ids=new Set(d.questions.map(q=>q.text));
@@ -2634,6 +2998,7 @@ function renderDashboard(){
 
   const act=d.activity||[];
   document.getElementById('dash-activity').innerHTML=act.slice(-5).reverse().map(a=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);">• ${a}</div>`).join('')||'<div style="color:var(--silver);">Aucune activité</div>';
+  renderLiveAnswers();
 }
 
 // ════════════════════════════════════════
