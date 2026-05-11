@@ -1252,11 +1252,11 @@
       </div>
     </div>
     <h1 class="landing-title">BHDS<br><span style="font-size:0.65em;letter-spacing:6px;background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ARENA ÉDUCATIVE</span></h1>
-    <p class="landing-desc">Quiz interclasse / interécole — programme guinéen.<br>5 niveaux · 60 questions par niveau · 16es → Finale · Classement en temps réel.</p>
+    <p class="landing-desc">Quiz interclasse / interécole — programme guinéen.<br>6 niveaux · 60 questions par niveau · Qualification → 16es → Finale · Matchs en direct · Classement en temps réel.</p>
 
     <div class="landing-stats-row">
       <div class="landing-stat">
-        <div class="landing-stat-num">5</div>
+        <div class="landing-stat-num">6</div>
         <div class="landing-stat-lbl">Niveaux</div>
       </div>
       <div class="landing-divider"></div>
@@ -1266,7 +1266,7 @@
       </div>
       <div class="landing-divider"></div>
       <div class="landing-stat">
-        <div class="landing-stat-num">945+</div>
+        <div class="landing-stat-num">1010+</div>
         <div class="landing-stat-lbl">Questions</div>
       </div>
       <div class="landing-divider"></div>
@@ -1277,12 +1277,12 @@
     </div>
 
     <div class="landing-features">
-      <div class="landing-feature"><span>📐</span> Maths · Arithmétique · Géométrie</div>
-      <div class="landing-feature"><span>✍️</span> Français · Dissertation · Romans</div>
-      <div class="landing-feature"><span>⚗️</span> Physique-Chimie · Sciences de la Vie</div>
-      <div class="landing-feature"><span>🌍</span> Histoire · Géographie · Civique</div>
-      <div class="landing-feature"><span>💡</span> Philosophie · Économie · Anglais</div>
-      <div class="landing-feature"><span>🏅</span> Classement & Compétition en direct</div>
+      <div class="landing-feature"><span>🎯</span> Qualification · Phase d'accès</div>
+      <div class="landing-feature"><span>⚔️</span> 16es → Quarts → Demis → Finale</div>
+      <div class="landing-feature"><span>📐</span> Maths · Physique-Chimie · Sciences</div>
+      <div class="landing-feature"><span>✍️</span> Français · Histoire · Géographie</div>
+      <div class="landing-feature"><span>💡</span> Civique · Économie · Anglais</div>
+      <div class="landing-feature"><span>⚡</span> Matchs en direct · Arbitrage admin</div>
     </div>
 
     <!-- COMPTE À REBOURS -->
@@ -1393,6 +1393,7 @@
         </div>
         <div class="tabs">
           <div class="tab active" onclick="filterQuestions('all',this)">Toutes</div>
+          <div class="tab" onclick="filterQuestions('0',this)">🎯 Qualif</div>
           <div class="tab" onclick="filterQuestions('1',this)">Niveau 1</div>
           <div class="tab" onclick="filterQuestions('2',this)">Niveau 2</div>
           <div class="tab" onclick="filterQuestions('3',this)">Niveau 3</div>
@@ -1507,6 +1508,275 @@
 
 <!-- input caché pour le code joueur (utilisé par auto-login URL) -->
 <input type="hidden" id="player-code-input">
+
+<!-- ══════════ MODAL MATCH EN DIRECT ══════════ -->
+<style>
+  /* ── OVERLAY MATCH ── */
+  #modal-live-match {
+    display:none; position:fixed; inset:0; z-index:9000;
+    background:rgba(5,10,20,0.97);
+    backdrop-filter:blur(16px);
+    overflow-y:auto;
+    flex-direction:column; align-items:center; justify-content:flex-start;
+    padding:20px 16px 40px;
+  }
+  #modal-live-match.open { display:flex; }
+
+  .lm-header {
+    width:100%; max-width:860px;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .lm-title {
+    font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:900;
+    background:linear-gradient(135deg,var(--gold),var(--red));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:3px; text-transform:uppercase;
+  }
+  .lm-phase-badge {
+    background:rgba(124,77,255,0.25); border:1px solid rgba(124,77,255,0.5);
+    color:#CE93D8; border-radius:20px; padding:4px 14px;
+    font-size:0.78rem; font-weight:700; letter-spacing:1px;
+  }
+
+  /* ── SCOREBOARD DES DEUX JOUEURS ── */
+  .lm-scoreboard {
+    width:100%; max-width:860px;
+    display:grid; grid-template-columns:1fr auto 1fr; gap:12px;
+    align-items:center; margin-bottom:20px;
+  }
+  .lm-player-card {
+    background:var(--card-bg); border:2px solid var(--border);
+    border-radius:16px; padding:16px 18px;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    transition:border-color 0.3s, box-shadow 0.3s;
+    position:relative;
+  }
+  .lm-player-card.answering {
+    border-color:var(--accent); box-shadow:0 0 20px rgba(0,229,255,0.25);
+  }
+  .lm-player-card.p1-answered {
+    border-color:var(--green); box-shadow:0 0 16px rgba(0,230,118,0.2);
+  }
+  .lm-player-card.p2-answered {
+    border-color:var(--green); box-shadow:0 0 16px rgba(0,230,118,0.2);
+  }
+  .lm-player-name {
+    font-family:'Orbitron',sans-serif; font-size:0.88rem; font-weight:700;
+    color:#E0E8FF; text-align:center; letter-spacing:1px;
+  }
+  .lm-player-school { font-size:0.72rem; color:var(--silver); text-align:center; }
+  .lm-match-score {
+    font-family:'Orbitron',sans-serif; font-size:2.2rem; font-weight:900;
+    color:var(--gold); line-height:1;
+    text-shadow:0 0 18px rgba(255,215,0,0.6);
+  }
+  .lm-match-score-label { font-size:0.6rem; color:var(--silver); text-transform:uppercase; letter-spacing:1.5px; }
+  .lm-vs-center {
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .lm-vs-text {
+    font-family:'Orbitron',sans-serif; font-size:1.6rem; font-weight:900;
+    color:var(--red); text-shadow:0 0 14px rgba(255,23,68,0.5);
+    animation:pulse-trophy 1.5s ease-in-out infinite;
+  }
+  .lm-q-counter {
+    font-size:0.72rem; color:var(--silver); letter-spacing:1px;
+    text-transform:uppercase; text-align:center;
+  }
+
+  /* ── QUESTION ZONE ── */
+  .lm-question-zone {
+    width:100%; max-width:860px;
+    background:var(--card-bg); border:1.5px solid var(--border);
+    border-radius:20px; padding:24px 26px;
+    margin-bottom:16px;
+  }
+  .lm-q-meta {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:14px;
+  }
+  .lm-q-matiere {
+    background:rgba(0,229,255,0.12); border:1px solid rgba(0,229,255,0.3);
+    color:var(--accent); border-radius:20px; padding:3px 12px;
+    font-size:0.75rem; font-weight:700; letter-spacing:0.5px;
+  }
+  .lm-timer-display {
+    font-family:'Orbitron',sans-serif; font-size:1.4rem; font-weight:900;
+    color:var(--accent); min-width:40px; text-align:right;
+    transition:color 0.3s;
+  }
+  .lm-timer-display.danger { color:var(--red); animation:blink-dot 0.5s ease-in-out infinite; }
+  .lm-q-text {
+    font-size:1.05rem; font-weight:600; color:#E0E8FF;
+    line-height:1.55; margin-bottom:20px;
+  }
+  .lm-options-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  }
+  .lm-option-btn {
+    padding:12px 16px; border-radius:12px; border:2px solid rgba(255,255,255,0.1);
+    background:rgba(255,255,255,0.04); color:#E0E8FF;
+    font-family:'Exo 2',sans-serif; font-size:0.9rem; font-weight:600;
+    cursor:pointer; transition:all 0.2s; text-align:left;
+    display:flex; align-items:center; gap:10px;
+  }
+  .lm-option-btn:hover:not(:disabled) {
+    background:rgba(0,229,255,0.1); border-color:var(--accent); transform:translateY(-1px);
+  }
+  .lm-option-btn:disabled { cursor:not-allowed; }
+  .lm-option-btn.correct {
+    border-color:var(--green); background:rgba(0,230,118,0.15); color:var(--green);
+  }
+  .lm-option-btn.wrong {
+    border-color:var(--red); background:rgba(255,23,68,0.12); color:#FF8A80;
+  }
+  .lm-option-letter {
+    font-family:'Orbitron',sans-serif; font-size:0.75rem; font-weight:900;
+    background:rgba(255,255,255,0.1); border-radius:6px;
+    width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; color:var(--accent);
+  }
+  .lm-option-btn.correct .lm-option-letter { background:rgba(0,230,118,0.25); color:var(--green); }
+  .lm-option-btn.wrong .lm-option-letter { background:rgba(255,23,68,0.2); color:var(--red); }
+
+  /* ── FEEDBACK RÉPONSE ── */
+  .lm-answer-status {
+    display:flex; gap:14px; justify-content:center; margin-bottom:12px;
+    width:100%; max-width:860px;
+  }
+  .lm-ans-chip {
+    padding:6px 18px; border-radius:20px; font-size:0.8rem; font-weight:700;
+    flex:1; text-align:center; border:1px solid;
+  }
+  .lm-ans-chip.waiting { border-color:rgba(176,190,197,0.3); color:var(--silver); background:rgba(255,255,255,0.03); }
+  .lm-ans-chip.ok { border-color:rgba(0,230,118,0.5); color:var(--green); background:rgba(0,230,118,0.1); }
+  .lm-ans-chip.fail { border-color:rgba(255,23,68,0.4); color:#FF8A80; background:rgba(255,23,68,0.08); }
+  .lm-ans-chip.timeout { border-color:rgba(255,165,0,0.4); color:var(--gold2); background:rgba(255,165,0,0.08); }
+
+  /* ── BARRE DE PROGRESSION DES QUESTIONS ── */
+  .lm-progress-dots {
+    display:flex; gap:6px; justify-content:center; margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .lm-pdot {
+    width:12px; height:12px; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.15);
+    background:transparent; transition:all 0.3s;
+  }
+  .lm-pdot.active { border-color:var(--accent); background:rgba(0,229,255,0.3); }
+  .lm-pdot.p1-ok { border-color:var(--green); background:var(--green); }
+  .lm-pdot.p2-ok { border-color:#00B0FF; background:#00B0FF; }
+  .lm-pdot.both-ok { border-color:var(--gold); background:var(--gold); }
+  .lm-pdot.miss { border-color:var(--red); background:rgba(255,23,68,0.4); }
+
+  /* ── RÉSULTAT FINAL DU MATCH ── */
+  .lm-result-overlay {
+    display:none; position:absolute; inset:0; z-index:10;
+    background:rgba(5,10,20,0.96); border-radius:18px;
+    flex-direction:column; align-items:center; justify-content:center;
+    padding:30px; gap:14px; text-align:center;
+  }
+  .lm-result-overlay.show { display:flex; }
+  #modal-live-match .result-wrap {
+    position:relative; width:100%; max-width:860px;
+  }
+  .lm-result-icon { font-size:3.5rem; }
+  .lm-result-title {
+    font-family:'Orbitron',sans-serif; font-size:1.4rem; font-weight:900;
+    color:var(--gold); letter-spacing:2px;
+  }
+  .lm-result-winner {
+    font-size:1.1rem; font-weight:700; color:#E0E8FF;
+    background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.4);
+    border-radius:12px; padding:10px 24px; margin:6px 0;
+  }
+  .lm-result-scores {
+    font-size:0.9rem; color:var(--silver);
+  }
+  .lm-result-actions { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+</style>
+
+<div id="modal-live-match">
+  <div class="lm-header">
+    <div class="lm-title">⚡ MATCH EN DIRECT</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span class="lm-phase-badge" id="lm-phase-label">16èmes · Niveau 1</span>
+      <button class="btn btn-outline btn-sm" onclick="closeLiveMatch()">✕ Fermer</button>
+    </div>
+  </div>
+
+  <!-- Scoreboard -->
+  <div class="lm-scoreboard">
+    <div class="lm-player-card" id="lm-p1-card">
+      <div id="lm-p1-avatar" style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;overflow:hidden;"></div>
+      <div class="lm-player-name" id="lm-p1-name">Joueur 1</div>
+      <div class="lm-player-school" id="lm-p1-school">—</div>
+      <div class="lm-match-score" id="lm-p1-score">0</div>
+      <div class="lm-match-score-label">pts match</div>
+    </div>
+    <div class="lm-vs-center">
+      <div class="lm-vs-text">VS</div>
+      <div class="lm-q-counter" id="lm-q-counter">Q 0 / 5</div>
+      <div style="margin-top:4px;font-size:0.65rem;color:var(--silver);">Questions jouées</div>
+    </div>
+    <div class="lm-player-card" id="lm-p2-card">
+      <div id="lm-p2-avatar" style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#FF4081,#FF6D00);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;overflow:hidden;"></div>
+      <div class="lm-player-name" id="lm-p2-name">Joueur 2</div>
+      <div class="lm-player-school" id="lm-p2-school">—</div>
+      <div class="lm-match-score" id="lm-p2-score">0</div>
+      <div class="lm-match-score-label">pts match</div>
+    </div>
+  </div>
+
+  <!-- Progression des questions -->
+  <div class="lm-progress-dots" id="lm-progress-dots"></div>
+
+  <!-- Statut réponses -->
+  <div class="lm-answer-status">
+    <div class="lm-ans-chip waiting" id="lm-ans-p1">⏳ En attente…</div>
+    <div class="lm-ans-chip waiting" id="lm-ans-p2">⏳ En attente…</div>
+  </div>
+
+  <!-- Zone question / résultat (wrappée pour l'overlay résultat) -->
+  <div class="result-wrap" id="lm-result-wrap" style="width:100%;max-width:860px;">
+    <!-- Question active -->
+    <div class="lm-question-zone" id="lm-question-zone">
+      <div class="lm-q-meta">
+        <span class="lm-q-matiere" id="lm-q-matiere">—</span>
+        <span class="lm-timer-display" id="lm-timer-display">30</span>
+      </div>
+      <div class="lm-q-text" id="lm-q-text">Chargement…</div>
+      <div class="lm-options-grid" id="lm-options-grid"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+        <button class="btn btn-accent" id="lm-next-btn" onclick="lmNextQuestion()" style="display:none;">
+          Question suivante →
+        </button>
+      </div>
+    </div>
+
+    <!-- Overlay résultat final du match -->
+    <div class="lm-result-overlay" id="lm-result-overlay">
+      <div class="lm-result-icon" id="lm-result-icon">🏆</div>
+      <div class="lm-result-title" id="lm-result-title">FIN DU MATCH</div>
+      <div class="lm-result-winner" id="lm-result-winner">—</div>
+      <div class="lm-result-scores" id="lm-result-scores">—</div>
+      <div style="font-size:0.8rem;color:var(--silver);margin-top:4px;" id="lm-result-detail">—</div>
+      <div class="lm-result-actions">
+        <button class="btn btn-gold" onclick="lmSaveAndClose()">💾 Sauvegarder & Fermer</button>
+        <button class="btn btn-outline" onclick="closeLiveMatch()">Fermer sans sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicateur mode arbitre -->
+  <div style="margin-top:18px;max-width:860px;width:100%;text-align:center;">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:20px;padding:6px 18px;font-size:0.75rem;color:var(--silver);">
+      <span style="color:var(--gold);">🎙️ Mode Arbitre</span>
+      · Sélectionnez les réponses pour chaque joueur · Timer commun · Résultat automatique
+    </div>
+  </div>
+</div>
 
 <!-- ══════════ PLAYER INTERFACE ══════════ -->
 <div id="screen-player" class="screen">
@@ -1846,6 +2116,7 @@
         <div>
           <label>Niveau (1-5)</label>
           <select id="aq-level">
+            <option value="0">🎯 Qualification – Phase qualificative</option>
             <option value="1">🟢 Niveau 1 – Facile</option>
             <option value="2">🔵 Niveau 2 – Moyen</option>
             <option value="3">🟡 Niveau 3 – Difficile</option>
@@ -2794,11 +3065,12 @@ function saveData(d) {
 
 // LEVELS CONFIG
 const LEVELS = [
-  { id:1, name:'Niveau 1', icon:'🟢', label:'Starter', pts:10, color:'#00E676' },
-  { id:2, name:'Niveau 2', icon:'🔵', label:'Challenger', pts:20, color:'#00B0FF' },
-  { id:3, name:'Niveau 3', icon:'🟡', label:'Expert', pts:30, color:'#FFD740' },
-  { id:4, name:'Niveau 4', icon:'🟠', label:'Maître', pts:50, color:'#FF6D00' },
-  { id:5, name:'Boss', icon:'🔴', label:'Boss Final', pts:100, color:'#FF1744' },
+  { id:0, name:'Qualification', icon:'🎯', label:'Phase Qualif', pts:5,   color:'#B0BEC5' },
+  { id:1, name:'Niveau 1', icon:'🟢', label:'Starter',      pts:10,  color:'#00E676' },
+  { id:2, name:'Niveau 2', icon:'🔵', label:'Challenger',   pts:20,  color:'#00B0FF' },
+  { id:3, name:'Niveau 3', icon:'🟡', label:'Expert',       pts:30,  color:'#FFD740' },
+  { id:4, name:'Niveau 4', icon:'🟠', label:'Maître',       pts:50,  color:'#FF6D00' },
+  { id:5, name:'Boss',     icon:'🔴', label:'Boss Final',   pts:100, color:'#FF1744' },
 ];
 
 // ════════════════════════════════════════
@@ -3032,13 +3304,14 @@ function renderLevels(){
   if(pgpTxt) { pgpTxt.textContent = `${completed.length} / ${LEVELS.length} niveaux complétés`; }
   if(pgpPct) { pgpPct.textContent = pct+'%'; }
 
-  // Couleurs par niveau
-  const lvColors = ['#00E676','#00B0FF','#FFD740','#FF6D00','#FF1744'];
+  // Couleurs par niveau (0 à 5)
+  const lvColors = ['#B0BEC5','#00E676','#00B0FF','#FFD740','#FF6D00','#FF1744'];
 
   grid.innerHTML = LEVELS.map((lv,idx)=>{
     const qs = d.questions.filter(q=>q.level==lv.id);
     const done = completed.includes(lv.id);
-    const locked = lv.id > 1 && !completed.includes(lv.id-1);
+    // Niveau 0 toujours déverrouillé ; les suivants nécessitent le précédent
+    const locked = lv.id > 0 && !completed.includes(lv.id-1);
     const col = lvColors[idx];
     const onclick = locked
       ? `toast('🔒 Complète le niveau précédent d\\'abord','info')`
@@ -3071,7 +3344,8 @@ function startLevel(levelId){
   if(qs.length===0){ toast('Aucune question pour ce niveau. L\'admin doit en ajouter.','info'); return; }
   currentLevelId = levelId;
   const lv = LEVELS.find(l=>l.id===levelId);
-  quizQuestions = shuffle([...qs]).slice(0,Math.min(qs.length,60));
+  // Tri déterministe par id → tous les joueurs reçoivent les mêmes 60 questions
+  quizQuestions = [...qs].sort((a,b)=> String(a.id).localeCompare(String(b.id), undefined, {numeric:true})).slice(0,60);
   quizIndex = 0; quizScore = 0;
 
   document.getElementById('pv-levels').style.display='none';
@@ -3086,7 +3360,7 @@ function loadQuestion(){
   const q = quizQuestions[quizIndex];
   const total = quizQuestions.length;
   // Chronomètre adapté au niveau : plus le niveau est élevé, moins de temps
-  const _timerByLevel = { 1:60, 2:45, 3:35, 4:25, 5:20 };
+  const _timerByLevel = { 0:45, 1:60, 2:45, 3:35, 4:25, 5:20 };
   const timer = _timerByLevel[currentLevelId] || getData().settings.timer || 30;
 
   // Mettre à jour le label du temps alloué
@@ -4288,6 +4562,86 @@ function loadSampleQuestions(){
     {text:"Which of these is an example of indirect speech?", options:["She said: 'I am tired'","She said she was tired","'I am tired,' she said","She said: She was tired"], correct:1, level:5, matiere:"Anglais"},
     {text:"What is the main theme of Chinua Achebe's 'Things Fall Apart'?", options:["Love and romance in Nigeria","The impact of colonialism on traditional Igbo society","A war story","An economic crisis in Africa"], correct:1, level:5, matiere:"Anglais"},
 
+    // ════════════════════════════════════════════════════════════════
+    // NIVEAU 0 – QUALIFICATION (60 questions mixtes – programme guinéen)
+    // ════════════════════════════════════════════════════════════════
+
+    // -- Culture générale Guinée --
+    {text:"Quelle est la capitale de la Guinée ?", options:["Kankan","Labé","Conakry","Kindia"], correct:2, level:0, matiere:"Géographie"},
+    {text:"En quelle année la Guinée a-t-elle obtenu son indépendance ?", options:["1956","1958","1960","1962"], correct:1, level:0, matiere:"Histoire"},
+    {text:"Qui fut le premier président de la Guinée ?", options:["Lansana Conté","Alpha Condé","Sékou Touré","Cellou Dalein Diallo"], correct:2, level:0, matiere:"Histoire"},
+    {text:"Quelles sont les couleurs du drapeau guinéen (de gauche à droite) ?", options:["Vert, Jaune, Rouge","Rouge, Jaune, Vert","Jaune, Rouge, Vert","Rouge, Vert, Jaune"], correct:1, level:0, matiere:"Éducation Civique"},
+    {text:"Quelle est la devise de la République de Guinée ?", options:["Liberté, Égalité, Fraternité","Unité, Foi, Discipline","Travail, Justice, Solidarité","Paix, Travail, Patrie"], correct:2, level:0, matiere:"Éducation Civique"},
+    {text:"Quel est le principal minerai exporté par la Guinée ?", options:["Le pétrole","L'or","La bauxite","Le diamant"], correct:2, level:0, matiere:"Géographie"},
+    {text:"Quel fleuve prend sa source en Guinée et traverse plusieurs pays d'Afrique de l'Ouest ?", options:["Le Congo","Le Nil","Le Niger","Le Sénégal"], correct:2, level:0, matiere:"Géographie"},
+    {text:"Combien de régions administratives compte la Guinée ?", options:["5","6","7","8"], correct:2, level:0, matiere:"Géographie"},
+    {text:"Quel héros guinéen a résisté à la colonisation française à la fin du XIXe siècle ?", options:["Sékou Touré","Samory Touré","Bocar Biro","Alpha Yaya"], correct:1, level:0, matiere:"Histoire"},
+    {text:"Dans quelle région naturelle se trouve le Fouta-Djalon ?", options:["Guinée Maritime","Haute-Guinée","Moyenne-Guinée","Guinée Forestière"], correct:2, level:0, matiere:"Géographie"},
+
+    // -- Mathématiques --
+    {text:"Combien font 12 × 12 ?", options:["124","134","144","154"], correct:2, level:0, matiere:"Mathématiques"},
+    {text:"Quel est le résultat de 25 % de 200 ?", options:["25","40","50","75"], correct:2, level:0, matiere:"Mathématiques"},
+    {text:"Quelle est la valeur de π (pi) arrondie à deux décimales ?", options:["3,12","3,14","3,16","3,18"], correct:1, level:0, matiere:"Mathématiques"},
+    {text:"Quel est le carré de 13 ?", options:["156","169","176","196"], correct:1, level:0, matiere:"Mathématiques"},
+    {text:"Dans un triangle rectangle, le carré de l'hypoténuse est égal à :", options:["La somme des deux autres côtés","La somme des carrés des deux autres côtés","Le produit des deux autres côtés","La différence des carrés"], correct:1, level:0, matiere:"Mathématiques"},
+    {text:"Quel est le PGCD de 24 et 36 ?", options:["6","8","12","18"], correct:2, level:0, matiere:"Mathématiques"},
+    {text:"Si x + 7 = 15, quelle est la valeur de x ?", options:["6","7","8","9"], correct:2, level:0, matiere:"Mathématiques"},
+    {text:"Combien font 2³ × 3² ?", options:["48","72","54","36"], correct:1, level:0, matiere:"Mathématiques"},
+    {text:"Quelle est l'aire d'un cercle de rayon 7 cm ? (π ≈ 3,14)", options:["43,96 cm²","87,92 cm²","153,86 cm²","219,8 cm²"], correct:2, level:0, matiere:"Mathématiques"},
+    {text:"Un commerçant achète à 50 000 GNF et revend avec 20 % de bénéfice. Prix de vente ?", options:["55 000 GNF","58 000 GNF","60 000 GNF","65 000 GNF"], correct:2, level:0, matiere:"Mathématiques"},
+
+    // -- Français --
+    {text:"Quel est le pluriel de 'œil' ?", options:["œils","yeux","œilles","yeux ou œils"], correct:1, level:0, matiere:"Français"},
+    {text:"Dans 'Les enfants jouent', quel est le sujet ?", options:["jouent","Les","enfants","Les enfants"], correct:3, level:0, matiere:"Français"},
+    {text:"Quel temps est utilisé dans : 'Il avait mangé avant de partir' ?", options:["Imparfait","Plus-que-parfait","Passé composé","Passé simple"], correct:1, level:0, matiere:"Français"},
+    {text:"Quel est le synonyme de 'courageux' ?", options:["Timide","Peureux","Vaillant","Faible"], correct:2, level:0, matiere:"Français"},
+    {text:"Quelle figure de style est utilisée dans 'Le temps est un voleur' ?", options:["Comparaison","Métaphore","Hyperbole","Allitération"], correct:1, level:0, matiere:"Français"},
+    {text:"Quel est l'antonyme de 'générosité' ?", options:["Bonté","Avarice","Richesse","Douceur"], correct:1, level:0, matiere:"Français"},
+    {text:"Dans 'Elle chante merveilleusement', 'merveilleusement' est :", options:["Un adjectif","Un nom","Un adverbe","Un verbe"], correct:2, level:0, matiere:"Français"},
+    {text:"Quel est le féminin de 'acteur' ?", options:["Acteuse","Actrice","Acteure","Acteurette"], correct:1, level:0, matiere:"Français"},
+
+    // -- Physique-Chimie --
+    {text:"Quelle est la formule chimique de l'eau ?", options:["CO₂","H₂O","O₂","NaCl"], correct:1, level:0, matiere:"Physique-Chimie"},
+    {text:"Quelle est l'unité de mesure de l'intensité électrique ?", options:["Volt","Ohm","Ampère","Watt"], correct:2, level:0, matiere:"Physique-Chimie"},
+    {text:"Quel est le symbole chimique de l'or ?", options:["Ag","Fe","Au","Cu"], correct:2, level:0, matiere:"Physique-Chimie"},
+    {text:"La lumière visible appartient au spectre :", options:["Radio","Infrarouge","Électromagnétique","Sonore"], correct:2, level:0, matiere:"Physique-Chimie"},
+    {text:"Quelle loi exprime la relation U = R × I ?", options:["Loi de Faraday","Loi d'Ohm","Loi de Newton","Loi de Joule"], correct:1, level:0, matiere:"Physique-Chimie"},
+    {text:"Quel est le numéro atomique de l'hydrogène ?", options:["0","1","2","3"], correct:1, level:0, matiere:"Physique-Chimie"},
+    {text:"L'ébullition de l'eau à pression normale se produit à :", options:["90°C","95°C","100°C","110°C"], correct:2, level:0, matiere:"Physique-Chimie"},
+    {text:"Quelle est la formule chimique du dioxyde de carbone ?", options:["CO","CO₂","C₂O","C₂O₂"], correct:1, level:0, matiere:"Physique-Chimie"},
+
+    // -- Sciences de la Vie --
+    {text:"Quel organe du corps humain produit l'insuline ?", options:["Le foie","Les reins","Le pancréas","L'estomac"], correct:2, level:0, matiere:"Sciences de la Vie"},
+    {text:"Combien d'os compte le corps humain adulte ?", options:["186","206","226","256"], correct:1, level:0, matiere:"Sciences de la Vie"},
+    {text:"Quel groupe sanguin est dit 'donneur universel' ?", options:["A","B","AB","O"], correct:3, level:0, matiere:"Sciences de la Vie"},
+    {text:"Quelle molécule transporte l'oxygène dans le sang ?", options:["L'insuline","La kératine","L'hémoglobine","La mélanine"], correct:2, level:0, matiere:"Sciences de la Vie"},
+    {text:"La photosynthèse se déroule dans :", options:["Les racines","Les mitochondries","Les chloroplastes","Les vacuoles"], correct:2, level:0, matiere:"Sciences de la Vie"},
+    {text:"Quel est le rôle principal des globules blancs ?", options:["Transporter l'oxygène","Défendre l'organisme contre les infections","Coaguler le sang","Produire de l'énergie"], correct:1, level:0, matiere:"Sciences de la Vie"},
+
+    // -- Histoire & Géographie générale --
+    {text:"Quel est le plus grand continent du monde ?", options:["Amérique","Afrique","Asie","Europe"], correct:2, level:0, matiere:"Géographie"},
+    {text:"Quelle est la plus haute montagne du monde ?", options:["Le Kilimandjaro","Le Mont Blanc","L'Everest","Le Mont McKinley"], correct:2, level:0, matiere:"Géographie"},
+    {text:"Quel océan sépare l'Afrique de l'Amérique ?", options:["Pacifique","Indien","Arctique","Atlantique"], correct:3, level:0, matiere:"Géographie"},
+    {text:"En quelle année a eu lieu la Première Guerre mondiale ?", options:["1904–1908","1914–1918","1924–1928","1939–1945"], correct:1, level:0, matiere:"Histoire"},
+    {text:"Qui a prononcé la célèbre phrase 'I have a dream' ?", options:["Nelson Mandela","Barack Obama","Martin Luther King","Malcolm X"], correct:2, level:0, matiere:"Histoire"},
+    {text:"Quelle organisation regroupe les pays d'Afrique de l'Ouest ?", options:["UA","ONU","CEDEAO","UNESCO"], correct:2, level:0, matiere:"Histoire"},
+    {text:"En quelle année a été fondée l'ONU ?", options:["1939","1945","1948","1955"], correct:1, level:0, matiere:"Histoire"},
+    {text:"Quel pays est le plus peuplé du monde ?", options:["États-Unis","Inde","Chine","Russie"], correct:1, level:0, matiere:"Géographie"},
+
+    // -- Éducation Civique & Culture générale --
+    {text:"Quel est le rôle principal de l'école ?", options:["Garder les enfants","Transmettre des connaissances et former des citoyens","Préparer aux sports","Distribuer des repas"], correct:1, level:0, matiere:"Éducation Civique"},
+    {text:"Qu'est-ce que la démocratie ?", options:["Le gouvernement d'un roi","Le gouvernement du peuple par le peuple","Le gouvernement des militaires","Le gouvernement des riches"], correct:1, level:0, matiere:"Éducation Civique"},
+    {text:"Que signifie ONU ?", options:["Organisation Nationale Unie","Organisation des Nations Unies","Office des Nations Unies","Ordre des Nations Unies"], correct:1, level:0, matiere:"Éducation Civique"},
+    {text:"Quel document garantit les droits fondamentaux des citoyens ?", options:["Le code civil","La Constitution","Le règlement intérieur","La loi de finances"], correct:1, level:0, matiere:"Éducation Civique"},
+
+    // -- Anglais --
+    {text:"What is the capital of England?", options:["Manchester","Liverpool","Birmingham","London"], correct:3, level:0, matiere:"Anglais"},
+    {text:"How do you say 'bonjour' in English?", options:["Goodbye","Good night","Hello","Please"], correct:2, level:0, matiere:"Anglais"},
+    {text:"Which is correct: 'She ____ to school every day.'", options:["go","going","gone","goes"], correct:3, level:0, matiere:"Anglais"},
+    {text:"What does 'knowledge' mean in French ?", options:["Connaissance","Courage","Bonheur","Richesse"], correct:0, level:0, matiere:"Anglais"},
+    {text:"What is 2 + 2 in English?", options:["Three","Four","Five","Six"], correct:1, level:0, matiere:"Anglais"},
+    {text:"Which African country has English as official language?", options:["Guinée","Sénégal","Mali","Ghana"], correct:3, level:0, matiere:"Anglais"},
+
   ];
   const d=getData();
   const ids=new Set(d.questions.map(q=>q.text));
@@ -4394,6 +4748,7 @@ function genCompetition(){
   const info = document.getElementById('comp-info');
   info.innerHTML = `<span style="color:var(--accent);">👥 ${total} joueur${total>1?'s':''} inscrits</span> · <span style="color:var(--gold);">${top16.length} qualifiés pour les 16es</span> · <span style="color:var(--silver);font-size:0.8rem;">Qualifications basées sur les scores actuels</span>
     <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:0.75rem;">
+      <span style="background:rgba(176,190,197,0.12);border:1px solid rgba(176,190,197,0.3);border-radius:8px;padding:3px 10px;color:#B0BEC5;">🎯 Qualifs → <strong>Niveau Qualif</strong></span>
       <span style="background:rgba(0,230,118,0.12);border:1px solid rgba(0,230,118,0.3);border-radius:8px;padding:3px 10px;color:#00E676;">⚔️ 16es → <strong>Niveau 1</strong></span>
       <span style="background:rgba(0,176,255,0.12);border:1px solid rgba(0,176,255,0.3);border-radius:8px;padding:3px 10px;color:#00B0FF;">🥊 8es → <strong>Niveau 2</strong></span>
       <span style="background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:3px 10px;color:#FFD740;">🔥 Quarts → <strong>Niveau 3</strong></span>
@@ -4433,10 +4788,28 @@ function genCompetition(){
   qualifDiv.innerHTML = `
     <div class="comp-phase-title">🎯 Qualifications
       <span style="font-size:0.75rem;color:var(--silver);font-family:sans-serif;font-weight:400;">${total} joueur${total>1?'s':''} classés · ${top16.length} retenu${top16.length>1?'s':''}</span>
+      <span style="font-size:0.72rem;background:rgba(176,190,197,0.2);color:#B0BEC5;border:1px solid rgba(176,190,197,0.35);border-radius:20px;padding:2px 10px;font-family:sans-serif;font-weight:700;margin-left:6px;">🎯 Niveau Qualif</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:2px;">${qualifRows}</div>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--accent);">
-      ➜ Les <strong>${top16.length} premier${top16.length>1?'s':''}</strong> au classement accèdent aux <strong>16èmes de finale</strong>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <div style="font-size:0.8rem;color:var(--accent);margin-bottom:10px;">➜ Les <strong>${top16.length} premier${top16.length>1?'s':''}</strong> au classement accèdent aux <strong>16èmes de finale</strong></div>
+      ${(()=>{
+        // Générer les matchs de qualification (joueurs pairés pour s'affronter)
+        const qualifMatches = [];
+        for(let i=0; i<top16.length; i+=2){
+          if(top16[i] && top16[i+1]){
+            qualifMatches.push(`
+              <div class="comp-match" style="margin-bottom:8px;">
+                <div class="comp-match-label">Match Q${Math.floor(i/2)+1}</div>
+                <div class="comp-player qualifie"><span>${top16[i].name} <span style="font-size:0.75rem;color:var(--silver);">${top16[i].classe||''}</span></span><span class="comp-player-score">${top16[i].score||0} pts</span></div>
+                <div style="text-align:center;color:var(--silver);font-size:0.75rem;padding:2px 0;">VS</div>
+                <div class="comp-player qualifie"><span>${top16[i+1].name} <span style="font-size:0.75rem;color:var(--silver);">${top16[i+1].classe||''}</span></span><span class="comp-player-score">${top16[i+1].score||0} pts</span></div>
+                <button class="btn btn-green btn-sm" style="margin-top:8px;width:100%;font-size:0.78rem;letter-spacing:1px;" onclick="openLiveMatch('${top16[i].code}','${top16[i+1].code}','Qualification',0)">⚡ Lancer le match en direct</button>
+              </div>`);
+          }
+        }
+        return qualifMatches.length ? `<div class="comp-matches">${qualifMatches.join('')}</div>` : '';
+      })()}
     </div>
   `;
   container.appendChild(qualifDiv);
@@ -4463,11 +4836,16 @@ function genCompetition(){
         </div>`;
       };
       const p1Win = w === m.p1;
+      const canLaunch = m.p1 && m.p2;
+      const launchBtn = canLaunch
+        ? `<button class="btn btn-green btn-sm" style="margin-top:8px;width:100%;font-size:0.78rem;letter-spacing:1px;" onclick="openLiveMatch('${m.p1.code}','${m.p2.code}','${phase.label}',${phase.level})">⚡ Lancer le match en direct</button>`
+        : '';
       return `<div class="comp-match">
         <div class="comp-match-label">Match ${mi+1}</div>
         ${renderPlayer(m.p1, p1Win)}
         <div style="text-align:center;color:var(--silver);font-size:0.75rem;padding:2px 0;">VS</div>
         ${m.p2 ? renderPlayer(m.p2, !p1Win) : renderPlayer(null, false)}
+        ${launchBtn}
       </div>`;
     }).join('');
 
@@ -4746,7 +5124,335 @@ function loadBgImage(input){
 })();
 
 // ════════════════════════════════════════
-// UTILS
+// MATCH EN DIRECT – ARBITRE (admin)
+// ════════════════════════════════════════
+let _lmP1 = null;       // objet joueur 1
+let _lmP2 = null;       // objet joueur 2
+let _lmLevel = 1;       // niveau du match
+let _lmPhaseLabel = ''; // label affiché
+let _lmQuestions = [];  // questions du match
+let _lmQIndex = 0;      // index question courante
+let _lmP1Score = 0;     // score match joueur 1
+let _lmP2Score = 0;     // score match joueur 2
+let _lmP1Correct = 0;   // bonnes réponses J1
+let _lmP2Correct = 0;   // bonnes réponses J2
+let _lmTimerInterval = null;
+let _lmTimeLeft = 30;
+let _lmP1Answered = false;
+let _lmP2Answered = false;
+let _lmP1Answer = -1;   // index de réponse J1
+let _lmP2Answer = -1;   // index de réponse J2
+let _lmAnswered = false; // question résolue
+const _LM_Q_COUNT = 7;  // nombre de questions par match
+
+function openLiveMatch(code1, code2, phaseLabel, level){
+  const d = getData();
+  _lmP1 = d.players.find(p=>p.code===code1);
+  _lmP2 = d.players.find(p=>p.code===code2);
+  if(!_lmP1 || !_lmP2){ toast('Joueur introuvable','error'); return; }
+
+  _lmLevel = level || 1;
+  _lmPhaseLabel = phaseLabel || 'Match';
+  _lmP1Score = 0; _lmP2Score = 0;
+  _lmP1Correct = 0; _lmP2Correct = 0;
+  _lmQIndex = 0; _lmAnswered = false;
+
+  // Sélectionner les questions
+  const allQ = d.questions.filter(q=>q.level==_lmLevel);
+  if(allQ.length < 3){ toast('Pas assez de questions pour ce niveau (min 3)','error'); return; }
+  _lmQuestions = shuffle([...allQ]).slice(0, Math.min(allQ.length, _LM_Q_COUNT));
+
+  // Remplir l'UI
+  document.getElementById('lm-phase-label').textContent = `${phaseLabel} · Niveau ${_lmLevel}`;
+
+  // Avatar + infos J1
+  const av1 = document.getElementById('lm-p1-avatar');
+  if(_lmP1.photo){ av1.innerHTML=`<img src="${_lmP1.photo}" style="width:100%;height:100%;object-fit:cover;" alt="">`; }
+  else { av1.textContent = _lmP1.name.charAt(0).toUpperCase(); }
+  document.getElementById('lm-p1-name').textContent = _lmP1.name;
+  document.getElementById('lm-p1-school').textContent = (_lmP1.classe||'') + (_lmP1.school?' · '+_lmP1.school:'');
+  document.getElementById('lm-p1-score').textContent = '0';
+
+  // Avatar + infos J2
+  const av2 = document.getElementById('lm-p2-avatar');
+  if(_lmP2.photo){ av2.innerHTML=`<img src="${_lmP2.photo}" style="width:100%;height:100%;object-fit:cover;" alt="">`; }
+  else { av2.textContent = _lmP2.name.charAt(0).toUpperCase(); }
+  document.getElementById('lm-p2-name').textContent = _lmP2.name;
+  document.getElementById('lm-p2-school').textContent = (_lmP2.classe||'') + (_lmP2.school?' · '+_lmP2.school:'');
+  document.getElementById('lm-p2-score').textContent = '0';
+
+  // Réinitialiser l'overlay résultat
+  document.getElementById('lm-result-overlay').classList.remove('show');
+
+  // Afficher le modal
+  document.getElementById('modal-live-match').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Charger la première question
+  _lmLoadQuestion();
+}
+
+function closeLiveMatch(){
+  clearInterval(_lmTimerInterval);
+  document.getElementById('modal-live-match').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function _lmBuildProgressDots(){
+  const n = _lmQuestions.length;
+  let html = '';
+  for(let i=0; i<n; i++){
+    let cls = 'lm-pdot';
+    if(i < _lmQIndex){ cls += ' miss'; } // passé – on pourrait enrichir plus tard
+    if(i === _lmQIndex){ cls += ' active'; }
+    html += `<div class="${cls}" id="lm-dot-${i}" title="Q${i+1}"></div>`;
+  }
+  document.getElementById('lm-progress-dots').innerHTML = html;
+}
+
+function _lmLoadQuestion(){
+  if(_lmQIndex >= _lmQuestions.length){ _lmEndMatch(); return; }
+
+  _lmAnswered = false;
+  _lmP1Answered = false;
+  _lmP2Answered = false;
+  _lmP1Answer = -1;
+  _lmP2Answer = -1;
+
+  const q = _lmQuestions[_lmQIndex];
+  const total = _lmQuestions.length;
+  const letters = ['A','B','C','D'];
+
+  // Temps par niveau
+  const timerMap = { 0:45, 1:60, 2:45, 3:35, 4:25, 5:20 };
+  _lmTimeLeft = timerMap[_lmLevel] || 30;
+
+  document.getElementById('lm-q-counter').textContent = `Q ${_lmQIndex+1} / ${total}`;
+  document.getElementById('lm-q-matiere').textContent = q.matiere || '—';
+  document.getElementById('lm-q-text').textContent = q.text;
+  document.getElementById('lm-next-btn').style.display = 'none';
+
+  // Reset statut réponses
+  _lmSetAnsChip('lm-ans-p1', 'waiting', `⏳ ${_lmP1.name.split(' ')[0]}…`);
+  _lmSetAnsChip('lm-ans-p2', 'waiting', `⏳ ${_lmP2.name.split(' ')[0]}…`);
+
+  // Reset bordures des cartes joueur
+  document.getElementById('lm-p1-card').className = 'lm-player-card answering';
+  document.getElementById('lm-p2-card').className = 'lm-player-card answering';
+
+  // Options → on génère 4 boutons par joueur (2 colonnes = J1 | J2)
+  // Interface arbitre : 2 rangées de boutons (J1 à gauche, J2 à droite)
+  const grid = document.getElementById('lm-options-grid');
+  grid.style.gridTemplateColumns = '1fr 1fr';
+  grid.innerHTML = `
+    <div style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.15);border-radius:12px;padding:10px 8px;">
+      <div style="font-size:0.72rem;color:var(--accent);text-align:center;font-weight:700;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;">
+        🎮 ${_lmP1.name.split(' ')[0]}
+      </div>
+      ${q.options.map((opt,i)=>`
+        <button class="lm-option-btn" id="lm-opt-p1-${i}" onclick="lmSelectAnswer(1,${i})" style="width:100%;margin-bottom:6px;">
+          <span class="lm-option-letter">${letters[i]}</span>
+          <span style="font-size:0.82rem;">${opt}</span>
+        </button>
+      `).join('')}
+    </div>
+    <div style="background:rgba(255,64,129,0.05);border:1px solid rgba(255,64,129,0.15);border-radius:12px;padding:10px 8px;">
+      <div style="font-size:0.72rem;color:#FF4081;text-align:center;font-weight:700;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;">
+        🎮 ${_lmP2.name.split(' ')[0]}
+      </div>
+      ${q.options.map((opt,i)=>`
+        <button class="lm-option-btn" id="lm-opt-p2-${i}" onclick="lmSelectAnswer(2,${i})" style="width:100%;margin-bottom:6px;">
+          <span class="lm-option-letter">${letters[i]}</span>
+          <span style="font-size:0.82rem;">${opt}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  // Progress dots
+  _lmBuildProgressDots();
+
+  // Timer
+  _lmStartTimer(_lmTimeLeft, q);
+}
+
+function _lmStartTimer(sec, q){
+  clearInterval(_lmTimerInterval);
+  _lmTimeLeft = sec;
+  const el = document.getElementById('lm-timer-display');
+  const update = () => {
+    if(el){
+      el.textContent = _lmTimeLeft;
+      el.className = _lmTimeLeft <= 8 ? 'lm-timer-display danger' : 'lm-timer-display';
+    }
+  };
+  update();
+  _lmTimerInterval = setInterval(()=>{
+    _lmTimeLeft--;
+    update();
+    if(_lmTimeLeft<=5 && _lmTimeLeft>0) _sndTimerBeep();
+    if(_lmTimeLeft<=0){
+      clearInterval(_lmTimerInterval);
+      _lmAutoExpire(q);
+    }
+  },1000);
+}
+
+function lmSelectAnswer(playerNum, idx){
+  if(_lmAnswered) return;
+  const q = _lmQuestions[_lmQIndex];
+
+  if(playerNum===1){
+    if(_lmP1Answered) return;
+    _lmP1Answered = true;
+    _lmP1Answer = idx;
+    // Désactiver les boutons J1
+    for(let i=0;i<4;i++){
+      const btn = document.getElementById(`lm-opt-p1-${i}`);
+      if(btn){ btn.disabled=true; if(i===idx) btn.classList.add(idx===q.correct?'correct':'wrong'); }
+    }
+    const ok = idx===q.correct;
+    _lmSetAnsChip('lm-ans-p1', ok?'ok':'fail', ok?`✅ ${_lmP1.name.split(' ')[0]} : ✓`:`❌ ${_lmP1.name.split(' ')[0]} : ✗`);
+    document.getElementById('lm-p1-card').className = 'lm-player-card ' + (ok ? 'p1-answered' : '');
+  } else {
+    if(_lmP2Answered) return;
+    _lmP2Answered = true;
+    _lmP2Answer = idx;
+    // Désactiver les boutons J2
+    for(let i=0;i<4;i++){
+      const btn = document.getElementById(`lm-opt-p2-${i}`);
+      if(btn){ btn.disabled=true; if(i===idx) btn.classList.add(idx===q.correct?'correct':'wrong'); }
+    }
+    const ok = idx===q.correct;
+    _lmSetAnsChip('lm-ans-p2', ok?'ok':'fail', ok?`✅ ${_lmP2.name.split(' ')[0]} : ✓`:`❌ ${_lmP2.name.split(' ')[0]} : ✗`);
+    document.getElementById('lm-p2-card').className = 'lm-player-card ' + (ok ? 'p2-answered' : '');
+  }
+
+  // Si les deux ont répondu, résoudre
+  if(_lmP1Answered && _lmP2Answered) _lmResolveQuestion(q);
+}
+
+function _lmAutoExpire(q){
+  if(!_lmP1Answered){
+    _lmP1Answered = true; _lmP1Answer = -1;
+    _lmSetAnsChip('lm-ans-p1', 'timeout', `⏰ ${_lmP1.name.split(' ')[0]} : temps`);
+  }
+  if(!_lmP2Answered){
+    _lmP2Answered = true; _lmP2Answer = -1;
+    _lmSetAnsChip('lm-ans-p2', 'timeout', `⏰ ${_lmP2.name.split(' ')[0]} : temps`);
+  }
+  _sndTimerExpire();
+  _lmResolveQuestion(q);
+}
+
+function _lmResolveQuestion(q){
+  if(_lmAnswered) return;
+  _lmAnswered = true;
+  clearInterval(_lmTimerInterval);
+
+  const letters = ['A','B','C','D'];
+  const lv = LEVELS.find(l=>l.id===_lmLevel);
+  const pts = lv ? lv.pts : 10;
+
+  const p1Ok = _lmP1Answer===q.correct;
+  const p2Ok = _lmP2Answer===q.correct;
+
+  if(p1Ok){ _lmP1Score += pts; _lmP1Correct++; }
+  if(p2Ok){ _lmP2Score += pts; _lmP2Correct++; }
+
+  // Montrer la bonne réponse sur tous les boutons
+  for(let i=0;i<4;i++){
+    const b1 = document.getElementById(`lm-opt-p1-${i}`);
+    const b2 = document.getElementById(`lm-opt-p2-${i}`);
+    if(b1){ b1.disabled=true; if(i===q.correct) b1.classList.add('correct'); }
+    if(b2){ b2.disabled=true; if(i===q.correct) b2.classList.add('correct'); }
+  }
+
+  // Mettre à jour les scores affichés
+  document.getElementById('lm-p1-score').textContent = _lmP1Score;
+  document.getElementById('lm-p2-score').textContent = _lmP2Score;
+
+  // Son
+  if(p1Ok || p2Ok){ _sndCorrect(); } else { _sndWrong(); }
+
+  // Mise à jour du dot
+  const dot = document.getElementById(`lm-dot-${_lmQIndex}`);
+  if(dot){
+    dot.className = 'lm-pdot ' + (p1Ok && p2Ok ? 'both-ok' : p1Ok ? 'p1-ok' : p2Ok ? 'p2-ok' : 'miss');
+  }
+
+  // Bouton suivant ou fin
+  const nextBtn = document.getElementById('lm-next-btn');
+  if(_lmQIndex+1 >= _lmQuestions.length){
+    nextBtn.textContent = '🏁 Voir le résultat';
+  } else {
+    nextBtn.textContent = `Question suivante (${_lmQIndex+2}/${_lmQuestions.length}) →`;
+  }
+  nextBtn.style.display = 'block';
+}
+
+function lmNextQuestion(){
+  _lmQIndex++;
+  if(_lmQIndex >= _lmQuestions.length){
+    _lmEndMatch();
+  } else {
+    _lmLoadQuestion();
+  }
+}
+
+function _lmEndMatch(){
+  clearInterval(_lmTimerInterval);
+  const total = _lmQuestions.length;
+
+  let winnerName, resultDetail, resultIcon;
+  if(_lmP1Score > _lmP2Score){
+    winnerName = `🏆 ${_lmP1.name} remporte le match !`;
+    resultIcon = '🏆';
+  } else if(_lmP2Score > _lmP1Score){
+    winnerName = `🏆 ${_lmP2.name} remporte le match !`;
+    resultIcon = '🏆';
+  } else {
+    winnerName = '🤝 Match nul — départage par score général';
+    resultIcon = '🤝';
+    // En cas d'égalité, le joueur avec le score général le plus élevé gagne
+    const realWinner = (_lmP1.score||0) >= (_lmP2.score||0) ? _lmP1 : _lmP2;
+    resultDetail = `Score égal → ${realWinner.name} qualifié (meilleur score général)`;
+  }
+
+  document.getElementById('lm-result-icon').textContent = resultIcon;
+  document.getElementById('lm-result-title').textContent = 'FIN DU MATCH';
+  document.getElementById('lm-result-winner').textContent = winnerName;
+  document.getElementById('lm-result-scores').innerHTML =
+    `${_lmP1.name} : <strong style="color:var(--gold);">${_lmP1Score} pts</strong> (${_lmP1Correct}/${total} ✓) &nbsp;·&nbsp; ` +
+    `${_lmP2.name} : <strong style="color:var(--gold);">${_lmP2Score} pts</strong> (${_lmP2Correct}/${total} ✓)`;
+  document.getElementById('lm-result-detail').textContent = resultDetail || '';
+
+  _sndVictory();
+  document.getElementById('lm-result-overlay').classList.add('show');
+}
+
+function lmSaveAndClose(){
+  // Ajouter les points de match aux scores généraux
+  const d = getData();
+  const idx1 = d.players.findIndex(p=>p.code===_lmP1.code);
+  const idx2 = d.players.findIndex(p=>p.code===_lmP2.code);
+  if(idx1>=0){ d.players[idx1].score = (d.players[idx1].score||0) + _lmP1Score; }
+  if(idx2>=0){ d.players[idx2].score = (d.players[idx2].score||0) + _lmP2Score; }
+  saveData(d);
+  logActivity(`Match ${_lmP1.name} vs ${_lmP2.name} : ${_lmP1Score}-${_lmP2Score}`);
+  toast('Résultats du match sauvegardés !','success');
+  closeLiveMatch();
+  genCompetition();
+  renderDashboard();
+  renderClassement();
+}
+
+function _lmSetAnsChip(id, state, text){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.className = `lm-ans-chip ${state}`;
+  el.textContent = text;
+}
 // ════════════════════════════════════════
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; } return a; }
 
