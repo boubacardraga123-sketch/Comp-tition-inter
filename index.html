@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BHDS Arena – Compétition Éducative</title>
+<title>Olympiade des Cerveaux Guinée</title>
 <!-- Firebase SDK (compat) – chargement robuste avec fallback localStorage -->
 <script>
 // Chargement dynamique Firebase avec détection d'erreur
@@ -722,6 +722,97 @@
   .admin-login {
     max-width:360px; width:100%; text-align:center; padding:20px;
   }
+
+  /* ── LIGHT MODE ── */
+  body.light-mode {
+    --dark: #F0F4FF;
+    --dark2: #E2E8F8;
+    --dark3: #D4DCF0;
+    --card-bg: rgba(255,255,255,0.92);
+    --border: rgba(0,100,200,0.18);
+    --silver: #5A6A80;
+    color: #1A2340;
+    background: var(--dark);
+  }
+  body.light-mode .quiz-question-text { color: #1A2340; }
+  body.light-mode .option-btn { color:#2A3A5A; background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.12); }
+  body.light-mode .option-btn:hover:not(:disabled){ background:rgba(0,100,200,0.08); }
+  body.light-mode .admin-sidebar { background:rgba(220,230,250,0.95); }
+  body.light-mode .player-header { background:linear-gradient(135deg,rgba(220,230,250,0.98),rgba(200,215,245,0.98)); }
+  body.light-mode input, body.light-mode select, body.light-mode textarea { background:rgba(0,0,0,0.04); color:#1A2340; }
+  body.light-mode .stars { opacity:0.08; }
+  body.light-mode body::before { opacity:0.3; }
+  body.light-mode .player-hname { background:linear-gradient(135deg,#0055AA,#B8860B); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+  /* Bouton toggle thème */
+  .theme-toggle-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.1rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  /* ── COMPTE À REBOURS ── */
+  .countdown-wrap {
+    margin: 22px 0 18px;
+    background: linear-gradient(135deg, rgba(0,229,255,0.07), rgba(124,77,255,0.07));
+    border: 1px solid rgba(0,229,255,0.22);
+    border-radius: 18px;
+    padding: 18px 20px 14px;
+    text-align: center;
+  }
+  .countdown-label {
+    font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--silver); margin-bottom: 12px;
+  }
+  .countdown-units {
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+  }
+  .cd-unit {
+    display: flex; flex-direction: column; align-items: center;
+    min-width: 58px;
+  }
+  .cd-num {
+    font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 900;
+    color: var(--accent); line-height: 1;
+    background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 10px; padding: 8px 14px;
+    min-width: 58px; text-align: center;
+    transition: color 0.3s;
+  }
+  .cd-num.danger { color: var(--red); border-color: rgba(255,23,68,0.4); background: rgba(255,23,68,0.08); }
+  .cd-sep {
+    font-family: 'Orbitron', sans-serif; font-size: 1.6rem; font-weight: 900;
+    color: var(--gold); align-self: flex-start; padding-top: 10px;
+  }
+  .cd-lbl { font-size: 0.6rem; color: var(--silver); margin-top: 5px; letter-spacing: 1px; text-transform: uppercase; }
+  .countdown-started {
+    font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 700;
+    color: var(--green); letter-spacing: 2px;
+    animation: blink-dot 1s ease-in-out infinite;
+  }
+  #countdown-wrap { display: none; }
+
+  /* ── PHOTO PROFIL ── */
+  .photo-picker-wrap {
+    display:flex; align-items:center; gap:16px; margin-bottom:8px;
+  }
+  .photo-preview {
+    width:72px; height:72px; border-radius:14px; flex-shrink:0;
+    background:linear-gradient(135deg,var(--accent2),var(--accent));
+    border:2px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.8rem; font-weight:900; color:#fff;
+    overflow:hidden; cursor:pointer;
+    transition:border-color 0.2s;
+  }
+  .photo-preview:hover { border-color:var(--accent); }
+  .photo-preview img { width:100%; height:100%; object-fit:cover; }
+  .photo-picker-info { flex:1; font-size:0.8rem; color:var(--silver); line-height:1.6; }
+  .photo-picker-info strong { color:var(--accent); }
 </style>
 </head>
 <body>
@@ -729,58 +820,144 @@
 
 <!-- ══════════ LANDING ══════════ -->
 <style>
+  /* ── FLAG ── */
   .landing-flag {
     display:flex; justify-content:center; gap:0; margin-bottom:18px;
   }
-  .flag-band { width:28px; height:56px; }
-  .flag-band:first-child { background:#CC0001; border-radius:6px 0 0 6px; }
+  .flag-band { width:38px; height:72px; }
+  .flag-band:first-child { background:#CC0001; border-radius:8px 0 0 8px; box-shadow:inset -2px 0 8px rgba(0,0,0,0.2); }
   .flag-band:nth-child(2) { background:#F7C800; }
-  .flag-band:last-child  { background:#009460; border-radius:0 6px 6px 0; }
+  .flag-band:last-child  { background:#009460; border-radius:0 8px 8px 0; box-shadow:inset 2px 0 8px rgba(0,0,0,0.2); }
 
+  /* ── BADGE ACTIVE ── */
   .landing-badge {
-    display:inline-flex; align-items:center; gap:7px;
-    background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.35);
-    color:var(--gold); border-radius:30px;
-    padding:5px 16px; font-size:0.75rem; font-weight:700;
-    letter-spacing:1.5px; text-transform:uppercase; margin-bottom:20px;
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.4);
+    color:var(--green); border-radius:30px;
+    padding:6px 20px; font-size:0.78rem; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase; margin-bottom:24px;
+    box-shadow: 0 0 20px rgba(0,230,118,0.15);
   }
   .landing-badge .dot {
-    width:7px; height:7px; border-radius:50%;
-    background:var(--green); box-shadow:0 0 8px var(--green);
+    width:8px; height:8px; border-radius:50%;
+    background:var(--green); box-shadow:0 0 10px var(--green);
     animation:blink-dot 1.4s ease-in-out infinite;
   }
   @keyframes blink-dot { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
 
-  .landing-stats-row {
-    display:flex; justify-content:center; gap:24px; margin:24px 0;
-    flex-wrap:wrap;
+  /* ── TITRE PRINCIPAL ── */
+  .landing-main-title {
+    font-family:'Orbitron',sans-serif;
+    font-size: clamp(2rem, 8vw, 4.2rem);
+    font-weight:900; line-height:1.05;
+    background: linear-gradient(135deg, #FFD700 0%, #00E5FF 50%, #FFD700 100%);
+    background-size: 200% auto;
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:3px; text-transform:uppercase;
+    animation: shine-title 3s linear infinite;
+    text-align:center; margin-bottom:6px;
   }
-  .landing-stat { text-align:center; }
+  @keyframes shine-title {
+    0%{ background-position:0% center; }
+    100%{ background-position:200% center; }
+  }
+  .landing-sub-title {
+    font-family:'Orbitron',sans-serif;
+    font-size: clamp(0.85rem, 3vw, 1.3rem);
+    font-weight:700; letter-spacing:6px;
+    color:var(--accent); text-transform:uppercase;
+    text-align:center; margin-bottom:10px; opacity:0.9;
+  }
+  .landing-nation {
+    font-size:0.8rem; color:var(--silver); letter-spacing:3px;
+    text-transform:uppercase; text-align:center; margin-bottom:28px;
+  }
+
+  /* ── STATS GRANDE TAILLE ── */
+  .landing-stats-row {
+    display:flex; justify-content:center; gap:0; margin:28px 0;
+    flex-wrap:wrap; width:100%;
+  }
+  .landing-stat {
+    text-align:center; flex:1; min-width:80px;
+    padding: 16px 10px;
+    border-right:1px solid var(--border);
+    position:relative;
+  }
+  .landing-stat:last-child { border-right:none; }
   .landing-stat-num {
-    font-family:'Orbitron',sans-serif; font-size:1.4rem; font-weight:900;
-    color:var(--accent); line-height:1;
+    font-family:'Orbitron',sans-serif; font-size:clamp(1.8rem,5vw,3rem); font-weight:900;
+    background:linear-gradient(135deg,var(--gold),var(--accent));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    line-height:1; display:block;
   }
   .landing-stat-lbl {
-    font-size:0.68rem; color:var(--silver); text-transform:uppercase;
-    letter-spacing:1px; margin-top:3px;
+    font-size:0.65rem; color:var(--silver); text-transform:uppercase;
+    letter-spacing:1.5px; margin-top:6px; display:block;
   }
-  .landing-divider { width:1px; background:var(--border); align-self:stretch; }
+  .landing-divider { display:none; }
 
+  /* ── MATIERES GRID ── */
   .landing-features {
     display:grid; grid-template-columns:1fr 1fr; gap:10px;
-    margin:20px 0 28px; text-align:left;
+    margin:20px 0 28px; text-align:left; width:100%;
   }
   .landing-feature {
-    display:flex; align-items:center; gap:9px;
-    background:rgba(255,255,255,0.03); border:1px solid var(--border);
-    border-radius:10px; padding:10px 13px; font-size:0.8rem; color:var(--silver);
+    display:flex; align-items:center; gap:10px;
+    background:rgba(0,229,255,0.05);
+    border:1px solid rgba(0,229,255,0.15);
+    border-radius:12px; padding:12px 16px;
+    font-size:0.85rem; font-weight:600; color:#C8D8F0;
+    transition:all 0.3s;
   }
-  .landing-feature span { font-size:1.1rem; }
+  .landing-feature span { font-size:1.3rem; }
+
+  /* ── FOOTER ── */
   .landing-footer-txt {
-    margin-top:20px; font-size:0.72rem; color:rgba(176,190,197,0.6);
-    line-height:1.6;
+    margin-top:24px; font-size:0.78rem; color:rgba(176,190,197,0.7);
+    line-height:1.8; text-align:center;
   }
   .landing-footer-txt strong { color:var(--gold); }
+
+  /* ── PARTICULES FOND ── */
+  .landing-particles {
+    position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+  }
+  .lp { position:absolute; border-radius:50%; opacity:0; animation:lp-float linear infinite; }
+  @keyframes lp-float {
+    0%  { transform:translateY(100vh) scale(0); opacity:0; }
+    10% { opacity:1; }
+    90% { opacity:0.6; }
+    100%{ transform:translateY(-10vh) scale(1); opacity:0; }
+  }
+
+  /* ── LIGNE BRILLANTE SOUS LE TITRE ── */
+  .title-glow-line {
+    width:180px; height:3px; margin:0 auto 20px;
+    background:linear-gradient(90deg,transparent,var(--gold),var(--accent),var(--gold),transparent);
+    border-radius:2px;
+    animation:glow-line 2s ease-in-out infinite;
+  }
+  @keyframes glow-line {
+    0%,100%{ opacity:0.6; width:120px; }
+    50%{ opacity:1; width:220px; }
+  }
+
+  /* ── BOUTON ADMIN ── */
+  .landing-admin-btn {
+    display:inline-flex; align-items:center; gap:10px;
+    background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,165,0,0.1));
+    border:1.5px solid rgba(255,215,0,0.5);
+    color:var(--gold); border-radius:14px;
+    padding:14px 36px; font-family:'Orbitron',sans-serif;
+    font-size:0.82rem; font-weight:700; letter-spacing:2px;
+    cursor:pointer; transition:all 0.25s; text-transform:uppercase;
+    box-shadow:0 4px 24px rgba(255,215,0,0.2);
+  }
+  .landing-admin-btn:hover {
+    background:linear-gradient(135deg,rgba(255,215,0,0.25),rgba(255,165,0,0.2));
+    box-shadow:0 8px 36px rgba(255,215,0,0.4); transform:translateY(-3px);
+  }
 
   /* ── FIREBASE STATUS BADGE ── */
   #fb-status {
@@ -826,7 +1003,7 @@
 
 <div id="screen-landing" class="screen active">
   <div class="arena-header">
-    <div class="arena-logo">⚡ BHDS ARENA</div>
+    <div class="arena-logo">🧠 OLYMPIADE DES CERVEAUX</div>
     <div class="arena-sub">Compétition Éducative · République de Guinée 🇬🇳</div>
   </div>
   <div class="landing-content" style="padding-top:32px; padding-bottom:40px;">
@@ -973,6 +1150,20 @@
       <div class="landing-feature"><span>🏅</span> Classement temps réel</div>
     </div>
 
+    <!-- COMPTE À REBOURS -->
+    <div class="countdown-wrap" id="countdown-wrap">
+      <div class="countdown-label" id="cd-label">🏁 Début de la compétition dans</div>
+      <div class="countdown-units" id="cd-units">
+        <div class="cd-unit"><div class="cd-num" id="cd-days">00</div><div class="cd-lbl">Jours</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><div class="cd-num" id="cd-hours">00</div><div class="cd-lbl">Heures</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><div class="cd-num" id="cd-mins">00</div><div class="cd-lbl">Minutes</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><div class="cd-num" id="cd-secs">00</div><div class="cd-lbl">Secondes</div></div>
+      </div>
+    </div>
+
     <div class="landing-btns">
       <button class="btn btn-gold" onclick="showAdminLogin()" style="font-size:1rem;padding:14px 32px;">🔐 Accès Administrateur</button>
     </div>
@@ -996,15 +1187,18 @@
       <button class="btn btn-gold" onclick="checkAdminPass()">Connexion</button>
       <button class="btn btn-outline" onclick="showScreen('screen-landing')">← Retour</button>
     </div>
-    <p style="font-size:0.75rem;color:var(--silver);margin-top:16px;">Mot de passe par défaut : <strong style="color:var(--gold);">bhds2026</strong></p>
+
   </div>
 </div>
 
 <!-- ══════════ ADMIN PANEL ══════════ -->
 <div id="screen-admin" class="screen">
-  <div class="arena-header">
-    <div class="arena-logo">⚡ BHDS ARENA – ADMIN</div>
-    <div class="arena-sub">Collection BHDS / Boubacar Diallo Édition 2026</div>
+  <div class="arena-header" style="display:flex;justify-content:space-between;align-items:center;padding:20px 28px;">
+    <div>
+      <div class="arena-logo">🧠 OLYMPIADE DES CERVEAUX – ADMIN</div>
+      <div class="arena-sub">Collection BHDS / Boubacar Diallo Édition 2026</div>
+    </div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn-admin" title="Mode clair / sombre">🌙</button>
   </div>
   <div class="admin-layout">
     <div class="admin-sidebar">
@@ -1091,10 +1285,11 @@
       <div id="s-settings" class="admin-section">
         <div class="section-title">⚙️ PARAMÈTRES DE LA COMPÉTITION</div>
         <div class="card form-grid" style="max-width:480px;">
-          <div><label>Nom de la compétition</label><input id="set-compname" value="BHDS Arena 2026"></div>
+          <div><label>Nom de la compétition</label><input id="set-compname" value="Olympiade des Cerveaux Guinée 2026"></div>
           <div><label>Mot de passe admin</label><input id="set-adminpass" type="password" value="bhds2026"></div>
           <div><label>Temps par question (secondes)</label><input id="set-timer" type="number" value="30" min="10" max="120"></div>
           <div><label>URL de base (pour les liens joueurs)</label><input id="set-baseurl" placeholder="https://monsite.com/arena.html"></div>
+          <div><label>⏳ Date/heure de début de compétition</label><input id="set-countdown" type="datetime-local" title="Laisse vide pour désactiver le compte à rebours"></div>
           <button class="btn btn-gold" onclick="saveSettings()">💾 Sauvegarder</button>
         </div>
       </div>
@@ -1127,6 +1322,7 @@
       <div class="score-num" id="ph-score">0</div>
       <div class="score-label">points</div>
     </div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn-player" title="Mode clair / sombre">🌙</button>
   </div>
 
   <!-- Niveaux -->
@@ -1191,6 +1387,8 @@
       <div class="result-title" id="r-title">Niveau Réussi !</div>
       <div class="result-pts" id="r-pts">+120 points</div>
       <div class="result-score" id="r-score">4 bonnes réponses sur 5</div>
+      <!-- Message d'encouragement final -->
+      <div id="r-encouragement" style="display:none;margin:14px 0 10px;padding:12px 18px;border-radius:12px;background:rgba(0,229,255,0.08);border-left:3px solid var(--accent);color:var(--accent);font-size:1rem;font-weight:600;text-align:center;animation:fade-in 0.4s ease;"></div>
       <!-- Indicateurs réponses -->
       <div class="result-score-bar">
         <div class="rsb-dots" id="rsb-dots"></div>
@@ -1211,6 +1409,21 @@
 
     <div class="modal-section-sep">👤 Identité</div>
     <div class="form-grid">
+      <!-- Photo de profil -->
+      <div>
+        <label>📷 Photo de profil</label>
+        <div class="photo-picker-wrap">
+          <div class="photo-preview" id="ap-photo-preview" onclick="document.getElementById('ap-photo-input').click()">
+            <span id="ap-photo-initial">?</span>
+          </div>
+          <div class="photo-picker-info">
+            Clique sur la photo pour choisir une image.<br>
+            <strong>JPG ou PNG</strong> · max 1 Mo · facultatif
+          </div>
+        </div>
+        <input type="file" id="ap-photo-input" accept="image/*" style="display:none" onchange="_loadPhotoPreview(this,'ap-photo-preview','ap-photo-initial','ap-photo-data')">
+        <input type="hidden" id="ap-photo-data">
+      </div>
       <div class="form-row">
         <div><label>Nom *</label><input id="ap-nom" placeholder="Ex: Diallo"></div>
         <div><label>Prénom</label><input id="ap-prenom" placeholder="Ex: Mamadou"></div>
@@ -1275,6 +1488,21 @@
 
     <div class="modal-section-sep">👤 Identité</div>
     <div class="form-grid">
+      <!-- Photo de profil -->
+      <div>
+        <label>📷 Photo de profil</label>
+        <div class="photo-picker-wrap">
+          <div class="photo-preview" id="ep-photo-preview" onclick="document.getElementById('ep-photo-input').click()">
+            <span id="ep-photo-initial">?</span>
+          </div>
+          <div class="photo-picker-info">
+            Clique sur la photo pour changer.<br>
+            <strong>JPG ou PNG</strong> · max 1 Mo · facultatif
+          </div>
+        </div>
+        <input type="file" id="ep-photo-input" accept="image/*" style="display:none" onchange="_loadPhotoPreview(this,'ep-photo-preview','ep-photo-initial','ep-photo-data')">
+        <input type="hidden" id="ep-photo-data">
+      </div>
       <div class="form-row">
         <div><label>Nom *</label><input id="ep-nom" placeholder="Ex: Diallo"></div>
         <div><label>Prénom</label><input id="ep-prenom" placeholder="Ex: Mamadou"></div>
@@ -1372,8 +1600,9 @@
         <button class="btn btn-outline btn-sm copy-btn" onclick="copyLink()">📋</button>
       </div>
     </div>
-    <div class="modal-actions">
+    <div class="modal-actions" style="flex-wrap:wrap;gap:10px;">
       <button class="btn btn-outline" onclick="closeModal('modal-player-link')">Fermer</button>
+      <button class="btn btn-accent btn-sm" onclick="sendEmail()" id="pl-email-btn">📧 Envoyer Email</button>
       <button class="btn btn-green" onclick="sendWhatsApp()" id="pl-wa-btn">📱 Envoyer WhatsApp</button>
     </div>
   </div>
@@ -1473,7 +1702,7 @@ const firebaseConfig = {
 const DEFAULT_DATA = {
   players: [],
   questions: [],
-  settings: { compname: 'BHDS Arena 2026', adminPass: 'bhds2026', timer: 30, baseUrl: '' },
+  settings: { compname: 'Olympiade des Cerveaux Guinée 2026', adminPass: 'bhds2026', timer: 30, baseUrl: '' },
   activity: []
 };
 
@@ -1664,6 +1893,100 @@ const LEVELS = [
 ];
 
 // ════════════════════════════════════════
+// AUDIO ENGINE (Web Audio API – sans fichiers externes)
+// ════════════════════════════════════════
+const _audioCtx = (()=>{
+  try { return new (window.AudioContext||window.webkitAudioContext)(); } catch(e){ return null; }
+})();
+
+function _playTone(freq, type, duration, vol, delay=0){
+  if(!_audioCtx) return;
+  try {
+    const osc = _audioCtx.createOscillator();
+    const gain = _audioCtx.createGain();
+    osc.connect(gain); gain.connect(_audioCtx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, _audioCtx.currentTime + delay);
+    gain.gain.setValueAtTime(vol, _audioCtx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, _audioCtx.currentTime + delay + duration);
+    osc.start(_audioCtx.currentTime + delay);
+    osc.stop(_audioCtx.currentTime + delay + duration);
+  } catch(e){}
+}
+
+function _audioUnlock(){
+  if(_audioCtx && _audioCtx.state==='suspended') _audioCtx.resume();
+}
+document.addEventListener('click', _audioUnlock, {once:true});
+document.addEventListener('touchstart', _audioUnlock, {once:true});
+
+function _sndCorrect(){
+  // Mélodie ascendante joyeuse
+  _playTone(523.25,'sine',0.12,0.35,0);
+  _playTone(659.25,'sine',0.12,0.35,0.10);
+  _playTone(783.99,'sine',0.18,0.40,0.20);
+}
+function _sndWrong(){
+  // Deux bips graves descendants
+  _playTone(220,'sawtooth',0.18,0.30,0);
+  _playTone(180,'sawtooth',0.22,0.28,0.16);
+}
+function _sndTimerBeep(){
+  // Bip d'alerte court (chrono danger)
+  _playTone(880,'square',0.07,0.18,0);
+}
+function _sndTimerExpire(){
+  // Buzzer temps écoulé
+  _playTone(150,'sawtooth',0.35,0.35,0);
+  _playTone(120,'sawtooth',0.30,0.28,0.18);
+}
+function _sndVictory(){
+  // Fanfare victoire
+  _playTone(523.25,'sine',0.12,0.4,0);
+  _playTone(659.25,'sine',0.12,0.4,0.1);
+  _playTone(783.99,'sine',0.12,0.4,0.2);
+  _playTone(1046.5,'sine',0.30,0.45,0.3);
+}
+function _sndDefeat(){
+  // Mélodie descendante triste
+  _playTone(392,'triangle',0.18,0.3,0);
+  _playTone(349,'triangle',0.18,0.3,0.15);
+  _playTone(311,'triangle',0.22,0.3,0.30);
+}
+
+// Messages d'encouragement
+const _ENCOUR_CORRECT = [
+  '🔥 Excellent ! Continue comme ça !',
+  '⭐ Parfait ! Tu maîtrises bien !',
+  '💪 Brillant ! Tu es sur la bonne voie !',
+  '🚀 Super ! Rien ne t\'arrête !',
+  '🎯 Dans le mille ! Bien joué !',
+];
+const _ENCOUR_WRONG = [
+  '💡 Pas grave ! Chaque erreur est une leçon.',
+  '🧠 Retiens bien la bonne réponse !',
+  '👊 Ne lâche pas, tu vas progresser !',
+  '📚 Révise ce point, tu peux y arriver !',
+  '💬 Presque ! Concentre-toi sur la prochaine.',
+];
+const _ENCOUR_TIMEOUT = [
+  '⏰ Le temps file ! Réponds plus vite !',
+  '⚡ Décide plus rapidement la prochaine fois !',
+  '🏃 Fais confiance à ton instinct !',
+];
+const _ENCOUR_WIN = [
+  '🎉 Félicitations ! Tu es un champion !',
+  '🏆 Niveau réussi ! Tu es incroyable !',
+  '🌟 Bravo ! Tes efforts paient !',
+];
+const _ENCOUR_FAIL = [
+  '💪 Ne baisse pas les bras, réessaie !',
+  '📖 Révise et reviens encore plus fort !',
+  '🔄 La persévérance est la clé du succès !',
+];
+function _pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+// ════════════════════════════════════════
 // NAVIGATION
 // ════════════════════════════════════════
 function showScreen(id){
@@ -1755,7 +2078,14 @@ function _doLogin(code){
   document.getElementById('ph-score').textContent = p.score || 0;
   // Avatar initiale
   const av = document.getElementById('ph-avatar');
-  if(av) av.textContent = p.name.charAt(0).toUpperCase();
+  if(av){
+    if(p.photo){
+      av.innerHTML=`<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" alt="${p.name}">`;
+      av.style.padding='0';
+    } else {
+      av.textContent = p.name.charAt(0).toUpperCase();
+    }
+  }
   showScreen('screen-player');
   showLevels();
   logActivity(p.name + ' s est connecte');
@@ -1899,6 +2229,7 @@ function startTimer(sec, q){
   timerInterval = setInterval(()=>{
     timeLeft--;
     update();
+    if(timeLeft<=5 && timeLeft>0 && !answered) _sndTimerBeep();
     if(timeLeft<=0){
       clearInterval(timerInterval);
       if(!answered) autoExpire(q);
@@ -1909,7 +2240,8 @@ function startTimer(sec, q){
 function autoExpire(q){
   answered=true;
   quizAnswers.push(false);
-  showFeedback(false, 'Temps écoulé ! ⏰', q.correct);
+  _sndTimerExpire();
+  showFeedback(false, 'Temps écoulé ! ⏰ ' + _pick(_ENCOUR_TIMEOUT), q.correct);
   document.getElementById('q-next-btn').style.display='block';
   // Envoyer au tableau de bord admin (temps écoulé)
   pushLiveAnswer(currentPlayer.name, q, -1, false);
@@ -1932,7 +2264,8 @@ function selectOption(idx){
     if(i===q.correct) b.classList.add('correct');
     else if(i===idx && !correct) b.classList.add('wrong');
   });
-  showFeedback(correct, correct?'✅ Bonne réponse !':'❌ Mauvaise réponse', q.correct);
+  if(correct){ _sndCorrect(); } else { _sndWrong(); }
+  showFeedback(correct, (correct?'✅ Bonne réponse ! ':' ❌ Mauvaise réponse. ')+ _pick(correct?_ENCOUR_CORRECT:_ENCOUR_WRONG), q.correct);
   document.getElementById('q-next-btn').style.display='block';
   // Envoyer la réponse au tableau de bord admin
   pushLiveAnswer(currentPlayer.name, q, idx, correct);
@@ -1972,10 +2305,15 @@ function endLevel(){
   document.getElementById('pv-result').style.display='block';
 
   const pass = correct >= Math.ceil(total*0.5);
+  if(pass){ _sndVictory(); } else { _sndDefeat(); }
   document.getElementById('r-icon').textContent = pass?'🎉':'😞';
   document.getElementById('r-title').textContent = pass?'Niveau Réussi !':'Essaie encore !';
   document.getElementById('r-pts').textContent = `+${quizScore} points gagnés`;
   document.getElementById('r-score').textContent = `${correct} bonne${correct>1?'s':''} réponse${correct>1?'s':''} sur ${total}`;
+
+  // Message d'encouragement final
+  const rEnc = document.getElementById('r-encouragement');
+  if(rEnc){ rEnc.textContent = _pick(pass?_ENCOUR_WIN:_ENCOUR_FAIL); rEnc.style.display='block'; }
 
   // Pastilles réponses
   const dots = document.getElementById('rsb-dots');
@@ -2114,11 +2452,12 @@ function addPlayer(){
   const matricule=document.getElementById('ap-matricule').value.trim();
   if(!nom){ toast('Le nom est obligatoire','error'); return; }
   const name = prenom ? prenom+' '+nom : nom;
+  const photo = document.getElementById('ap-photo-data').value || '';
   const d=getData();
   let code; do { code=genCode(); } while(d.players.find(p=>p.code===code));
   d.players.push({
     id:Date.now(), name, nom, prenom, ddn, sexe,
-    phone, email,
+    phone, email, photo,
     school, typeEcole, classe, ville, matricule,
     code, score:0, completedLevels:[],
     createdAt:new Date().toISOString()
@@ -2131,6 +2470,11 @@ function addPlayer(){
     const el=document.getElementById(i); if(el) el.value='';
   });
   ['ap-sexe','ap-type-ecole'].forEach(i=>{ const el=document.getElementById(i); if(el) el.value=''; });
+  // Reset photo
+  document.getElementById('ap-photo-data').value='';
+  const apPrev=document.getElementById('ap-photo-preview');
+  if(apPrev){ apPrev.innerHTML='<span id="ap-photo-initial">?</span>'; }
+  document.getElementById('ap-photo-input').value='';
   openPlayerLink(code);
 }
 
@@ -2186,8 +2530,8 @@ function renderPlayers(){
       <div style="flex-shrink:0;width:36px;text-align:center;font-size:1.3rem;">${rankIcon}</div>
 
       <!-- Avatar -->
-      <div class="player-avatar" style="background:linear-gradient(135deg,${i===0?'#FFD700,#FF8C00':i===1?'#B0BEC5,#607D8B':i===2?'#CD7F32,#8D4B00':'var(--accent2),var(--accent)'});">
-        ${p.name.charAt(0).toUpperCase()}
+      <div class="player-avatar" style="background:linear-gradient(135deg,${i===0?'#FFD700,#FF8C00':i===1?'#B0BEC5,#607D8B':i===2?'#CD7F32,#8D4B00':'var(--accent2),var(--accent)'});overflow:hidden;padding:0;">
+        ${p.photo?`<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;" alt="${p.name}">`:`<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">${p.name.charAt(0).toUpperCase()}</span>`}
       </div>
 
       <!-- Infos -->
@@ -2253,6 +2597,8 @@ function openPlayerLink(code){
   document.getElementById('pl-wa-btn').dataset.phone=p.phone||'';
   document.getElementById('pl-wa-btn').dataset.link=link;
   document.getElementById('pl-wa-btn').dataset.name=p.name;
+  const emailBtn=document.getElementById('pl-email-btn');
+  if(emailBtn){ emailBtn.dataset.email=p.email||''; emailBtn.dataset.link=link; emailBtn.dataset.name=p.name; }
   document.getElementById('modal-player-link').classList.add('open');
 }
 
@@ -2263,9 +2609,25 @@ function sendWhatsApp(){
   const phone=btn.dataset.phone.replace(/[^0-9+]/g,'');
   const link=btn.dataset.link;
   const name=btn.dataset.name;
-  const msg=encodeURIComponent(`Bonjour ${name} ! 🏆\nTu es invité(e) à la compétition *BHDS Arena*.\nAccède à ton interface personnelle ici :\n${link}\nBonne chance ! ⚡`);
+  const msg=encodeURIComponent(`Bonjour ${name} ! 🏆\nTu es invité(e) à la compétition *Olympiade des Cerveaux Guinée*.\nAccède à ton interface personnelle ici :\n${link}\nBonne chance ! ⚡`);
   const url=phone?`https://wa.me/${phone}?text=${msg}`:`https://wa.me/?text=${msg}`;
   window.open(url,'_blank');
+}
+
+function sendEmail(){
+  const btn=document.getElementById('pl-email-btn');
+  const email=btn.dataset.email||'';
+  const link=btn.dataset.link;
+  const name=btn.dataset.name;
+  const subject=encodeURIComponent('🏆 Ton lien Olympiade des Cerveaux Guinée');
+  const body=encodeURIComponent(
+    `Bonjour ${name} !\n\n`+
+    `Tu es invité(e) à participer à la compétition éducative Olympiade des Cerveaux Guinée.\n\n`+
+    `👉 Accède à ton interface personnelle ici :\n${link}\n\n`+
+    `Ce lien t'est réservé. Bonne chance et montre ce que tu vaux ! ⚡\n\n`+
+    `— Collection BHDS / Boubacar Diallo Édition 2026`
+  );
+  window.open(`mailto:${email}?subject=${subject}&body=${body}`,'_blank');
 }
 
 function openEditPlayer(code){
@@ -2284,6 +2646,19 @@ function openEditPlayer(code){
   document.getElementById('ep-class').value=p.classe||'';
   document.getElementById('ep-ville').value=p.ville||'';
   document.getElementById('ep-matricule').value=p.matricule||'';
+  // Photo
+  const epData=document.getElementById('ep-photo-data');
+  const epPrev=document.getElementById('ep-photo-preview');
+  const epInit=document.getElementById('ep-photo-initial');
+  if(epData) epData.value=p.photo||'';
+  if(epPrev){
+    if(p.photo){
+      epPrev.innerHTML=`<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;" alt="${p.name}">`;
+    } else {
+      epPrev.innerHTML=`<span id="ep-photo-initial">${p.name.charAt(0).toUpperCase()}</span>`;
+    }
+  }
+  document.getElementById('ep-photo-input').value='';
   document.getElementById('modal-edit-player').classList.add('open');
 }
 
@@ -2296,6 +2671,7 @@ function saveEditPlayer(){
   const idx=d.players.findIndex(p=>p.code===code);
   if(idx<0){ toast('Joueur introuvable','error'); return; }
   const name=prenom?prenom+' '+nom:nom;
+  const newPhoto=document.getElementById('ep-photo-data').value;
   d.players[idx]={
     ...d.players[idx], name, nom, prenom,
     ddn:document.getElementById('ep-ddn').value,
@@ -2307,6 +2683,7 @@ function saveEditPlayer(){
     classe:document.getElementById('ep-class').value.trim(),
     ville:document.getElementById('ep-ville').value.trim(),
     matricule:document.getElementById('ep-matricule').value.trim(),
+    photo: newPhoto || d.players[idx].photo || '',
   };
   saveData(d);
   closeModal('modal-edit-player');
@@ -3006,13 +3383,124 @@ function renderDashboard(){
 // ════════════════════════════════════════
 function saveSettings(){
   const d=getData();
-  d.settings.compname=document.getElementById('set-compname').value||'BHDS Arena 2026';
+  d.settings.compname=document.getElementById('set-compname').value||'Olympiade des Cerveaux Guinée 2026';
   d.settings.adminPass=document.getElementById('set-adminpass').value||'bhds2026';
   d.settings.timer=parseInt(document.getElementById('set-timer').value)||30;
   d.settings.baseUrl=document.getElementById('set-baseurl').value.trim();
+  d.settings.countdownDate=document.getElementById('set-countdown').value||'';
   saveData(d);
+  _startCountdown(d.settings.countdownDate);
   toast('Paramètres sauvegardés !','success');
 }
+
+// ════════════════════════════════════════
+// COMPTE À REBOURS
+// ════════════════════════════════════════
+let _cdInterval = null;
+
+function _startCountdown(dateStr){
+  clearInterval(_cdInterval);
+  const wrap = document.getElementById('countdown-wrap');
+  if(!dateStr){ if(wrap) wrap.style.display='none'; return; }
+  const target = new Date(dateStr).getTime();
+  if(isNaN(target)){ if(wrap) wrap.style.display='none'; return; }
+  if(wrap) wrap.style.display='block';
+
+  function _pad(n){ return String(n).padStart(2,'0'); }
+
+  function _tick(){
+    const now = Date.now();
+    const diff = target - now;
+    const unitsEl = document.getElementById('cd-units');
+    const labelEl = document.getElementById('cd-label');
+
+    if(diff <= 0){
+      // Compétition commencée
+      clearInterval(_cdInterval);
+      if(labelEl) labelEl.innerHTML='<span class="countdown-started">🟢 COMPÉTITION EN COURS !</span>';
+      if(unitsEl) unitsEl.style.display='none';
+      return;
+    }
+
+    const days  = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins  = Math.floor((diff % 3600000)  / 60000);
+    const secs  = Math.floor((diff % 60000)    / 1000);
+
+    const danger = diff < 3600000; // moins d'1 heure → rouge
+    ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){ el.classList.toggle('danger', danger); }
+    });
+
+    const dEl=document.getElementById('cd-days');
+    const hEl=document.getElementById('cd-hours');
+    const mEl=document.getElementById('cd-mins');
+    const sEl=document.getElementById('cd-secs');
+    if(dEl) dEl.textContent=_pad(days);
+    if(hEl) hEl.textContent=_pad(hours);
+    if(mEl) mEl.textContent=_pad(mins);
+    if(sEl) sEl.textContent=_pad(secs);
+    if(labelEl) labelEl.textContent='🏁 Début de la compétition dans';
+    if(unitsEl) unitsEl.style.display='';
+  }
+  _tick();
+  _cdInterval = setInterval(_tick, 1000);
+}
+
+// ════════════════════════════════════════
+// PHOTO PROFIL – helpers
+// ════════════════════════════════════════
+function _resizePhoto(file, maxW, maxH, quality, cb){
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      let w=img.width, h=img.height;
+      if(w>maxW||h>maxH){
+        const ratio=Math.min(maxW/w,maxH/h);
+        w=Math.round(w*ratio); h=Math.round(h*ratio);
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      cb(canvas.toDataURL('image/jpeg',quality));
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function _loadPhotoPreview(input, previewId, initialId, dataId){
+  const file=input.files[0];
+  if(!file) return;
+  if(file.size>1.5*1024*1024){ toast('Photo trop lourde (max 1 Mo)','error'); input.value=''; return; }
+  _resizePhoto(file,200,200,0.82,function(b64){
+    const prev=document.getElementById(previewId);
+    if(prev){ prev.innerHTML=`<img src="${b64}" style="width:100%;height:100%;object-fit:cover;" alt="photo">`; }
+    const dataEl=document.getElementById(dataId);
+    if(dataEl) dataEl.value=b64;
+  });
+}
+
+// ════════════════════════════════════════
+// THEME TOGGLE (dark / light)
+// ════════════════════════════════════════
+function toggleTheme(){
+  const isLight = document.body.classList.toggle('light-mode');
+  const icon = isLight ? '☀️' : '🌙';
+  document.querySelectorAll('.theme-toggle-btn').forEach(b=>b.textContent=icon);
+  try { localStorage.setItem('bhds_theme', isLight?'light':'dark'); } catch(e){}
+}
+// Restaurer le thème sauvegardé
+(function(){
+  try {
+    if(localStorage.getItem('bhds_theme')==='light'){
+      document.body.classList.add('light-mode');
+      document.querySelectorAll('.theme-toggle-btn').forEach(b=>b.textContent='☀️');
+    }
+  } catch(e){}
+})();
 
 // ════════════════════════════════════════
 // UTILS
@@ -3040,10 +3528,12 @@ function toast(msg,type='info'){
 (()=>{
   const applySettings = () => {
     const d=getData();
-    document.getElementById('set-compname').value=d.settings.compname||'BHDS Arena 2026';
+    document.getElementById('set-compname').value=d.settings.compname||'Olympiade des Cerveaux Guinée 2026';
     document.getElementById('set-adminpass').value=d.settings.adminPass||'bhds2026';
     document.getElementById('set-timer').value=d.settings.timer||30;
     document.getElementById('set-baseurl').value=d.settings.baseUrl||'';
+    document.getElementById('set-countdown').value=d.settings.countdownDate||'';
+    _startCountdown(d.settings.countdownDate||'');
   };
   if (_fbReady) {
     applySettings();
