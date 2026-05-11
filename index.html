@@ -643,6 +643,24 @@
   .toast.error { background:linear-gradient(135deg,var(--red),#FF6D00); color:#fff; }
   .toast.info { background:linear-gradient(135deg,var(--accent2),var(--accent)); color:#fff; }
 
+  /* ── COMPÉTITION BRACKET ── */
+  .comp-phase { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:14px; padding:18px; }
+  .comp-phase-title { font-family:"Orbitron",sans-serif; font-size:0.85rem; letter-spacing:2px; color:var(--gold); font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .comp-matches { display:flex; flex-wrap:wrap; gap:12px; }
+  .comp-match { background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:10px; padding:12px 16px; min-width:220px; flex:1; }
+  .comp-match-label { font-size:0.72rem; color:var(--silver); letter-spacing:1px; margin-bottom:8px; text-transform:uppercase; }
+  .comp-player { display:flex; justify-content:space-between; align-items:center; padding:6px 10px; border-radius:7px; margin:3px 0; font-size:0.88rem; border:1px solid transparent; }
+  .comp-player.qualifie { border-color:var(--green); background:rgba(0,230,118,0.07); color:var(--green); font-weight:700; }
+  .comp-player.elimine { opacity:0.45; text-decoration:line-through; color:var(--silver); }
+  .comp-player.tbd { color:var(--silver); font-style:italic; opacity:0.6; }
+  .comp-player-score { font-size:0.78rem; color:var(--gold); font-weight:700; }
+  .comp-badge { font-size:0.72rem; padding:2px 8px; border-radius:20px; font-weight:700; }
+  .comp-badge.q { background:rgba(0,230,118,0.2); color:var(--green); border:1px solid rgba(0,230,118,0.4); }
+  .comp-badge.e { background:rgba(255,23,68,0.15); color:var(--red); border:1px solid rgba(255,23,68,0.3); }
+  .comp-winner-banner { background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,215,0,0.05)); border:2px solid var(--gold); border-radius:14px; padding:24px; text-align:center; }
+  .comp-winner-name { font-family:"Orbitron",sans-serif; font-size:1.4rem; color:var(--gold); font-weight:900; margin:8px 0 4px; }
+  .comp-winner-sub { color:var(--silver); font-size:0.85rem; }
+
   /* ── MODAL ── */
   .modal-overlay {
     display:none; position:fixed; inset:0; z-index:1000;
@@ -1206,6 +1224,7 @@
       <div class="sidebar-item" onclick="showAdminSection('s-players')">👥 Joueurs</div>
       <div class="sidebar-item" onclick="showAdminSection('s-questions')">❓ Questions</div>
       <div class="sidebar-item" onclick="showAdminSection('s-classement')">🏆 Classement</div>
+      <div class="sidebar-item" onclick="showAdminSection('s-competition')">⚔️ Compétition</div>
       <div class="sidebar-item" onclick="showAdminSection('s-settings')">⚙️ Paramètres</div>
       <div class="sidebar-item" style="margin-top:auto;color:var(--red);" onclick="adminLogout()">🚪 Déconnexion</div>
     </div>
@@ -1279,6 +1298,18 @@
             <tbody id="classement-body"></tbody>
           </table>
         </div>
+      </div>
+
+      <!-- COMPÉTITION PAR PHASES -->
+      <div id="s-competition" class="admin-section">
+        <div class="section-title">⚔️ TABLEAU DE COMPÉTITION</div>
+        <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-gold" onclick="genCompetition()">🔄 Générer / Actualiser le tableau</button>
+          <button class="btn btn-accent btn-sm" onclick="resetCompetition()">🗑 Réinitialiser</button>
+        </div>
+        <div id="comp-info" style="color:var(--silver);font-size:0.85rem;margin-bottom:16px;"></div>
+        <!-- Phases -->
+        <div id="comp-phases" style="display:flex;flex-direction:column;gap:24px;"></div>
       </div>
 
       <!-- PARAMÈTRES -->
@@ -2026,6 +2057,7 @@ function showAdminSection(id){
   event.target.classList.add('active');
   if(id==='s-dashboard') renderDashboard();
   if(id==='s-classement') renderClassement();
+  if(id==='s-competition') genCompetition();
 }
 
 // ════════════════════════════════════════
@@ -2132,10 +2164,12 @@ function renderLevels(){
     const col = lvColors[idx];
     const onclick = locked
       ? `toast('🔒 Complète le niveau précédent d\\'abord','info')`
-      : `startLevel(${lv.id})`;
+      : done
+        ? `toast('✅ Niveau déjà complété ! Tu ne peux plus y revenir. Continue vers le suivant.','info')`
+        : `startLevel(${lv.id})`;
     return `
     <div class="level-card ${done?'completed':''} ${locked?'locked':''}"
-      style="--lc-color:${col};"
+      style="--lc-color:${col};${done?'cursor:not-allowed;':''}${done?'filter:brightness(0.7) saturate(0.5);':''}"
       onclick="${onclick}">
       <div class="level-icon-wrap">
         <span style="font-size:2rem;">${lv.icon}</span>
@@ -2145,7 +2179,7 @@ function renderLevels(){
       <div class="level-pts">+${lv.pts} pts / bonne rép.</div>
       <div class="level-qcount">${qs.length} question${qs.length>1?'s':''}</div>
       ${locked ? '<div class="level-lock-icon">🔒</div>' : ''}
-      ${done   ? '' : ''}
+      ${done ? '<div class="level-lock-icon" style="font-size:1.1rem;">✅ Terminé</div>' : ''}
     </div>`;
   }).join('');
 }
@@ -3348,6 +3382,140 @@ function resetAllScores(){
   saveData(d);
   renderClassement(); renderPlayers();
   toast('Scores réinitialisés','info');
+}
+
+// ════════════════════════════════════════
+// COMPÉTITION PAR PHASES (16e→8e→QF→SF→F)
+// ════════════════════════════════════════
+const COMP_PHASES = [
+  { id:'r16',  label:'16èmes de finale', icon:'⚔️',  slots:16, winners:8  },
+  { id:'r8',   label:'8èmes de finale',  icon:'🥊',  slots:8,  winners:4  },
+  { id:'qf',   label:'Quarts de finale', icon:'🔥',  slots:4,  winners:2  },
+  { id:'sf',   label:'Demi-finales',     icon:'⭐',  slots:2,  winners:1  },
+  { id:'f',    label:'Finale',           icon:'🏆',  slots:2,  winners:1  },
+];
+
+function genCompetition(){
+  const d = getData();
+  const sorted = [...d.players].sort((a,b)=>(b.score||0)-(a.score||0));
+  const total = sorted.length;
+
+  if(total < 2){
+    document.getElementById('comp-info').textContent = '⚠️ Il faut au moins 2 joueurs pour générer le tableau.';
+    document.getElementById('comp-phases').innerHTML = '';
+    return;
+  }
+
+  // Déterminer la phase de départ selon le nombre de joueurs
+  // On prend les 16 meilleurs pour 16e de finale, sinon on adapte
+  const phases = [];
+
+  // Phase 1 : sélection des 16 (ou moins) meilleurs pour les 16e
+  const top16 = sorted.slice(0, Math.min(16, total));
+  // Paire les joueurs : 1vs16, 2vs15, etc.
+  const buildMatches = (players, phaseSlots) => {
+    const matches = [];
+    const n = players.length;
+    // Si nombre impair, le dernier passe directement (bye)
+    for(let i=0; i < Math.floor(n/2); i++){
+      matches.push({ p1: players[i], p2: players[n-1-i] });
+    }
+    if(n % 2 !== 0){
+      matches.push({ p1: players[Math.floor(n/2)], p2: null }); // bye
+    }
+    return matches;
+  };
+
+  // Qualifiés de chaque phase = le joueur avec le score le plus haut dans chaque match
+  const getWinner = (p1, p2) => {
+    if(!p2) return p1; // bye
+    return (p1.score||0) >= (p2.score||0) ? p1 : p2;
+  };
+
+  let current = top16;
+  const phasesData = [];
+
+  for(let pi=0; pi < COMP_PHASES.length; pi++){
+    const ph = COMP_PHASES[pi];
+    if(current.length < 2) break;
+    const matches = buildMatches(current, ph.slots);
+    const winners = matches.map(m => getWinner(m.p1, m.p2));
+    phasesData.push({ phase: ph, matches, winners });
+    current = winners;
+    if(ph.id === 'f') break;
+  }
+
+  // Affichage
+  const info = document.getElementById('comp-info');
+  info.innerHTML = `<span style="color:var(--accent);">👥 ${total} joueur${total>1?'s':''} inscrits</span> · <span style="color:var(--gold);">${top16.length} qualifiés pour les 16es</span> · <span style="color:var(--silver);font-size:0.8rem;">Qualifications basées sur les scores actuels</span>`;
+
+  const container = document.getElementById('comp-phases');
+  container.innerHTML = '';
+
+  phasesData.forEach((pd, phIdx) => {
+    const { phase, matches, winners } = pd;
+    const phaseDiv = document.createElement('div');
+    phaseDiv.className = 'comp-phase';
+
+    let matchesHTML = matches.map((m, mi) => {
+      const w = getWinner(m.p1, m.p2);
+      const renderPlayer = (p, isWinner) => {
+        if(!p) return `<div class="comp-player tbd"><span>— (exemption)</span><span class="comp-player-score">—</span></div>`;
+        const cls = isWinner ? 'qualifie' : 'elimine';
+        const badge = isWinner
+          ? `<span class="comp-badge q">✓ Qualifié</span>`
+          : `<span class="comp-badge e">Éliminé</span>`;
+        return `<div class="comp-player ${cls}">
+          <span>${p.name} <span style="font-size:0.75rem;color:var(--silver);">${p.classe||''}</span></span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <span class="comp-player-score">${p.score||0} pts</span>
+            ${badge}
+          </span>
+        </div>`;
+      };
+      const p1Win = w === m.p1;
+      return `<div class="comp-match">
+        <div class="comp-match-label">Match ${mi+1}</div>
+        ${renderPlayer(m.p1, p1Win)}
+        <div style="text-align:center;color:var(--silver);font-size:0.75rem;padding:2px 0;">VS</div>
+        ${m.p2 ? renderPlayer(m.p2, !p1Win) : renderPlayer(null, false)}
+      </div>`;
+    }).join('');
+
+    phaseDiv.innerHTML = `
+      <div class="comp-phase-title">${phase.icon} ${phase.label}
+        <span style="font-size:0.75rem;color:var(--silver);font-family:sans-serif;font-weight:400;">${matches.length} match${matches.length>1?'s':''} · ${winners.length} qualifié${winners.length>1?'s':''}</span>
+      </div>
+      <div class="comp-matches">${matchesHTML}</div>
+      ${phIdx < phasesData.length-1 ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--accent);">
+        ➜ Qualifiés pour <strong>${COMP_PHASES[phIdx+1]?.label||'la prochaine phase'}</strong> : ${winners.map(p=>`<strong>${p.name}</strong>`).join(', ')}
+      </div>` : ''}
+    `;
+    container.appendChild(phaseDiv);
+  });
+
+  // Afficher le vainqueur final si dispo
+  if(current.length === 1){
+    const champion = current[0];
+    const bannerDiv = document.createElement('div');
+    bannerDiv.className = 'comp-winner-banner';
+    bannerDiv.innerHTML = `
+      <div style="font-size:2.5rem;">🏆</div>
+      <div style="font-size:0.85rem;color:var(--silver);letter-spacing:2px;text-transform:uppercase;">Champion de l'Olympiade</div>
+      <div class="comp-winner-name">${champion.name}</div>
+      <div class="comp-winner-sub">${champion.classe||''} ${champion.school?'· '+champion.school:''} · ${champion.score||0} points</div>
+    `;
+    container.appendChild(bannerDiv);
+  }
+
+  toast('Tableau de compétition généré !','success');
+}
+
+function resetCompetition(){
+  if(!confirm('Réinitialiser le tableau de compétition ?')) return;
+  document.getElementById('comp-phases').innerHTML = '';
+  document.getElementById('comp-info').textContent = '';
+  toast('Tableau réinitialisé','info');
 }
 
 // ════════════════════════════════════════
