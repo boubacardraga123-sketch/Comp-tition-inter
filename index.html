@@ -4,9 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BHDS Arena – Compétition Éducative</title>
-<!-- Firebase SDK (compat) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<!-- Firebase SDK (compat) – chargement robuste avec fallback localStorage -->
+<script>
+// Chargement dynamique Firebase avec détection d'erreur
+(function() {
+  function loadScript(src, onload, onerror) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = onload;
+    s.onerror = onerror;
+    document.head.appendChild(s);
+  }
+
+  window._FIREBASE_LOAD_FAILED = false;
+
+  loadScript(
+    'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
+    function() {
+      loadScript(
+        'https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js',
+        function() {
+          window._FIREBASE_SDK_READY = true;
+          document.dispatchEvent(new Event('firebaseSdkReady'));
+        },
+        function() {
+          window._FIREBASE_LOAD_FAILED = true;
+          document.dispatchEvent(new Event('firebaseSdkReady'));
+        }
+      );
+    },
+    function() {
+      window._FIREBASE_LOAD_FAILED = true;
+      document.dispatchEvent(new Event('firebaseSdkReady'));
+    }
+  );
+})();
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap');
 
@@ -613,19 +646,32 @@
   /* ── MODAL ── */
   .modal-overlay {
     display:none; position:fixed; inset:0; z-index:1000;
-    background:rgba(0,0,0,0.75); backdrop-filter:blur(6px);
-    align-items:center; justify-content:center; padding:20px;
+    background:rgba(0,0,0,0.78); backdrop-filter:blur(6px);
+    align-items:flex-start; justify-content:center; padding:16px;
+    overflow-y:auto;
   }
   .modal-overlay.open { display:flex; }
   .modal {
     background:var(--dark2); border:1px solid var(--border);
-    border-radius:20px; padding:28px; max-width:520px; width:100%;
+    border-radius:20px; padding:24px; max-width:560px; width:100%;
     box-shadow:0 20px 80px rgba(0,0,0,0.7);
     animation:modal-in 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+    margin:auto;
   }
-  @keyframes modal-in { from{transform:scale(0.85);opacity:0;} to{transform:scale(1);opacity:1;} }
-  .modal-title { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; color:var(--gold); margin-bottom:20px; }
-  .modal-actions { display:flex; gap:12px; margin-top:24px; justify-content:flex-end; }
+  @keyframes modal-in { from{transform:scale(0.92);opacity:0;} to{transform:scale(1);opacity:1;} }
+  .modal-title {
+    font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700;
+    color:var(--gold); margin-bottom:16px;
+    padding-bottom:12px; border-bottom:1px solid var(--border);
+  }
+  .modal-actions { display:flex; gap:12px; margin-top:20px; justify-content:flex-end; padding-top:16px; border-top:1px solid var(--border); }
+  /* Séparateurs de section dans le modal */
+  .modal-section-sep {
+    font-size:0.72rem; letter-spacing:2px; text-transform:uppercase;
+    color:var(--accent); margin:18px 0 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .modal-section-sep::after { content:''; flex:1; height:1px; background:var(--border); }
 
   /* FORM GRID */
   .form-grid { display:grid; gap:14px; }
@@ -1151,13 +1197,10 @@
   <div class="modal" style="max-width:600px;">
     <div class="modal-title">👤 AJOUTER UN JOUEUR</div>
 
-    <!-- Séparateur section joueur -->
-    <div style="font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">
-      ── Informations personnelles
-    </div>
+    <div class="modal-section-sep">👤 Identité</div>
     <div class="form-grid">
       <div class="form-row">
-        <div><label>Nom</label><input id="ap-nom" placeholder="Ex: Diallo"></div>
+        <div><label>Nom *</label><input id="ap-nom" placeholder="Ex: Diallo"></div>
         <div><label>Prénom</label><input id="ap-prenom" placeholder="Ex: Mamadou"></div>
       </div>
       <div class="form-row">
@@ -1173,32 +1216,20 @@
       </div>
     </div>
 
-    <!-- Séparateur section contact -->
-    <div style="font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin:16px 0 10px;">
-      ── Contact
-    </div>
+    <div class="modal-section-sep">📞 Contact</div>
     <div class="form-grid">
       <div class="form-row">
-        <div>
-          <label>📱 Numéro WhatsApp</label>
-          <input id="ap-phone" placeholder="+224 620 000 000" type="tel">
-        </div>
-        <div>
-          <label>📧 Adresse Email</label>
-          <input id="ap-email" placeholder="exemple@email.com" type="email">
-        </div>
+        <div><label>📱 WhatsApp</label><input id="ap-phone" placeholder="+224 620 000 000" type="tel"></div>
+        <div><label>📧 Email</label><input id="ap-email" placeholder="exemple@email.com" type="email"></div>
       </div>
     </div>
 
-    <!-- Séparateur section école -->
-    <div style="font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin:16px 0 10px;">
-      ── Établissement scolaire
-    </div>
+    <div class="modal-section-sep">🏫 Établissement</div>
     <div class="form-grid">
       <div class="form-row">
         <div><label>Nom de l'école</label><input id="ap-school" placeholder="Ex: ENPETP, Lycée Donka"></div>
         <div>
-          <label>Type d'établissement</label>
+          <label>Type</label>
           <select id="ap-type-ecole">
             <option value="">-- Sélectionner --</option>
             <option>Lycée public</option>
@@ -1212,9 +1243,9 @@
       </div>
       <div class="form-row">
         <div><label>Classe / Niveau</label><input id="ap-class" placeholder="Ex: Terminale A, BT2"></div>
-        <div><label>Ville / Commune</label><input id="ap-ville" placeholder="Ex: Conakry, Kindia"></div>
+        <div><label>Ville / Commune</label><input id="ap-ville" placeholder="Ex: Mamou, Conakry"></div>
       </div>
-      <div><label>Matricule scolaire (optionnel)</label><input id="ap-matricule" placeholder="Ex: GN-2024-00123"></div>
+      <div><label>Matricule scolaire</label><input id="ap-matricule" placeholder="Ex: GN-2024-00123 (optionnel)"></div>
     </div>
 
     <div class="modal-actions">
@@ -1230,12 +1261,10 @@
     <div class="modal-title">✏️ MODIFIER LE JOUEUR</div>
     <input type="hidden" id="ep-code">
 
-    <div style="font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">
-      ── Informations personnelles
-    </div>
+    <div class="modal-section-sep">👤 Identité</div>
     <div class="form-grid">
       <div class="form-row">
-        <div><label>Nom</label><input id="ep-nom" placeholder="Ex: Diallo"></div>
+        <div><label>Nom *</label><input id="ep-nom" placeholder="Ex: Diallo"></div>
         <div><label>Prénom</label><input id="ep-prenom" placeholder="Ex: Mamadou"></div>
       </div>
       <div class="form-row">
@@ -1251,24 +1280,20 @@
       </div>
     </div>
 
-    <div style="font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin:16px 0 10px;">
-      ── Contact
-    </div>
+    <div class="modal-section-sep">📞 Contact</div>
     <div class="form-grid">
       <div class="form-row">
-        <div><label>📱 Numéro WhatsApp</label><input id="ep-phone" type="tel" placeholder="+224 620 000 000"></div>
-        <div><label>📧 Adresse Email</label><input id="ep-email" type="email" placeholder="exemple@email.com"></div>
+        <div><label>📱 WhatsApp</label><input id="ep-phone" type="tel" placeholder="+224 620 000 000"></div>
+        <div><label>📧 Email</label><input id="ep-email" type="email" placeholder="exemple@email.com"></div>
       </div>
     </div>
 
-    <div style="font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin:16px 0 10px;">
-      ── Établissement scolaire
-    </div>
+    <div class="modal-section-sep">🏫 Établissement</div>
     <div class="form-grid">
       <div class="form-row">
         <div><label>Nom de l'école</label><input id="ep-school" placeholder="Ex: ENPETP"></div>
         <div>
-          <label>Type d'établissement</label>
+          <label>Type</label>
           <select id="ep-type-ecole">
             <option value="">-- Sélectionner --</option>
             <option>Lycée public</option>
@@ -1282,9 +1307,9 @@
       </div>
       <div class="form-row">
         <div><label>Classe / Niveau</label><input id="ep-class" placeholder="Ex: Terminale A"></div>
-        <div><label>Ville / Commune</label><input id="ep-ville" placeholder="Ex: Conakry"></div>
+        <div><label>Ville / Commune</label><input id="ep-ville" placeholder="Ex: Mamou"></div>
       </div>
-      <div><label>Matricule scolaire (optionnel)</label><input id="ep-matricule" placeholder="Ex: GN-2024-00123"></div>
+      <div><label>Matricule scolaire</label><input id="ep-matricule" placeholder="Ex: GN-2024-00123 (optionnel)"></div>
     </div>
 
     <div class="modal-actions">
@@ -1430,12 +1455,8 @@ const firebaseConfig = {
   databaseURL: "https://comp-inter-default-rtdb.europe-west1.firebasedatabase.app/"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const ARENA_REF = db.ref('bhds_arena');
-
 // ════════════════════════════════════════
-// CACHE LOCAL (snapshot Firebase en mémoire)
+// CACHE LOCAL & VARIABLES GLOBALES
 // ════════════════════════════════════════
 const DEFAULT_DATA = {
   players: [],
@@ -1444,19 +1465,78 @@ const DEFAULT_DATA = {
   activity: []
 };
 
-let _cache = null;          // cache en mémoire (objet JS)
-let _fbReady = false;       // Firebase a-t-il chargé au moins une fois ?
-let _pendingSave = false;   // sauvegarde en attente
+let _cache = null;
+let _fbReady = false;
+let _pendingSave = false;
+let _useLocalOnly = false;
+let db = null;
+let ARENA_REF = null;
+
+const LS_KEY = 'bhds_arena_fallback';
+function _lsGet() {
+  try { const v = localStorage.getItem(LS_KEY); return v ? JSON.parse(v) : null; } catch { return null; }
+}
+function _lsSet(d) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch {}
+}
 
 // ── Status UI ──────────────────────────
 function setFbStatus(state, text) {
   const el = document.getElementById('fb-status');
   const txt = document.getElementById('fb-status-text');
   if (!el) return;
-  el.className = state;  // '', 'connected', 'error'
+  el.className = state;
   txt.textContent = text;
 }
 
+// ── MODE OFFLINE ──────────────────────────────────────────────
+function _initOfflineMode() {
+  _useLocalOnly = true;
+  setFbStatus('error', '📴 Mode hors-ligne (localStorage)');
+  console.warn('Firebase SDK non disponible – mode localStorage activé.');
+  const local = _lsGet();
+  _cache = local ? local : JSON.parse(JSON.stringify(DEFAULT_DATA));
+  _fbReady = true;
+  setTimeout(() => {
+    if (document.getElementById('screen-admin').classList.contains('active')) {
+      const activeSection = document.querySelector('.admin-section.active');
+      if (activeSection) {
+        const sid = activeSection.id;
+        if (sid === 's-dashboard')  renderDashboard();
+        if (sid === 's-players')    renderPlayers();
+        if (sid === 's-questions')  renderQuestions();
+        if (sid === 's-classement') renderClassement();
+      }
+    }
+  }, 100);
+}
+
+function _initFirebase() {
+  if (window._FIREBASE_LOAD_FAILED || typeof firebase === 'undefined') {
+    _initOfflineMode();
+    return;
+  }
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    ARENA_REF = db.ref('bhds_arena');
+    _setupFirebaseListeners();
+  } catch(e) {
+    console.error('Firebase init error:', e);
+    _initOfflineMode();
+  }
+}
+
+// ── Déclencher l'init quand le SDK est prêt ──────────────────
+function _triggerInit() { if (!_fbReady) _initFirebase(); }
+if (window._FIREBASE_SDK_READY || window._FIREBASE_LOAD_FAILED) {
+  _triggerInit();
+} else {
+  document.addEventListener('firebaseSdkReady', _triggerInit);
+  setTimeout(function() { window._FIREBASE_LOAD_FAILED = true; _triggerInit(); }, 6000);
+}
+
+function _setupFirebaseListeners() {
 // ── Listener temps réel ──────────────
 ARENA_REF.on('value',
   (snap) => {
@@ -1526,6 +1606,7 @@ db.ref('.info/connected').on('value', (snap) => {
     setFbStatus('error', '📡 Reconnexion…');
   }
 });
+} // fin _setupFirebaseListeners
 
 // ════════════════════════════════════════
 // getData / saveData (remplacement de STORE)
@@ -1537,8 +1618,13 @@ function getData() {
 
 function saveData(d) {
   _cache = d;
-  // Sauvegarde locale de secours
-  try { localStorage.setItem('bhds_arena_fallback', JSON.stringify(d)); } catch {}
+  // Sauvegarde locale (toujours)
+  _lsSet(d);
+
+  if (_useLocalOnly || !ARENA_REF) {
+    setFbStatus('error', '📴 Sauvegardé en local');
+    return;
+  }
 
   // Afficher spinner
   const txt = document.getElementById('fb-status-text');
