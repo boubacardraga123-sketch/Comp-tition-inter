@@ -1373,13 +1373,19 @@
     <div class="intro-sub">Olympiade Éducative · Guinée</div>
     <div class="intro-badges">
       <span class="intro-badge" style="animation-delay:0.1s">📐 Maths</span>
-      <span class="intro-badge" style="animation-delay:0.2s">⚗️ Physique</span>
-      <span class="intro-badge" style="animation-delay:0.3s">🌿 Sciences</span>
+      <span class="intro-badge" style="animation-delay:0.2s">⚗️ Physique-Chimie</span>
+      <span class="intro-badge" style="animation-delay:0.3s">🌿 Sciences de la Vie</span>
       <span class="intro-badge" style="animation-delay:0.4s">✍️ Français</span>
       <span class="intro-badge" style="animation-delay:0.5s">🌍 Histoire</span>
       <span class="intro-badge" style="animation-delay:0.6s">🧭 Géographie</span>
-      <span class="intro-badge" style="animation-delay:0.7s">🏛️ Civique</span>
-      <span class="intro-badge" style="animation-delay:0.8s">🌐 Anglais</span>
+      <span class="intro-badge" style="animation-delay:0.7s">🏛️ Éducation Civique</span>
+      <span class="intro-badge" style="animation-delay:0.8s">📏 Géométrie</span>
+      <span class="intro-badge" style="animation-delay:0.9s">🔢 Arithmétique</span>
+      <span class="intro-badge" style="animation-delay:1.0s">🌐 Anglais</span>
+      <span class="intro-badge" style="animation-delay:1.1s">💡 Philosophie</span>
+      <span class="intro-badge" style="animation-delay:1.2s">📈 Économie</span>
+      <span class="intro-badge" style="animation-delay:1.3s">⚡ Électricité</span>
+      <span class="intro-badge" style="animation-delay:1.4s">☢️ Physique nucléaire</span>
     </div>
     <div class="intro-loader-wrap">
       <div class="intro-loader-track"><div class="intro-loader-fill" id="intro-loader"></div></div>
@@ -2572,31 +2578,26 @@
     <div class="form-grid">
       <div class="form-row">
         <div>
-          <label>Matière</label>
-          <select id="aq-matiere">
-            <option>Physique-Chimie</option>
-            <option>Mathématiques</option>
-            <option>Sciences de la Vie</option>
-            <option>Histoire-Géographie</option>
-            <option>Français</option>
-            <option>Anglais</option>
-            <option>Sciences Techniques</option>
-            <option>Culture Générale</option>
-            <option>Calcul</option>
-            <option>Géographie</option>
-            <option>Histoire</option>
-            <option>Éducation Civique et Morale</option>
-            <option>Problème Arithmétique</option>
+          <label>Niveau (1-5)</label>
+          <select id="aq-level" onchange="_updateMatieres(this.value)">
+            <option value="1">🟢 Niveau 1 – Primaire / Collège (6e–4e)</option>
+            <option value="2">🔵 Niveau 2 – Collège (3e–2e)</option>
+            <option value="3">🟡 Niveau 3 – Collège avancé (1ère)</option>
+            <option value="4">🟠 Niveau 4 – Lycée</option>
+            <option value="5">🔴 Niveau 5 – Terminale SM/SL</option>
           </select>
         </div>
         <div>
-          <label>Niveau (1-5)</label>
-          <select id="aq-level">
-            <option value="1">🟢 Niveau 1 – Facile</option>
-            <option value="2">🔵 Niveau 2 – Moyen</option>
-            <option value="3">🟡 Niveau 3 – Difficile</option>
-            <option value="4">🟠 Niveau 4 – Expert</option>
-            <option value="5">🔴 Boss Final</option>
+          <label>Matière</label>
+          <select id="aq-matiere">
+            <!-- Options remplies dynamiquement par _updateMatieres() -->
+            <option>Mathématiques</option>
+            <option>Physique-Chimie</option>
+            <option>Français</option>
+            <option>Sciences de la Vie</option>
+            <option>Géographie</option>
+            <option>Histoire</option>
+            <option>Éducation Civique et Morale</option>
           </select>
         </div>
       </div>
@@ -2669,80 +2670,80 @@ const DEFAULT_DATA = {
     // ══════════════════════════════════
 
     // -- Culture générale Guinée --
-    {id:'q0cg01', level:"0", matiere:'Géographie',       text:"Quelle est la capitale de la Guinée ?",                                                                options:["Kankan","Labé","Conakry","Kindia"],                                                                                           correct:2},
-    {id:'q0cg02', level:"0", matiere:'Histoire',         text:"En quelle année la Guinée a-t-elle obtenu son indépendance ?",                                         options:["1956","1958","1960","1962"],                                                                                                  correct:1},
-    {id:'q0cg03', level:"0", matiere:'Histoire',         text:"Qui fut le premier président de la Guinée ?",                                                           options:["Lansana Conté","Alpha Condé","Sékou Touré","Cellou Dalein Diallo"],                                                             correct:2},
-    {id:'q0cg04', level:"0", matiere:'Éducation Civique',text:"Quelles sont les couleurs du drapeau guinéen (de gauche à droite) ?",                                   options:["Vert, Jaune, Rouge","Rouge, Jaune, Vert","Jaune, Rouge, Vert","Rouge, Vert, Jaune"],                                          correct:1},
-    {id:'q0cg05', level:"0", matiere:'Éducation Civique',text:"Quelle est la devise de la République de Guinée ?",                                                    options:["Liberté, Égalité, Fraternité","Unité, Foi, Discipline","Travail, Justice, Solidarité","Paix, Travail, Patrie"],              correct:2},
-    {id:'q0cg06', level:"0", matiere:'Géographie',       text:"Quel est le principal minerai exporté par la Guinée ?",                                                 options:["Le pétrole","L'or","La bauxite","Le diamant"],                                                                                correct:2},
-    {id:'q0cg07', level:"0", matiere:'Géographie',       text:"Quel fleuve prend sa source en Guinée et traverse plusieurs pays d'Afrique de l'Ouest ?",               options:["Le Congo","Le Nil","Le Niger","Le Sénégal"],                                                                                  correct:2},
-    {id:'q0cg08', level:"0", matiere:'Géographie',       text:"Combien de régions administratives compte la Guinée ?",                                                 options:["5","6","7","8"],                                                                                                             correct:2},
-    {id:'q0cg09', level:"0", matiere:'Histoire',         text:"Quel héros guinéen a résisté à la colonisation française à la fin du XIXe siècle ?",                    options:["Sékou Touré","Samory Touré","Bocar Biro","Alpha Yaya"],                                                                       correct:1},
-    {id:'q0cg10', level:"0", matiere:'Géographie',       text:"Dans quelle région naturelle se trouve le Fouta-Djalon ?",                                              options:["Guinée Maritime","Haute-Guinée","Moyenne-Guinée","Guinée Forestière"],                                                        correct:2},
+    {id:'q0cg01', level:"1", matiere:'Géographie',       text:"Quelle est la capitale de la Guinée ?",                                                                options:["Kankan","Labé","Conakry","Kindia"],                                                                                           correct:2},
+    {id:'q0cg02', level:"1", matiere:'Histoire',         text:"En quelle année la Guinée a-t-elle obtenu son indépendance ?",                                         options:["1956","1958","1960","1962"],                                                                                                  correct:1},
+    {id:'q0cg03', level:"1", matiere:'Histoire',         text:"Qui fut le premier président de la Guinée ?",                                                           options:["Lansana Conté","Alpha Condé","Sékou Touré","Cellou Dalein Diallo"],                                                             correct:2},
+    {id:'q0cg04', level:"1", matiere:'Éducation Civique',text:"Quelles sont les couleurs du drapeau guinéen (de gauche à droite) ?",                                   options:["Vert, Jaune, Rouge","Rouge, Jaune, Vert","Jaune, Rouge, Vert","Rouge, Vert, Jaune"],                                          correct:1},
+    {id:'q0cg05', level:"1", matiere:'Éducation Civique',text:"Quelle est la devise de la République de Guinée ?",                                                    options:["Liberté, Égalité, Fraternité","Unité, Foi, Discipline","Travail, Justice, Solidarité","Paix, Travail, Patrie"],              correct:2},
+    {id:'q0cg06', level:"1", matiere:'Géographie',       text:"Quel est le principal minerai exporté par la Guinée ?",                                                 options:["Le pétrole","L'or","La bauxite","Le diamant"],                                                                                correct:2},
+    {id:'q0cg07', level:"1", matiere:'Géographie',       text:"Quel fleuve prend sa source en Guinée et traverse plusieurs pays d'Afrique de l'Ouest ?",               options:["Le Congo","Le Nil","Le Niger","Le Sénégal"],                                                                                  correct:2},
+    {id:'q0cg08', level:"1", matiere:'Géographie',       text:"Combien de régions administratives compte la Guinée ?",                                                 options:["5","6","7","8"],                                                                                                             correct:2},
+    {id:'q0cg09', level:"1", matiere:'Histoire',         text:"Quel héros guinéen a résisté à la colonisation française à la fin du XIXe siècle ?",                    options:["Sékou Touré","Samory Touré","Bocar Biro","Alpha Yaya"],                                                                       correct:1},
+    {id:'q0cg10', level:"1", matiere:'Géographie',       text:"Dans quelle région naturelle se trouve le Fouta-Djalon ?",                                              options:["Guinée Maritime","Haute-Guinée","Moyenne-Guinée","Guinée Forestière"],                                                        correct:2},
 
     // -- Mathématiques --
-    {id:'q0m01',  level:0, matiere:'Mathématiques',    text:"Combien font 12 × 12 ?",                                                                                options:["124","134","144","154"],                                                                                                     correct:2},
-    {id:'q0m02',  level:0, matiere:'Mathématiques',    text:"Quel est le résultat de 25 % de 200 ?",                                                                 options:["25","40","50","75"],                                                                                                         correct:2},
-    {id:'q0m03',  level:0, matiere:'Mathématiques',    text:"Quelle est la valeur de π (pi) arrondie à deux décimales ?",                                            options:["3,12","3,14","3,16","3,18"],                                                                                                 correct:1},
-    {id:'q0m04',  level:0, matiere:'Mathématiques',    text:"Quel est le carré de 13 ?",                                                                             options:["156","169","176","196"],                                                                                                     correct:1},
-    {id:'q0m05',  level:0, matiere:'Mathématiques',    text:"Dans un triangle rectangle, le carré de l'hypoténuse est égal à :",                                     options:["La somme des deux autres côtés","La somme des carrés des deux autres côtés","Le produit des deux autres côtés","La différence des carrés"], correct:1},
-    {id:'q0m06',  level:0, matiere:'Mathématiques',    text:"Quel est le PGCD de 24 et 36 ?",                                                                        options:["6","8","12","18"],                                                                                                           correct:2},
-    {id:'q0m07',  level:0, matiere:'Mathématiques',    text:"Si x + 7 = 15, quelle est la valeur de x ?",                                                            options:["6","7","8","9"],                                                                                                             correct:2},
-    {id:'q0m08',  level:0, matiere:'Mathématiques',    text:"Combien font 2³ × 3² ?",                                                                                options:["48","72","54","36"],                                                                                                         correct:1},
-    {id:'q0m09',  level:0, matiere:'Mathématiques',    text:"Quelle est l'aire d'un cercle de rayon 7 cm ? (π ≈ 3,14)",                                              options:["43,96 cm²","87,92 cm²","153,86 cm²","219,8 cm²"],                                                                           correct:2},
-    {id:'q0m10',  level:0, matiere:'Mathématiques',    text:"Un commerçant achète à 50 000 GNF et revend avec 20 % de bénéfice. Prix de vente ?",                    options:["55 000 GNF","58 000 GNF","60 000 GNF","65 000 GNF"],                                                                         correct:2},
+    {id:'q0m01',  level:"1", matiere:'Mathématiques',    text:"Combien font 12 × 12 ?",                                                                                options:["124","134","144","154"],                                                                                                     correct:2},
+    {id:'q0m02',  level:"1", matiere:'Mathématiques',    text:"Quel est le résultat de 25 % de 200 ?",                                                                 options:["25","40","50","75"],                                                                                                         correct:2},
+    {id:'q0m03',  level:"1", matiere:'Mathématiques',    text:"Quelle est la valeur de π (pi) arrondie à deux décimales ?",                                            options:["3,12","3,14","3,16","3,18"],                                                                                                 correct:1},
+    {id:'q0m04',  level:"1", matiere:'Mathématiques',    text:"Quel est le carré de 13 ?",                                                                             options:["156","169","176","196"],                                                                                                     correct:1},
+    {id:'q0m05',  level:"1", matiere:'Mathématiques',    text:"Dans un triangle rectangle, le carré de l'hypoténuse est égal à :",                                     options:["La somme des deux autres côtés","La somme des carrés des deux autres côtés","Le produit des deux autres côtés","La différence des carrés"], correct:1},
+    {id:'q0m06',  level:"1", matiere:'Mathématiques',    text:"Quel est le PGCD de 24 et 36 ?",                                                                        options:["6","8","12","18"],                                                                                                           correct:2},
+    {id:'q0m07',  level:"1", matiere:'Mathématiques',    text:"Si x + 7 = 15, quelle est la valeur de x ?",                                                            options:["6","7","8","9"],                                                                                                             correct:2},
+    {id:'q0m08',  level:"1", matiere:'Mathématiques',    text:"Combien font 2³ × 3² ?",                                                                                options:["48","72","54","36"],                                                                                                         correct:1},
+    {id:'q0m09',  level:"1", matiere:'Mathématiques',    text:"Quelle est l'aire d'un cercle de rayon 7 cm ? (π ≈ 3,14)",                                              options:["43,96 cm²","87,92 cm²","153,86 cm²","219,8 cm²"],                                                                           correct:2},
+    {id:'q0m10',  level:"1", matiere:'Mathématiques',    text:"Un commerçant achète à 50 000 GNF et revend avec 20 % de bénéfice. Prix de vente ?",                    options:["55 000 GNF","58 000 GNF","60 000 GNF","65 000 GNF"],                                                                         correct:2},
 
     // -- Français --
-    {id:'q0fr01', level:"0", matiere:'Français',         text:"Quel est le pluriel de 'œil' ?",                                                                        options:["œils","yeux","œilles","yeux ou œils"],                                                                                       correct:1},
-    {id:'q0fr02', level:"0", matiere:'Français',         text:"Dans 'Les enfants jouent', quel est le sujet ?",                                                        options:["jouent","Les","enfants","Les enfants"],                                                                                       correct:3},
-    {id:'q0fr03', level:"0", matiere:'Français',         text:"Quel temps est utilisé dans : 'Il avait mangé avant de partir' ?",                                      options:["Imparfait","Plus-que-parfait","Passé composé","Passé simple"],                                                                correct:1},
-    {id:'q0fr04', level:"0", matiere:'Français',         text:"Quel est le synonyme de 'courageux' ?",                                                                 options:["Timide","Peureux","Vaillant","Faible"],                                                                                       correct:2},
-    {id:'q0fr05', level:"0", matiere:'Français',         text:"Quelle figure de style est utilisée dans 'Le temps est un voleur' ?",                                   options:["Comparaison","Métaphore","Hyperbole","Allitération"],                                                                         correct:1},
-    {id:'q0fr06', level:"0", matiere:'Français',         text:"Quel est l'antonyme de 'générosité' ?",                                                                 options:["Bonté","Avarice","Richesse","Douceur"],                                                                                       correct:1},
-    {id:'q0fr07', level:"0", matiere:'Français',         text:"Dans 'Elle chante merveilleusement', 'merveilleusement' est :",                                         options:["Un adjectif","Un nom","Un adverbe","Un verbe"],                                                                               correct:2},
-    {id:'q0fr08', level:"0", matiere:'Français',         text:"Quel est le féminin de 'acteur' ?",                                                                     options:["Acteuse","Actrice","Acteure","Acteurette"],                                                                                   correct:1},
+    {id:'q0fr01', level:"1", matiere:'Français',         text:"Quel est le pluriel de 'œil' ?",                                                                        options:["œils","yeux","œilles","yeux ou œils"],                                                                                       correct:1},
+    {id:'q0fr02', level:"1", matiere:'Français',         text:"Dans 'Les enfants jouent', quel est le sujet ?",                                                        options:["jouent","Les","enfants","Les enfants"],                                                                                       correct:3},
+    {id:'q0fr03', level:"1", matiere:'Français',         text:"Quel temps est utilisé dans : 'Il avait mangé avant de partir' ?",                                      options:["Imparfait","Plus-que-parfait","Passé composé","Passé simple"],                                                                correct:1},
+    {id:'q0fr04', level:"1", matiere:'Français',         text:"Quel est le synonyme de 'courageux' ?",                                                                 options:["Timide","Peureux","Vaillant","Faible"],                                                                                       correct:2},
+    {id:'q0fr05', level:"1", matiere:'Français',         text:"Quelle figure de style est utilisée dans 'Le temps est un voleur' ?",                                   options:["Comparaison","Métaphore","Hyperbole","Allitération"],                                                                         correct:1},
+    {id:'q0fr06', level:"1", matiere:'Français',         text:"Quel est l'antonyme de 'générosité' ?",                                                                 options:["Bonté","Avarice","Richesse","Douceur"],                                                                                       correct:1},
+    {id:'q0fr07', level:"1", matiere:'Français',         text:"Dans 'Elle chante merveilleusement', 'merveilleusement' est :",                                         options:["Un adjectif","Un nom","Un adverbe","Un verbe"],                                                                               correct:2},
+    {id:'q0fr08', level:"1", matiere:'Français',         text:"Quel est le féminin de 'acteur' ?",                                                                     options:["Acteuse","Actrice","Acteure","Acteurette"],                                                                                   correct:1},
 
     // -- Physique-Chimie --
-    {id:'q0pc01', level:"0", matiere:'Physique-Chimie',  text:"Quelle est la formule chimique de l'eau ?",                                                             options:["CO₂","H₂O","O₂","NaCl"],                                                                                                    correct:1},
-    {id:'q0pc02', level:"0", matiere:'Physique-Chimie',  text:"Quelle est l'unité de mesure de l'intensité électrique ?",                                              options:["Volt","Ohm","Ampère","Watt"],                                                                                                correct:2},
-    {id:'q0pc03', level:"0", matiere:'Physique-Chimie',  text:"Quel est le symbole chimique de l'or ?",                                                                options:["Ag","Fe","Au","Cu"],                                                                                                         correct:2},
-    {id:'q0pc04', level:"0", matiere:'Physique-Chimie',  text:"La lumière visible appartient au spectre :",                                                            options:["Radio","Infrarouge","Électromagnétique","Sonore"],                                                                           correct:2},
-    {id:'q0pc05', level:"0", matiere:'Physique-Chimie',  text:"Quelle loi exprime la relation U = R × I ?",                                                            options:["Loi de Faraday","Loi d'Ohm","Loi de Newton","Loi de Joule"],                                                                  correct:1},
-    {id:'q0pc06', level:"0", matiere:'Physique-Chimie',  text:"Quel est le numéro atomique de l'hydrogène ?",                                                          options:["0","1","2","3"],                                                                                                             correct:1},
-    {id:'q0pc07', level:"0", matiere:'Physique-Chimie',  text:"L'ébullition de l'eau à pression normale se produit à :",                                               options:["90°C","95°C","100°C","110°C"],                                                                                               correct:2},
-    {id:'q0pc08', level:"0", matiere:'Physique-Chimie',  text:"Quelle est la formule chimique du dioxyde de carbone ?",                                                options:["CO","CO₂","C₂O","C₂O₂"],                                                                                                    correct:1},
+    {id:'q0pc01', level:"1", matiere:'Physique-Chimie',  text:"Quelle est la formule chimique de l'eau ?",                                                             options:["CO₂","H₂O","O₂","NaCl"],                                                                                                    correct:1},
+    {id:'q0pc02', level:"1", matiere:'Physique-Chimie',  text:"Quelle est l'unité de mesure de l'intensité électrique ?",                                              options:["Volt","Ohm","Ampère","Watt"],                                                                                                correct:2},
+    {id:'q0pc03', level:"1", matiere:'Physique-Chimie',  text:"Quel est le symbole chimique de l'or ?",                                                                options:["Ag","Fe","Au","Cu"],                                                                                                         correct:2},
+    {id:'q0pc04', level:"1", matiere:'Physique-Chimie',  text:"La lumière visible appartient au spectre :",                                                            options:["Radio","Infrarouge","Électromagnétique","Sonore"],                                                                           correct:2},
+    {id:'q0pc05', level:"1", matiere:'Physique-Chimie',  text:"Quelle loi exprime la relation U = R × I ?",                                                            options:["Loi de Faraday","Loi d'Ohm","Loi de Newton","Loi de Joule"],                                                                  correct:1},
+    {id:'q0pc06', level:"1", matiere:'Physique-Chimie',  text:"Quel est le numéro atomique de l'hydrogène ?",                                                          options:["0","1","2","3"],                                                                                                             correct:1},
+    {id:'q0pc07', level:"1", matiere:'Physique-Chimie',  text:"L'ébullition de l'eau à pression normale se produit à :",                                               options:["90°C","95°C","100°C","110°C"],                                                                                               correct:2},
+    {id:'q0pc08', level:"1", matiere:'Physique-Chimie',  text:"Quelle est la formule chimique du dioxyde de carbone ?",                                                options:["CO","CO₂","C₂O","C₂O₂"],                                                                                                    correct:1},
 
     // -- Sciences de la Vie --
-    {id:'q0sv01', level:"0", matiere:'Sciences de la Vie',text:"Quel organe du corps humain produit l'insuline ?",                                                     options:["Le foie","Les reins","Le pancréas","L'estomac"],                                                                              correct:2},
-    {id:'q0sv02', level:"0", matiere:'Sciences de la Vie',text:"Combien d'os compte le corps humain adulte ?",                                                         options:["186","206","226","256"],                                                                                                     correct:1},
-    {id:'q0sv03', level:"0", matiere:'Sciences de la Vie',text:"Quel groupe sanguin est dit 'donneur universel' ?",                                                    options:["A","B","AB","O"],                                                                                                            correct:3},
-    {id:'q0sv04', level:"0", matiere:'Sciences de la Vie',text:"Quelle molécule transporte l'oxygène dans le sang ?",                                                  options:["L'insuline","La kératine","L'hémoglobine","La mélanine"],                                                                     correct:2},
-    {id:'q0sv05', level:"0", matiere:'Sciences de la Vie',text:"La photosynthèse se déroule dans :",                                                                   options:["Les racines","Les mitochondries","Les chloroplastes","Les vacuoles"],                                                          correct:2},
-    {id:'q0sv06', level:"0", matiere:'Sciences de la Vie',text:"Quel est le rôle principal des globules blancs ?",                                                     options:["Transporter l'oxygène","Défendre l'organisme contre les infections","Coaguler le sang","Produire de l'énergie"],             correct:1},
+    {id:'q0sv01', level:"1", matiere:'Sciences de la Vie',text:"Quel organe du corps humain produit l'insuline ?",                                                     options:["Le foie","Les reins","Le pancréas","L'estomac"],                                                                              correct:2},
+    {id:'q0sv02', level:"1", matiere:'Sciences de la Vie',text:"Combien d'os compte le corps humain adulte ?",                                                         options:["186","206","226","256"],                                                                                                     correct:1},
+    {id:'q0sv03', level:"1", matiere:'Sciences de la Vie',text:"Quel groupe sanguin est dit 'donneur universel' ?",                                                    options:["A","B","AB","O"],                                                                                                            correct:3},
+    {id:'q0sv04', level:"1", matiere:'Sciences de la Vie',text:"Quelle molécule transporte l'oxygène dans le sang ?",                                                  options:["L'insuline","La kératine","L'hémoglobine","La mélanine"],                                                                     correct:2},
+    {id:'q0sv05', level:"1", matiere:'Sciences de la Vie',text:"La photosynthèse se déroule dans :",                                                                   options:["Les racines","Les mitochondries","Les chloroplastes","Les vacuoles"],                                                          correct:2},
+    {id:'q0sv06', level:"1", matiere:'Sciences de la Vie',text:"Quel est le rôle principal des globules blancs ?",                                                     options:["Transporter l'oxygène","Défendre l'organisme contre les infections","Coaguler le sang","Produire de l'énergie"],             correct:1},
 
     // -- Histoire & Géographie générale --
-    {id:'q0geo01',level:0, matiere:'Géographie',       text:"Quel est le plus grand continent du monde ?",                                                           options:["Amérique","Afrique","Asie","Europe"],                                                                                         correct:2},
-    {id:'q0geo02',level:0, matiere:'Géographie',       text:"Quelle est la plus haute montagne du monde ?",                                                          options:["Le Kilimandjaro","Le Mont Blanc","L'Everest","Le Mont McKinley"],                                                              correct:2},
-    {id:'q0geo03',level:0, matiere:'Géographie',       text:"Quel océan sépare l'Afrique de l'Amérique ?",                                                           options:["Pacifique","Indien","Arctique","Atlantique"],                                                                                 correct:3},
-    {id:'q0hist01',level:0,matiere:'Histoire',         text:"En quelle année a eu lieu la Première Guerre mondiale ?",                                               options:["1904–1908","1914–1918","1924–1928","1939–1945"],                                                                              correct:1},
-    {id:'q0hist02',level:0,matiere:'Histoire',         text:"Qui a prononcé la célèbre phrase 'I have a dream' ?",                                                   options:["Nelson Mandela","Barack Obama","Martin Luther King","Malcolm X"],                                                              correct:2},
-    {id:'q0hist03',level:0,matiere:'Histoire',         text:"Quelle organisation regroupe les pays d'Afrique de l'Ouest ?",                                          options:["UA","ONU","CEDEAO","UNESCO"],                                                                                                 correct:2},
-    {id:'q0hist04',level:0,matiere:'Histoire',         text:"En quelle année a été fondée l'ONU ?",                                                                  options:["1939","1945","1948","1955"],                                                                                                  correct:1},
-    {id:'q0geo04',level:0, matiere:'Géographie',       text:"Quel pays est le plus peuplé du monde ?",                                                               options:["États-Unis","Inde","Chine","Russie"],                                                                                         correct:1},
+    {id:'q0geo01',level:"1", matiere:'Géographie',       text:"Quel est le plus grand continent du monde ?",                                                           options:["Amérique","Afrique","Asie","Europe"],                                                                                         correct:2},
+    {id:'q0geo02',level:"1", matiere:'Géographie',       text:"Quelle est la plus haute montagne du monde ?",                                                          options:["Le Kilimandjaro","Le Mont Blanc","L'Everest","Le Mont McKinley"],                                                              correct:2},
+    {id:'q0geo03',level:"1", matiere:'Géographie',       text:"Quel océan sépare l'Afrique de l'Amérique ?",                                                           options:["Pacifique","Indien","Arctique","Atlantique"],                                                                                 correct:3},
+    {id:'q0hist01',level:"1",matiere:'Histoire',         text:"En quelle année a eu lieu la Première Guerre mondiale ?",                                               options:["1904–1908","1914–1918","1924–1928","1939–1945"],                                                                              correct:1},
+    {id:'q0hist02',level:"1",matiere:'Histoire',         text:"Qui a prononcé la célèbre phrase 'I have a dream' ?",                                                   options:["Nelson Mandela","Barack Obama","Martin Luther King","Malcolm X"],                                                              correct:2},
+    {id:'q0hist03',level:"1",matiere:'Histoire',         text:"Quelle organisation regroupe les pays d'Afrique de l'Ouest ?",                                          options:["UA","ONU","CEDEAO","UNESCO"],                                                                                                 correct:2},
+    {id:'q0hist04',level:"1",matiere:'Histoire',         text:"En quelle année a été fondée l'ONU ?",                                                                  options:["1939","1945","1948","1955"],                                                                                                  correct:1},
+    {id:'q0geo04',level:"1", matiere:'Géographie',       text:"Quel pays est le plus peuplé du monde ?",                                                               options:["États-Unis","Inde","Chine","Russie"],                                                                                         correct:1},
 
     // -- Éducation Civique & Culture générale --
-    {id:'q0ec01', level:"0", matiere:'Éducation Civique',text:"Quel est le rôle principal de l'école ?",                                                              options:["Garder les enfants","Transmettre des connaissances et former des citoyens","Préparer aux sports","Distribuer des repas"],    correct:1},
-    {id:'q0ec02', level:"0", matiere:'Éducation Civique',text:"Qu'est-ce que la démocratie ?",                                                                        options:["Le gouvernement d'un roi","Le gouvernement du peuple par le peuple","Le gouvernement des militaires","Le gouvernement des riches"], correct:1},
-    {id:'q0ec03', level:"0", matiere:'Éducation Civique',text:"Que signifie ONU ?",                                                                                   options:["Organisation Nationale Unie","Organisation des Nations Unies","Office des Nations Unies","Ordre des Nations Unies"],          correct:1},
-    {id:'q0ec04', level:"0", matiere:'Éducation Civique',text:"Quel document garantit les droits fondamentaux des citoyens ?",                                        options:["Le code civil","La Constitution","Le règlement intérieur","La loi de finances"],                                               correct:1},
+    {id:'q0ec01', level:"1", matiere:'Éducation Civique',text:"Quel est le rôle principal de l'école ?",                                                              options:["Garder les enfants","Transmettre des connaissances et former des citoyens","Préparer aux sports","Distribuer des repas"],    correct:1},
+    {id:'q0ec02', level:"1", matiere:'Éducation Civique',text:"Qu'est-ce que la démocratie ?",                                                                        options:["Le gouvernement d'un roi","Le gouvernement du peuple par le peuple","Le gouvernement des militaires","Le gouvernement des riches"], correct:1},
+    {id:'q0ec03', level:"1", matiere:'Éducation Civique',text:"Que signifie ONU ?",                                                                                   options:["Organisation Nationale Unie","Organisation des Nations Unies","Office des Nations Unies","Ordre des Nations Unies"],          correct:1},
+    {id:'q0ec04', level:"1", matiere:'Éducation Civique',text:"Quel document garantit les droits fondamentaux des citoyens ?",                                        options:["Le code civil","La Constitution","Le règlement intérieur","La loi de finances"],                                               correct:1},
 
     // -- Anglais --
-    {id:'q0en01', level:"0", matiere:'Anglais',          text:"What is the capital of England?",                                                                       options:["Manchester","Liverpool","Birmingham","London"],                                                                               correct:3},
-    {id:'q0en02', level:"0", matiere:'Anglais',          text:"How do you say 'bonjour' in English?",                                                                  options:["Goodbye","Good night","Hello","Please"],                                                                                      correct:2},
-    {id:'q0en03', level:"0", matiere:'Anglais',          text:"Which is correct: 'She ____ to school every day.'",                                                     options:["go","going","gone","goes"],                                                                                                   correct:3},
-    {id:'q0en04', level:"0", matiere:'Anglais',          text:"What does 'knowledge' mean in French ?",                                                                options:["Connaissance","Courage","Bonheur","Richesse"],                                                                                correct:0},
-    {id:'q0en05', level:"0", matiere:'Anglais',          text:"What is 2 + 2 in English?",                                                                             options:["Three","Four","Five","Six"],                                                                                                  correct:1},
-    {id:'q0en06', level:"0", matiere:'Anglais',          text:"Which African country has English as official language?",                                               options:["Guinée","Sénégal","Mali","Ghana"],                                                                                            correct:3},
+    {id:'q0en01', level:"1", matiere:'Anglais',          text:"What is the capital of England?",                                                                       options:["Manchester","Liverpool","Birmingham","London"],                                                                               correct:3},
+    {id:'q0en02', level:"1", matiere:'Anglais',          text:"How do you say 'bonjour' in English?",                                                                  options:["Goodbye","Good night","Hello","Please"],                                                                                      correct:2},
+    {id:'q0en03', level:"1", matiere:'Anglais',          text:"Which is correct: 'She ____ to school every day.'",                                                     options:["go","going","gone","goes"],                                                                                                   correct:3},
+    {id:'q0en04', level:"1", matiere:'Anglais',          text:"What does 'knowledge' mean in French ?",                                                                options:["Connaissance","Courage","Bonheur","Richesse"],                                                                                correct:0},
+    {id:'q0en05', level:"1", matiere:'Anglais',          text:"What is 2 + 2 in English?",                                                                             options:["Three","Four","Five","Six"],                                                                                                  correct:1},
+    {id:'q0en06', level:"1", matiere:'Anglais',          text:"Which African country has English as official language?",                                               options:["Guinée","Sénégal","Mali","Ghana"],                                                                                            correct:3},
 
     // ══════════════════════════════════
     // NIVEAU 2 – CHALLENGER (programme collège guinéen)
@@ -3561,7 +3562,8 @@ ARENA_REF.on('value',
         if (sid === 's-players')     renderPlayers();
         if (sid === 's-questions')   renderQuestions();
         if (sid === 's-classement')  renderClassement();
-        if (sid === 's-competition') genCompetition();
+        // Ne pas appeler genCompetition depuis le listener si match en cours (fix bug #2)
+        if (sid === 's-competition' && !_lmActive) genCompetition();
       }
     }
 
@@ -3624,12 +3626,14 @@ function saveData(d) {
   const txt = document.getElementById('fb-status-text');
   if (txt) txt.innerHTML = 'Sync… <span class="sync-spin"></span>';
 
-  // Sauvegarder sur Firebase
+  // Sauvegarder sur Firebase — update() est plus sûr que set() en cas d'écritures concurrentes (fix bug #9)
   ARENA_REF.set(d)
     .then(() => {
       setFbStatus('connected', '🔥 Firebase sync');
     })
     .catch((err) => {
+      // Retry automatique une fois avec set (fallback)
+      ARENA_REF.set(d).catch(()=>{});
       setFbStatus('error', '⚠️ Erreur sync');
       console.error('saveData error:', err);
       toast('⚠️ Erreur de sauvegarde Firebase', 'error');
@@ -3786,7 +3790,7 @@ function showAdminSection(id){
 // PLAYER LOGIN
 // ════════════════════════════════════════
 let currentPlayer = null;
-let currentLevelId = 1;
+let currentLevelId = "1";
 let quizQuestions = [];
 let quizIndex = 0;
 let quizScore = 0;
@@ -3879,19 +3883,24 @@ function renderLevels(){
   // Couleurs par niveau (1 à 5)
   const lvColors = ['#00E676','#00B0FF','#FFD740','#FF6D00','#FF1744'];
 
+  // Calculer le classement une seule fois (optimisation)
+  const _allSortedLv = d.players.slice().sort((a,b)=>(b.score||0)-(a.score||0));
+  const _top16codes = new Set(_allSortedLv.slice(0,16).map(p=>p.code));
+  const _top8codes  = new Set(_allSortedLv.slice(0,8).map(p=>p.code));
+  const _top4codes  = new Set(_allSortedLv.slice(0,4).map(p=>p.code));
+  const _top2codes  = new Set(_allSortedLv.slice(0,2).map(p=>p.code));
+  const _inTop16 = _top16codes.has(currentPlayer.code);
+  const _inTop8  = _top8codes.has(currentPlayer.code);
+  const _inTop4  = _top4codes.has(currentPlayer.code);
+  const _inTop2  = _top2codes.has(currentPlayer.code);
+
   grid.innerHTML = LEVELS.map((lv,idx)=>{
     const qs = d.questions.filter(q=>String(q.level)===String(lv.id));
     const done = completed.map(String).includes(String(lv.id));
-    // Niveau 1 toujours déverrouillé ; les suivants nécessitent d'être qualifié puis le niveau précédent
-    const allSorted = d.players.slice().sort((a,b)=>(b.score||0)-(a.score||0));
-    const top16codes = new Set(allSorted.slice(0,16).map(p=>p.code));
-    const top8codes  = new Set(allSorted.slice(0,8).map(p=>p.code));
-    const top4codes  = new Set(allSorted.slice(0,4).map(p=>p.code));
-    const top2codes  = new Set(allSorted.slice(0,2).map(p=>p.code));
-    const inTop16 = top16codes.has(currentPlayer.code);
-    const inTop8  = top8codes.has(currentPlayer.code);
-    const inTop4  = top4codes.has(currentPlayer.code);
-    const inTop2  = top2codes.has(currentPlayer.code);
+    const inTop16 = _inTop16;
+    const inTop8  = _inTop8;
+    const inTop4  = _inTop4;
+    const inTop2  = _inTop2;
     const qualifOk = Number(lv.id) === 2 ? inTop16 : Number(lv.id) === 3 ? inTop8 : Number(lv.id) === 4 ? inTop4 : (Number(lv.id) >= 5 ? inTop2 : true);
     const locked = Number(lv.id) > 1 && (!qualifOk || !completed.map(String).includes(String(Number(lv.id)-1)));
     const col = lvColors[idx];
@@ -3907,7 +3916,7 @@ function renderLevels(){
       ? (!qualifOk ? notQualifMsg : notPrevMsg)
       : done
         ? `toast('✅ Niveau déjà complété ! Tu ne peux plus y revenir. Continue vers le suivant.','info')`
-        : `startLevel(${lv.id})`;
+        : `startLevel('${lv.id}')`;
     return `
     <div class="level-card ${done?'completed':''} ${locked?'locked':''}"
       style="--lc-color:${col};${done?'cursor:not-allowed;':''}${done?'filter:brightness(0.7) saturate(0.5);':''}"
@@ -3939,6 +3948,10 @@ function startLevel(levelId){
   if(!d.levelQuestions) d.levelQuestions = {};
   const key = String(levelId);
 
+  // Normaliser : Firebase peut convertir un tableau en objet {} lors du snapshot
+  if(d.levelQuestions[key] && !Array.isArray(d.levelQuestions[key]))
+    d.levelQuestions[key] = Object.values(d.levelQuestions[key]);
+
   function _launch(){
     quizQuestions = d.levelQuestions[key];
     quizIndex = 0; quizScore = 0;
@@ -3949,20 +3962,20 @@ function startLevel(levelId){
     loadQuestion();
   }
 
-  if(!d.levelQuestions[key] || d.levelQuestions[key].length === 0){
-    // Premier joueur : tirer les 60 questions, sauvegarder sur Firebase, puis lancer
-    d.levelQuestions[key] = shuffle([...qs]).slice(0,60);
-    // Sauvegarder uniquement levelQuestions sur Firebase pour éviter les conflits
+  if(!d.levelQuestions[key] || !Array.isArray(d.levelQuestions[key]) || d.levelQuestions[key].length === 0){
+    // Premier joueur : tirer exactement 60 questions (ou toutes si moins de 60)
+    const _picked = shuffle([...qs]).slice(0, Math.min(qs.length, 60));
+    // Mettre à jour _cache IMMÉDIATEMENT avant _launch() pour éviter un tableau vide
+    if(!_cache.levelQuestions) _cache.levelQuestions = {};
+    _cache.levelQuestions[key] = _picked;
+    d.levelQuestions[key] = _picked;
+    // Sauvegarder sur Firebase en arrière-plan (best-effort, ne bloque pas le lancement)
     if(ARENA_REF){
-      ARENA_REF.child('levelQuestions').child(key).set(d.levelQuestions[key])
-        .then(()=>{ _cache.levelQuestions = _cache.levelQuestions||{}; _cache.levelQuestions[key]=d.levelQuestions[key]; _launch(); })
-        .catch(()=>{ _launch(); }); // en cas d'erreur Firebase, on lance quand même
+      ARENA_REF.child('levelQuestions').child(key).set(_picked).catch(()=>{});
     } else {
-      // Mode hors-ligne : sauvegarder en local et lancer
-      if(_cache) { if(!_cache.levelQuestions) _cache.levelQuestions={}; _cache.levelQuestions[key]=d.levelQuestions[key]; }
-      try{ const loc=JSON.parse(localStorage.getItem('bhds_arena_fallback')||'{}'); if(!loc.levelQuestions) loc.levelQuestions={}; loc.levelQuestions[key]=d.levelQuestions[key]; localStorage.setItem('bhds_arena_fallback',JSON.stringify(loc)); }catch(e){}
-      _launch();
+      try{ const loc=JSON.parse(localStorage.getItem('bhds_arena_fallback')||'{}'); if(!loc.levelQuestions) loc.levelQuestions={}; loc.levelQuestions[key]=_picked; localStorage.setItem('bhds_arena_fallback',JSON.stringify(loc)); }catch(e){}
     }
+    _launch();
   } else {
     // Questions déjà fixées : tous les joueurs reçoivent les mêmes
     _launch();
@@ -4061,7 +4074,7 @@ function selectOption(idx){
   const correct = q.correct===idx;
   quizAnswers.push(correct);
   if(correct){
-    const lv = LEVELS.find(l=>l.id===currentLevelId);
+    const lv = LEVELS.find(l=>String(l.id)===String(currentLevelId));
     quizScore += lv.pts;
     awardPlayerPoints(lv.pts);
   }
@@ -4098,8 +4111,8 @@ let quizAnswers = [];
 function endLevel(){
   clearInterval(timerInterval);
   const total = quizQuestions.length;
-  const lv = LEVELS.find(l=>l.id===currentLevelId);
-  const correct = quizScore / lv.pts;
+  const lv = LEVELS.find(l=>String(l.id)===String(currentLevelId));
+  const correct = Math.round(quizScore / lv.pts);
 
   if(!currentPlayer.completedLevels) currentPlayer.completedLevels=[];
   if(!currentPlayer.completedLevels.map(String).includes(String(currentLevelId)))
@@ -4129,11 +4142,21 @@ function endLevel(){
     ).join('');
   }
 
-  const nextLv = LEVELS.find(l=>l.id===currentLevelId+1);
+  const nextLv = LEVELS.find(l=>l.id===String(Number(currentLevelId)+1));
   const nextBtn = document.getElementById('btn-next-level');
-  if(nextLv && pass){
+  // Qualification pour le niveau suivant : top 16/8/4/2 selon le niveau
+  const _d2 = getData();
+  const _allSorted = _d2.players.slice().sort((a,b)=>(b.score||0)-(a.score||0));
+  const _nextId = Number(currentLevelId)+1;
+  const _topN = _nextId===2?16 : _nextId===3?8 : _nextId===4?4 : _nextId===5?2 : 0;
+  const _qualifNext = _topN>0 && new Set(_allSorted.slice(0,_topN).map(p=>p.code)).has(currentPlayer.code);
+  if(nextLv && pass && _qualifNext){
     nextBtn.style.display='block';
-    nextBtn.textContent=`${nextLv.icon} ${nextLv.name} →`;
+    nextBtn.textContent=nextLv.icon+' '+nextLv.name+' →';
+  } else if(nextLv && pass && !_qualifNext){
+    nextBtn.style.display='none';
+    const rEnc2 = document.getElementById('r-encouragement');
+    if(rEnc2){ rEnc2.textContent='✅ Niveau réussi ! Tu dois être dans le top '+_topN+' pour accéder au niveau suivant.'; rEnc2.style.display='block'; }
   } else { nextBtn.style.display='none'; }
 
   logActivity(`${currentPlayer.name} a terminé ${lv.name} (+${quizScore} pts)`);
@@ -4150,7 +4173,14 @@ function awardPlayerPoints(pts){
     d.players[idx].score = (d.players[idx].score||0)+pts;
     currentPlayer.score = d.players[idx].score;
     document.getElementById('ph-score').textContent = currentPlayer.score;
-    saveData(d);
+    // Sauvegarder uniquement le score du joueur (évite d'écraser levelQuestions)
+    if(ARENA_REF){
+      ARENA_REF.child('players').child(String(idx)).child('score').set(d.players[idx].score).catch(()=>{});
+      _cache = d; // mise à jour locale immédiate
+      _lsSet(d);
+    } else {
+      saveData(d);
+    }
   }
 }
 
@@ -4159,7 +4189,14 @@ function savePlayerState(){
   const idx = d.players.findIndex(p=>p.code===currentPlayer.code);
   if(idx>=0){
     d.players[idx].completedLevels = currentPlayer.completedLevels;
-    saveData(d);
+    // Sauvegarder uniquement completedLevels (évite d'écraser levelQuestions)
+    if(ARENA_REF){
+      ARENA_REF.child('players').child(String(idx)).child('completedLevels').set(currentPlayer.completedLevels).catch(()=>{});
+      _cache = d;
+      _lsSet(d);
+    } else {
+      saveData(d);
+    }
   }
 }
 
@@ -4170,7 +4207,7 @@ const _liveAnswers = [];   // stockage en mémoire (session courante)
 
 function pushLiveAnswer(playerName, q, chosenIdx, correct){
   const letters = ['A','B','C','D'];
-  const lv = LEVELS.find(l=>l.id===currentLevelId);
+  const lv = LEVELS.find(l=>String(l.id)===String(currentLevelId));
   const ptsGagnes = correct ? (lv ? lv.pts : 0) : 0;
   const ptsTotal = currentPlayer ? (currentPlayer.score || 0) : 0;
   _liveAnswers.unshift({
@@ -4293,7 +4330,8 @@ function importPlayers(){
   let added=0;
   names.forEach(name=>{
     let code; do { code=genCode(); } while(d.players.find(p=>p.code===code));
-    d.players.push({ id:Date.now()+Math.random(), name, classe, school, phone:'', code, score:0, completedLevels:[], createdAt:new Date().toISOString() });
+    const uid = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + '-' + Math.random().toString(36).slice(2)); // fix bug #8
+    d.players.push({ id: uid, name, classe, school, phone:'', code, score:0, completedLevels:[], createdAt:new Date().toISOString() });
     added++;
   });
   saveData(d);
@@ -4510,7 +4548,11 @@ function deletePlayer(code){
 // ADMIN – QUESTIONS
 // ════════════════════════════════════════
 let _qFilter='all';
-function openAddQuestion(){ document.getElementById('modal-add-question').classList.add('open'); }
+function openAddQuestion(){
+  document.getElementById('modal-add-question').classList.add('open');
+  const lv = document.getElementById('aq-level')?.value || '1';
+  _updateMatieres(lv);
+}
 
 function addQuestion(){
   const text=document.getElementById('aq-text').value.trim();
@@ -4518,7 +4560,9 @@ function addQuestion(){
   const b=document.getElementById('aq-b').value.trim();
   const c=document.getElementById('aq-c').value.trim();
   const dv=document.getElementById('aq-d').value.trim();
-  const correct=parseInt(document.querySelector('input[name="aq-correct"]:checked').value);
+  const correctRadio = document.querySelector('input[name="aq-correct"]:checked');
+  if(!correctRadio){ toast('Sélectionne la bonne réponse','error'); return; }
+  const correct=parseInt(correctRadio.value);
   const level=parseInt(document.getElementById('aq-level').value);
   const matiere=document.getElementById('aq-matiere').value;
   if(!text||!a||!b||!c||!dv){ toast('Remplis tous les champs','error'); return; }
@@ -4567,7 +4611,7 @@ function renderQuestions(){
 
 function deleteQuestion(id){
   const d=getData();
-  d.questions=d.questions.filter(q=>q.id!==id);
+  d.questions=d.questions.filter(q=>String(q.id)!==String(id));
   saveData(d);
   renderQuestions();
   toast('Question supprimée','info');
@@ -5181,80 +5225,80 @@ function loadSampleQuestions(){
     // ════════════════════════════════════════════════════════════════
 
     // -- Culture générale Guinée --
-    {text:"Quelle est la capitale de la Guinée ?", options:["Kankan","Labé","Conakry","Kindia"], correct:2, level:"0", matiere:"Géographie"},
-    {text:"En quelle année la Guinée a-t-elle obtenu son indépendance ?", options:["1956","1958","1960","1962"], correct:1, level:"0", matiere:"Histoire"},
-    {text:"Qui fut le premier président de la Guinée ?", options:["Lansana Conté","Alpha Condé","Sékou Touré","Cellou Dalein Diallo"], correct:2, level:"0", matiere:"Histoire"},
-    {text:"Quelles sont les couleurs du drapeau guinéen (de gauche à droite) ?", options:["Vert, Jaune, Rouge","Rouge, Jaune, Vert","Jaune, Rouge, Vert","Rouge, Vert, Jaune"], correct:1, level:"0", matiere:"Éducation Civique"},
-    {text:"Quelle est la devise de la République de Guinée ?", options:["Liberté, Égalité, Fraternité","Unité, Foi, Discipline","Travail, Justice, Solidarité","Paix, Travail, Patrie"], correct:2, level:"0", matiere:"Éducation Civique"},
-    {text:"Quel est le principal minerai exporté par la Guinée ?", options:["Le pétrole","L'or","La bauxite","Le diamant"], correct:2, level:"0", matiere:"Géographie"},
-    {text:"Quel fleuve prend sa source en Guinée et traverse plusieurs pays d'Afrique de l'Ouest ?", options:["Le Congo","Le Nil","Le Niger","Le Sénégal"], correct:2, level:"0", matiere:"Géographie"},
-    {text:"Combien de régions administratives compte la Guinée ?", options:["5","6","7","8"], correct:2, level:"0", matiere:"Géographie"},
-    {text:"Quel héros guinéen a résisté à la colonisation française à la fin du XIXe siècle ?", options:["Sékou Touré","Samory Touré","Bocar Biro","Alpha Yaya"], correct:1, level:"0", matiere:"Histoire"},
-    {text:"Dans quelle région naturelle se trouve le Fouta-Djalon ?", options:["Guinée Maritime","Haute-Guinée","Moyenne-Guinée","Guinée Forestière"], correct:2, level:"0", matiere:"Géographie"},
+    {text:"Quelle est la capitale de la Guinée ?", options:["Kankan","Labé","Conakry","Kindia"], correct:2, level:"1", matiere:"Géographie"},
+    {text:"En quelle année la Guinée a-t-elle obtenu son indépendance ?", options:["1956","1958","1960","1962"], correct:1, level:"1", matiere:"Histoire"},
+    {text:"Qui fut le premier président de la Guinée ?", options:["Lansana Conté","Alpha Condé","Sékou Touré","Cellou Dalein Diallo"], correct:2, level:"1", matiere:"Histoire"},
+    {text:"Quelles sont les couleurs du drapeau guinéen (de gauche à droite) ?", options:["Vert, Jaune, Rouge","Rouge, Jaune, Vert","Jaune, Rouge, Vert","Rouge, Vert, Jaune"], correct:1, level:"1", matiere:"Éducation Civique"},
+    {text:"Quelle est la devise de la République de Guinée ?", options:["Liberté, Égalité, Fraternité","Unité, Foi, Discipline","Travail, Justice, Solidarité","Paix, Travail, Patrie"], correct:2, level:"1", matiere:"Éducation Civique"},
+    {text:"Quel est le principal minerai exporté par la Guinée ?", options:["Le pétrole","L'or","La bauxite","Le diamant"], correct:2, level:"1", matiere:"Géographie"},
+    {text:"Quel fleuve prend sa source en Guinée et traverse plusieurs pays d'Afrique de l'Ouest ?", options:["Le Congo","Le Nil","Le Niger","Le Sénégal"], correct:2, level:"1", matiere:"Géographie"},
+    {text:"Combien de régions administratives compte la Guinée ?", options:["5","6","7","8"], correct:2, level:"1", matiere:"Géographie"},
+    {text:"Quel héros guinéen a résisté à la colonisation française à la fin du XIXe siècle ?", options:["Sékou Touré","Samory Touré","Bocar Biro","Alpha Yaya"], correct:1, level:"1", matiere:"Histoire"},
+    {text:"Dans quelle région naturelle se trouve le Fouta-Djalon ?", options:["Guinée Maritime","Haute-Guinée","Moyenne-Guinée","Guinée Forestière"], correct:2, level:"1", matiere:"Géographie"},
 
     // -- Mathématiques --
-    {text:"Combien font 12 × 12 ?", options:["124","134","144","154"], correct:2, level:"0", matiere:"Mathématiques"},
-    {text:"Quel est le résultat de 25 % de 200 ?", options:["25","40","50","75"], correct:2, level:"0", matiere:"Mathématiques"},
-    {text:"Quelle est la valeur de π (pi) arrondie à deux décimales ?", options:["3,12","3,14","3,16","3,18"], correct:1, level:"0", matiere:"Mathématiques"},
-    {text:"Quel est le carré de 13 ?", options:["156","169","176","196"], correct:1, level:"0", matiere:"Mathématiques"},
-    {text:"Dans un triangle rectangle, le carré de l'hypoténuse est égal à :", options:["La somme des deux autres côtés","La somme des carrés des deux autres côtés","Le produit des deux autres côtés","La différence des carrés"], correct:1, level:"0", matiere:"Mathématiques"},
-    {text:"Quel est le PGCD de 24 et 36 ?", options:["6","8","12","18"], correct:2, level:"0", matiere:"Mathématiques"},
-    {text:"Si x + 7 = 15, quelle est la valeur de x ?", options:["6","7","8","9"], correct:2, level:"0", matiere:"Mathématiques"},
-    {text:"Combien font 2³ × 3² ?", options:["48","72","54","36"], correct:1, level:"0", matiere:"Mathématiques"},
-    {text:"Quelle est l'aire d'un cercle de rayon 7 cm ? (π ≈ 3,14)", options:["43,96 cm²","87,92 cm²","153,86 cm²","219,8 cm²"], correct:2, level:"0", matiere:"Mathématiques"},
-    {text:"Un commerçant achète à 50 000 GNF et revend avec 20 % de bénéfice. Prix de vente ?", options:["55 000 GNF","58 000 GNF","60 000 GNF","65 000 GNF"], correct:2, level:"0", matiere:"Mathématiques"},
+    {text:"Combien font 12 × 12 ?", options:["124","134","144","154"], correct:2, level:"1", matiere:"Mathématiques"},
+    {text:"Quel est le résultat de 25 % de 200 ?", options:["25","40","50","75"], correct:2, level:"1", matiere:"Mathématiques"},
+    {text:"Quelle est la valeur de π (pi) arrondie à deux décimales ?", options:["3,12","3,14","3,16","3,18"], correct:1, level:"1", matiere:"Mathématiques"},
+    {text:"Quel est le carré de 13 ?", options:["156","169","176","196"], correct:1, level:"1", matiere:"Mathématiques"},
+    {text:"Dans un triangle rectangle, le carré de l'hypoténuse est égal à :", options:["La somme des deux autres côtés","La somme des carrés des deux autres côtés","Le produit des deux autres côtés","La différence des carrés"], correct:1, level:"1", matiere:"Mathématiques"},
+    {text:"Quel est le PGCD de 24 et 36 ?", options:["6","8","12","18"], correct:2, level:"1", matiere:"Mathématiques"},
+    {text:"Si x + 7 = 15, quelle est la valeur de x ?", options:["6","7","8","9"], correct:2, level:"1", matiere:"Mathématiques"},
+    {text:"Combien font 2³ × 3² ?", options:["48","72","54","36"], correct:1, level:"1", matiere:"Mathématiques"},
+    {text:"Quelle est l'aire d'un cercle de rayon 7 cm ? (π ≈ 3,14)", options:["43,96 cm²","87,92 cm²","153,86 cm²","219,8 cm²"], correct:2, level:"1", matiere:"Mathématiques"},
+    {text:"Un commerçant achète à 50 000 GNF et revend avec 20 % de bénéfice. Prix de vente ?", options:["55 000 GNF","58 000 GNF","60 000 GNF","65 000 GNF"], correct:2, level:"1", matiere:"Mathématiques"},
 
     // -- Français --
-    {text:"Quel est le pluriel de 'œil' ?", options:["œils","yeux","œilles","yeux ou œils"], correct:1, level:"0", matiere:"Français"},
-    {text:"Dans 'Les enfants jouent', quel est le sujet ?", options:["jouent","Les","enfants","Les enfants"], correct:3, level:"0", matiere:"Français"},
-    {text:"Quel temps est utilisé dans : 'Il avait mangé avant de partir' ?", options:["Imparfait","Plus-que-parfait","Passé composé","Passé simple"], correct:1, level:"0", matiere:"Français"},
-    {text:"Quel est le synonyme de 'courageux' ?", options:["Timide","Peureux","Vaillant","Faible"], correct:2, level:"0", matiere:"Français"},
-    {text:"Quelle figure de style est utilisée dans 'Le temps est un voleur' ?", options:["Comparaison","Métaphore","Hyperbole","Allitération"], correct:1, level:"0", matiere:"Français"},
-    {text:"Quel est l'antonyme de 'générosité' ?", options:["Bonté","Avarice","Richesse","Douceur"], correct:1, level:"0", matiere:"Français"},
-    {text:"Dans 'Elle chante merveilleusement', 'merveilleusement' est :", options:["Un adjectif","Un nom","Un adverbe","Un verbe"], correct:2, level:"0", matiere:"Français"},
-    {text:"Quel est le féminin de 'acteur' ?", options:["Acteuse","Actrice","Acteure","Acteurette"], correct:1, level:"0", matiere:"Français"},
+    {text:"Quel est le pluriel de 'œil' ?", options:["œils","yeux","œilles","yeux ou œils"], correct:1, level:"1", matiere:"Français"},
+    {text:"Dans 'Les enfants jouent', quel est le sujet ?", options:["jouent","Les","enfants","Les enfants"], correct:3, level:"1", matiere:"Français"},
+    {text:"Quel temps est utilisé dans : 'Il avait mangé avant de partir' ?", options:["Imparfait","Plus-que-parfait","Passé composé","Passé simple"], correct:1, level:"1", matiere:"Français"},
+    {text:"Quel est le synonyme de 'courageux' ?", options:["Timide","Peureux","Vaillant","Faible"], correct:2, level:"1", matiere:"Français"},
+    {text:"Quelle figure de style est utilisée dans 'Le temps est un voleur' ?", options:["Comparaison","Métaphore","Hyperbole","Allitération"], correct:1, level:"1", matiere:"Français"},
+    {text:"Quel est l'antonyme de 'générosité' ?", options:["Bonté","Avarice","Richesse","Douceur"], correct:1, level:"1", matiere:"Français"},
+    {text:"Dans 'Elle chante merveilleusement', 'merveilleusement' est :", options:["Un adjectif","Un nom","Un adverbe","Un verbe"], correct:2, level:"1", matiere:"Français"},
+    {text:"Quel est le féminin de 'acteur' ?", options:["Acteuse","Actrice","Acteure","Acteurette"], correct:1, level:"1", matiere:"Français"},
 
     // -- Physique-Chimie --
-    {text:"Quelle est la formule chimique de l'eau ?", options:["CO₂","H₂O","O₂","NaCl"], correct:1, level:"0", matiere:"Physique-Chimie"},
-    {text:"Quelle est l'unité de mesure de l'intensité électrique ?", options:["Volt","Ohm","Ampère","Watt"], correct:2, level:"0", matiere:"Physique-Chimie"},
-    {text:"Quel est le symbole chimique de l'or ?", options:["Ag","Fe","Au","Cu"], correct:2, level:"0", matiere:"Physique-Chimie"},
-    {text:"La lumière visible appartient au spectre :", options:["Radio","Infrarouge","Électromagnétique","Sonore"], correct:2, level:"0", matiere:"Physique-Chimie"},
-    {text:"Quelle loi exprime la relation U = R × I ?", options:["Loi de Faraday","Loi d'Ohm","Loi de Newton","Loi de Joule"], correct:1, level:"0", matiere:"Physique-Chimie"},
-    {text:"Quel est le numéro atomique de l'hydrogène ?", options:["0","1","2","3"], correct:1, level:"0", matiere:"Physique-Chimie"},
-    {text:"L'ébullition de l'eau à pression normale se produit à :", options:["90°C","95°C","100°C","110°C"], correct:2, level:"0", matiere:"Physique-Chimie"},
-    {text:"Quelle est la formule chimique du dioxyde de carbone ?", options:["CO","CO₂","C₂O","C₂O₂"], correct:1, level:"0", matiere:"Physique-Chimie"},
+    {text:"Quelle est la formule chimique de l'eau ?", options:["CO₂","H₂O","O₂","NaCl"], correct:1, level:"1", matiere:"Physique-Chimie"},
+    {text:"Quelle est l'unité de mesure de l'intensité électrique ?", options:["Volt","Ohm","Ampère","Watt"], correct:2, level:"1", matiere:"Physique-Chimie"},
+    {text:"Quel est le symbole chimique de l'or ?", options:["Ag","Fe","Au","Cu"], correct:2, level:"1", matiere:"Physique-Chimie"},
+    {text:"La lumière visible appartient au spectre :", options:["Radio","Infrarouge","Électromagnétique","Sonore"], correct:2, level:"1", matiere:"Physique-Chimie"},
+    {text:"Quelle loi exprime la relation U = R × I ?", options:["Loi de Faraday","Loi d'Ohm","Loi de Newton","Loi de Joule"], correct:1, level:"1", matiere:"Physique-Chimie"},
+    {text:"Quel est le numéro atomique de l'hydrogène ?", options:["0","1","2","3"], correct:1, level:"1", matiere:"Physique-Chimie"},
+    {text:"L'ébullition de l'eau à pression normale se produit à :", options:["90°C","95°C","100°C","110°C"], correct:2, level:"1", matiere:"Physique-Chimie"},
+    {text:"Quelle est la formule chimique du dioxyde de carbone ?", options:["CO","CO₂","C₂O","C₂O₂"], correct:1, level:"1", matiere:"Physique-Chimie"},
 
     // -- Sciences de la Vie --
-    {text:"Quel organe du corps humain produit l'insuline ?", options:["Le foie","Les reins","Le pancréas","L'estomac"], correct:2, level:"0", matiere:"Sciences de la Vie"},
-    {text:"Combien d'os compte le corps humain adulte ?", options:["186","206","226","256"], correct:1, level:"0", matiere:"Sciences de la Vie"},
-    {text:"Quel groupe sanguin est dit 'donneur universel' ?", options:["A","B","AB","O"], correct:3, level:"0", matiere:"Sciences de la Vie"},
-    {text:"Quelle molécule transporte l'oxygène dans le sang ?", options:["L'insuline","La kératine","L'hémoglobine","La mélanine"], correct:2, level:"0", matiere:"Sciences de la Vie"},
-    {text:"La photosynthèse se déroule dans :", options:["Les racines","Les mitochondries","Les chloroplastes","Les vacuoles"], correct:2, level:"0", matiere:"Sciences de la Vie"},
-    {text:"Quel est le rôle principal des globules blancs ?", options:["Transporter l'oxygène","Défendre l'organisme contre les infections","Coaguler le sang","Produire de l'énergie"], correct:1, level:"0", matiere:"Sciences de la Vie"},
+    {text:"Quel organe du corps humain produit l'insuline ?", options:["Le foie","Les reins","Le pancréas","L'estomac"], correct:2, level:"1", matiere:"Sciences de la Vie"},
+    {text:"Combien d'os compte le corps humain adulte ?", options:["186","206","226","256"], correct:1, level:"1", matiere:"Sciences de la Vie"},
+    {text:"Quel groupe sanguin est dit 'donneur universel' ?", options:["A","B","AB","O"], correct:3, level:"1", matiere:"Sciences de la Vie"},
+    {text:"Quelle molécule transporte l'oxygène dans le sang ?", options:["L'insuline","La kératine","L'hémoglobine","La mélanine"], correct:2, level:"1", matiere:"Sciences de la Vie"},
+    {text:"La photosynthèse se déroule dans :", options:["Les racines","Les mitochondries","Les chloroplastes","Les vacuoles"], correct:2, level:"1", matiere:"Sciences de la Vie"},
+    {text:"Quel est le rôle principal des globules blancs ?", options:["Transporter l'oxygène","Défendre l'organisme contre les infections","Coaguler le sang","Produire de l'énergie"], correct:1, level:"1", matiere:"Sciences de la Vie"},
 
     // -- Histoire & Géographie générale --
-    {text:"Quel est le plus grand continent du monde ?", options:["Amérique","Afrique","Asie","Europe"], correct:2, level:"0", matiere:"Géographie"},
-    {text:"Quelle est la plus haute montagne du monde ?", options:["Le Kilimandjaro","Le Mont Blanc","L'Everest","Le Mont McKinley"], correct:2, level:"0", matiere:"Géographie"},
-    {text:"Quel océan sépare l'Afrique de l'Amérique ?", options:["Pacifique","Indien","Arctique","Atlantique"], correct:3, level:"0", matiere:"Géographie"},
-    {text:"En quelle année a eu lieu la Première Guerre mondiale ?", options:["1904–1908","1914–1918","1924–1928","1939–1945"], correct:1, level:"0", matiere:"Histoire"},
-    {text:"Qui a prononcé la célèbre phrase 'I have a dream' ?", options:["Nelson Mandela","Barack Obama","Martin Luther King","Malcolm X"], correct:2, level:"0", matiere:"Histoire"},
-    {text:"Quelle organisation regroupe les pays d'Afrique de l'Ouest ?", options:["UA","ONU","CEDEAO","UNESCO"], correct:2, level:"0", matiere:"Histoire"},
-    {text:"En quelle année a été fondée l'ONU ?", options:["1939","1945","1948","1955"], correct:1, level:"0", matiere:"Histoire"},
-    {text:"Quel pays est le plus peuplé du monde ?", options:["États-Unis","Inde","Chine","Russie"], correct:1, level:"0", matiere:"Géographie"},
+    {text:"Quel est le plus grand continent du monde ?", options:["Amérique","Afrique","Asie","Europe"], correct:2, level:"1", matiere:"Géographie"},
+    {text:"Quelle est la plus haute montagne du monde ?", options:["Le Kilimandjaro","Le Mont Blanc","L'Everest","Le Mont McKinley"], correct:2, level:"1", matiere:"Géographie"},
+    {text:"Quel océan sépare l'Afrique de l'Amérique ?", options:["Pacifique","Indien","Arctique","Atlantique"], correct:3, level:"1", matiere:"Géographie"},
+    {text:"En quelle année a eu lieu la Première Guerre mondiale ?", options:["1904–1908","1914–1918","1924–1928","1939–1945"], correct:1, level:"1", matiere:"Histoire"},
+    {text:"Qui a prononcé la célèbre phrase 'I have a dream' ?", options:["Nelson Mandela","Barack Obama","Martin Luther King","Malcolm X"], correct:2, level:"1", matiere:"Histoire"},
+    {text:"Quelle organisation regroupe les pays d'Afrique de l'Ouest ?", options:["UA","ONU","CEDEAO","UNESCO"], correct:2, level:"1", matiere:"Histoire"},
+    {text:"En quelle année a été fondée l'ONU ?", options:["1939","1945","1948","1955"], correct:1, level:"1", matiere:"Histoire"},
+    {text:"Quel pays est le plus peuplé du monde ?", options:["États-Unis","Inde","Chine","Russie"], correct:1, level:"1", matiere:"Géographie"},
 
     // -- Éducation Civique & Culture générale --
-    {text:"Quel est le rôle principal de l'école ?", options:["Garder les enfants","Transmettre des connaissances et former des citoyens","Préparer aux sports","Distribuer des repas"], correct:1, level:"0", matiere:"Éducation Civique"},
-    {text:"Qu'est-ce que la démocratie ?", options:["Le gouvernement d'un roi","Le gouvernement du peuple par le peuple","Le gouvernement des militaires","Le gouvernement des riches"], correct:1, level:"0", matiere:"Éducation Civique"},
-    {text:"Que signifie ONU ?", options:["Organisation Nationale Unie","Organisation des Nations Unies","Office des Nations Unies","Ordre des Nations Unies"], correct:1, level:"0", matiere:"Éducation Civique"},
-    {text:"Quel document garantit les droits fondamentaux des citoyens ?", options:["Le code civil","La Constitution","Le règlement intérieur","La loi de finances"], correct:1, level:"0", matiere:"Éducation Civique"},
+    {text:"Quel est le rôle principal de l'école ?", options:["Garder les enfants","Transmettre des connaissances et former des citoyens","Préparer aux sports","Distribuer des repas"], correct:1, level:"1", matiere:"Éducation Civique"},
+    {text:"Qu'est-ce que la démocratie ?", options:["Le gouvernement d'un roi","Le gouvernement du peuple par le peuple","Le gouvernement des militaires","Le gouvernement des riches"], correct:1, level:"1", matiere:"Éducation Civique"},
+    {text:"Que signifie ONU ?", options:["Organisation Nationale Unie","Organisation des Nations Unies","Office des Nations Unies","Ordre des Nations Unies"], correct:1, level:"1", matiere:"Éducation Civique"},
+    {text:"Quel document garantit les droits fondamentaux des citoyens ?", options:["Le code civil","La Constitution","Le règlement intérieur","La loi de finances"], correct:1, level:"1", matiere:"Éducation Civique"},
 
     // -- Anglais --
-    {text:"What is the capital of England?", options:["Manchester","Liverpool","Birmingham","London"], correct:3, level:"0", matiere:"Anglais"},
-    {text:"How do you say 'bonjour' in English?", options:["Goodbye","Good night","Hello","Please"], correct:2, level:"0", matiere:"Anglais"},
-    {text:"Which is correct: 'She ____ to school every day.'", options:["go","going","gone","goes"], correct:3, level:"0", matiere:"Anglais"},
-    {text:"What does 'knowledge' mean in French ?", options:["Connaissance","Courage","Bonheur","Richesse"], correct:0, level:"0", matiere:"Anglais"},
-    {text:"What is 2 + 2 in English?", options:["Three","Four","Five","Six"], correct:1, level:"0", matiere:"Anglais"},
-    {text:"Which African country has English as official language?", options:["Guinée","Sénégal","Mali","Ghana"], correct:3, level:"0", matiere:"Anglais"},
+    {text:"What is the capital of England?", options:["Manchester","Liverpool","Birmingham","London"], correct:3, level:"1", matiere:"Anglais"},
+    {text:"How do you say 'bonjour' in English?", options:["Goodbye","Good night","Hello","Please"], correct:2, level:"1", matiere:"Anglais"},
+    {text:"Which is correct: 'She ____ to school every day.'", options:["go","going","gone","goes"], correct:3, level:"1", matiere:"Anglais"},
+    {text:"What does 'knowledge' mean in French ?", options:["Connaissance","Courage","Bonheur","Richesse"], correct:0, level:"1", matiere:"Anglais"},
+    {text:"What is 2 + 2 in English?", options:["Three","Four","Five","Six"], correct:1, level:"1", matiere:"Anglais"},
+    {text:"Which African country has English as official language?", options:["Guinée","Sénégal","Mali","Ghana"], correct:3, level:"1", matiere:"Anglais"},
 
   ];
   const d=getData();
@@ -5309,6 +5353,11 @@ const COMP_PHASES = [
 ];
 
 function genCompetition(){
+  // Ne pas recalculer le bracket si un match est en cours (fix bug #2)
+  if(_lmActive){
+    toast('⚠️ Un match est en cours — tableau non rechargé pour éviter une interruption','info');
+    return;
+  }
   const d = getData();
   const sorted = [...d.players].sort((a,b)=>(b.score||0)-(a.score||0));
   const total = sorted.length;
@@ -5340,9 +5389,16 @@ function genCompetition(){
   };
 
   // Qualifiés de chaque phase = le joueur avec le score le plus haut dans chaque match
+  // En cas d'égalité : départage par completedLevels count, puis barrage mort subite
   const getWinner = (p1, p2) => {
     if(!p2) return p1; // bye
-    return (p1.score||0) >= (p2.score||0) ? p1 : p2;
+    const s1 = p1.score||0, s2 = p2.score||0;
+    if(s1 !== s2) return s1 > s2 ? p1 : p2;
+    // égalité : nombre de niveaux complétés
+    const l1 = (p1.completedLevels||[]).length, l2 = (p2.completedLevels||[]).length;
+    if(l1 !== l2) return l1 > l2 ? p1 : p2;
+    // égalité parfaite → barrage requis (retourner null pour signaler)
+    return null;
   };
 
   let current = top16;
@@ -5352,7 +5408,11 @@ function genCompetition(){
     const ph = COMP_PHASES[pi];
     if(current.length < 2) break;
     const matches = buildMatches(current, ph.slots);
-    const winners = matches.map(m => getWinner(m.p1, m.p2));
+    const winners = matches.map(m => {
+      const w = getWinner(m.p1, m.p2);
+      if(w === null) return { ...m.p1, _barrage: true, _barrageP2: m.p2 }; // marquer égalité
+      return w;
+    });
     phasesData.push({ phase: ph, matches, winners });
     current = winners;
     if(ph.id === 'f') break;
@@ -5444,12 +5504,15 @@ function genCompetition(){
 
     let matchesHTML = matches.map((m, mi) => {
       const w = getWinner(m.p1, m.p2);
+      const isBarrage = w === null;
       const renderPlayer = (p, isWinner) => {
         if(!p) return `<div class="comp-player tbd"><span>— (exemption)</span><span class="comp-player-score">—</span></div>`;
-        const cls = isWinner ? 'qualifie' : 'elimine';
-        const badge = isWinner
-          ? `<span class="comp-badge q">✓ Qualifié</span>`
-          : `<span class="comp-badge e">Éliminé</span>`;
+        const cls = isBarrage ? 'qualifie' : isWinner ? 'qualifie' : 'elimine';
+        const badge = isBarrage
+          ? `<span class="comp-badge" style="background:rgba(255,215,0,0.2);color:var(--gold);border:1px solid rgba(255,215,0,0.5);">⚡ Égalité</span>`
+          : isWinner
+            ? `<span class="comp-badge q">✓ Qualifié</span>`
+            : `<span class="comp-badge e">Éliminé</span>`;
         return `<div class="comp-player ${cls}">
           <span>${p.name} <span style="font-size:0.75rem;color:var(--silver);">${p.classe||''}</span></span>
           <span style="display:flex;align-items:center;gap:6px;">
@@ -5458,17 +5521,21 @@ function genCompetition(){
           </span>
         </div>`;
       };
-      const p1Win = w === m.p1;
+      const p1Win = !isBarrage && w === m.p1;
       const canLaunch = m.p1 && m.p2;
-      const launchBtn = canLaunch
+      // Bouton barrage mort subite si égalité parfaite
+      const barrageBtn = isBarrage && canLaunch
+        ? `<button class="btn btn-gold btn-sm" style="margin-top:8px;width:100%;font-size:0.75rem;letter-spacing:1px;" onclick="openBarrage('${m.p1.code}','${m.p2.code}','${phase.label}',${phase.level})">⚡ Barrage — Mort subite</button>`
+        : '';
+      const launchBtn = !isBarrage && canLaunch
         ? `<button class="btn btn-accent btn-sm" style="margin-top:8px;width:100%;font-size:0.75rem;letter-spacing:1px;" onclick="openLiveMatch('${m.p1.code}','${m.p2.code}','${phase.label}',${phase.level})">🎙️ Arbitrer ce match</button>`
         : '';
       return `<div class="comp-match">
-        <div class="comp-match-label">Match ${mi+1}</div>
+        <div class="comp-match-label">Match ${mi+1}${isBarrage?' <span style="color:var(--gold);font-size:0.7rem;">⚡ BARRAGE</span>':''}</div>
         ${renderPlayer(m.p1, p1Win)}
         <div style="text-align:center;color:var(--silver);font-size:0.75rem;padding:2px 0;">VS</div>
-        ${m.p2 ? renderPlayer(m.p2, !p1Win) : renderPlayer(null, false)}
-        ${launchBtn}
+        ${m.p2 ? renderPlayer(m.p2, !p1Win && !isBarrage) : renderPlayer(null, false)}
+        ${barrageBtn}${launchBtn}
       </div>`;
     }).join('');
 
@@ -5539,6 +5606,8 @@ function renderDashboard(){
   const act=d.activity||[];
   document.getElementById('dash-activity').innerHTML=act.slice(-5).reverse().map(a=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);">• ${a}</div>`).join('')||'<div style="color:var(--silver);">Aucune activité</div>';
   renderLiveAnswers();
+  // Vérifier si un match Firebase était en cours (fix amélioration #11)
+  if(typeof _lmGetLiveRef === 'function') setTimeout(_checkResumeMatch, 500);
 }
 
 // ════════════════════════════════════════
@@ -5748,8 +5817,27 @@ function loadBgImage(input){
 })();
 
 // ════════════════════════════════════════
-// MATCH EN DIRECT – ARBITRE (admin)
+// BARRAGE — MORT SUBITE (1 question décisive)
 // ════════════════════════════════════════
+function openBarrage(code1, code2, phaseLabel, level){
+  const d = getData();
+  const p1 = d.players.find(p=>p.code===code1);
+  const p2 = d.players.find(p=>p.code===code2);
+  if(!p1||!p2){ toast('Joueur introuvable','error'); return; }
+
+  const allQ = d.questions.filter(q=>q.level==level);
+  if(!allQ.length){ toast('Pas de questions pour ce niveau','error'); return; }
+
+  if(!confirm(`⚡ BARRAGE MORT SUBITE\n${p1.name} vs ${p2.name}\n\nUne seule question décisive (Niveau ${level}).\nLancer le barrage ?`)) return;
+
+  // Sélectionner 1 question aléatoire
+  const q = shuffle([...allQ])[0];
+  window._barrageQuestion = q; // stocker pour injection dans openLiveMatch
+
+  openLiveMatch(code1, code2, `⚡ BARRAGE — ${phaseLabel}`, level);
+}
+
+
 let _lmP1 = null;       // objet joueur 1
 let _lmP2 = null;       // objet joueur 2
 let _lmLevel = 1;       // niveau du match
@@ -5767,24 +5855,37 @@ let _lmP2Answered = false;
 let _lmP1Answer = -1;   // index de réponse J1
 let _lmP2Answer = -1;   // index de réponse J2
 let _lmAnswered = false; // question résolue
-const _LM_Q_COUNT = 7;  // nombre de questions par match
+let _lmDotHistory = []; // historique des états de dots (fix bug #1)
+const _LM_Q_COUNT = 60;  // nombre de questions par match
+
+let _lmActive = false; // anti-double-clic (fix bug #2 & #6)
 
 function openLiveMatch(code1, code2, phaseLabel, level){
+  if(_lmActive){ toast('Un match est déjà en cours','error'); return; }
   const d = getData();
   _lmP1 = d.players.find(p=>p.code===code1);
   _lmP2 = d.players.find(p=>p.code===code2);
   if(!_lmP1 || !_lmP2){ toast('Joueur introuvable','error'); return; }
 
+  _lmActive = true;
   _lmLevel = level || 1;
   _lmPhaseLabel = phaseLabel || 'Match';
   _lmP1Score = 0; _lmP2Score = 0;
   _lmP1Correct = 0; _lmP2Correct = 0;
   _lmQIndex = 0; _lmAnswered = false;
+  _lmDotHistory = []; // reset historique dots (fix bug #1)
 
   // Sélectionner les questions
   const allQ = d.questions.filter(q=>q.level==_lmLevel);
-  if(allQ.length < 3){ toast('Pas assez de questions pour ce niveau (min 3)','error'); return; }
-  _lmQuestions = shuffle([...allQ]).slice(0, Math.min(allQ.length, _LM_Q_COUNT));
+  if(allQ.length < 60 && !window._barrageQuestion){ toast('Pas assez de questions pour ce niveau (min 60)','error'); return; }
+
+  // Mode barrage : 1 seule question décisive
+  if(window._barrageQuestion){
+    _lmQuestions = [window._barrageQuestion];
+    window._barrageQuestion = null; // consommer le flag
+  } else {
+    _lmQuestions = shuffle([...allQ]).slice(0, Math.min(allQ.length, _LM_Q_COUNT));
+  }
 
   // Remplir l'UI
   document.getElementById('lm-phase-label').textContent = `${phaseLabel} · Niveau ${_lmLevel}`;
@@ -5821,6 +5922,7 @@ function openLiveMatch(code1, code2, phaseLabel, level){
 
 function closeLiveMatch(){
   clearInterval(_lmTimerInterval);
+  _lmActive = false; // libérer le verrou (fix bug #6)
   _lmPublishClear(); // Signaler au public que le match est terminé
   document.getElementById('modal-live-match').classList.remove('open');
   document.body.style.overflow = '';
@@ -5831,7 +5933,10 @@ function _lmBuildProgressDots(){
   let html = '';
   for(let i=0; i<n; i++){
     let cls = 'lm-pdot';
-    if(i < _lmQIndex){ cls += ' miss'; } // passé – on pourrait enrichir plus tard
+    if(i < _lmQIndex){
+      // Utiliser l'état réel stocké dans l'historique (fix bug #1)
+      cls += ' ' + (_lmDotHistory[i] || 'miss');
+    }
     if(i === _lmQIndex){ cls += ' active'; }
     html += `<div class="${cls}" id="lm-dot-${i}" title="Q${i+1}"></div>`;
   }
@@ -5982,7 +6087,7 @@ function _lmResolveQuestion(q){
   clearInterval(_lmTimerInterval);
 
   const letters = ['A','B','C','D'];
-  const lv = LEVELS.find(l=>l.id===_lmLevel);
+  const lv = LEVELS.find(l=>String(l.id)===String(_lmLevel));
   const pts = lv ? lv.pts : 10;
 
   const p1Ok = _lmP1Answer===q.correct;
@@ -6007,17 +6112,17 @@ function _lmResolveQuestion(q){
   if(p1Ok || p2Ok){ _sndCorrect(); } else { _sndWrong(); }
 
   // Mise à jour du dot
+  const dotState = (p1Ok && p2Ok) ? 'both-ok' : p1Ok ? 'p1-ok' : p2Ok ? 'p2-ok' : 'miss';
+  _lmDotHistory[_lmQIndex] = dotState; // stocker l'état réel (fix bug #1)
   const dot = document.getElementById(`lm-dot-${_lmQIndex}`);
   if(dot){
-    dot.className = 'lm-pdot ' + (p1Ok && p2Ok ? 'both-ok' : p1Ok ? 'p1-ok' : p2Ok ? 'p2-ok' : 'miss');
+    dot.className = 'lm-pdot ' + dotState;
   }
 
-  // Construire les dots pour le public
+  // Construire les dots pour le public (utiliser l'historique réel)
   const dotStates = _lmQuestions.map((_,i) => {
     if(i > _lmQIndex) return '';
-    if(i < _lmQIndex) return 'miss'; // simplification — l'état exact est stocké localement
-    // question courante
-    return (p1Ok && p2Ok) ? 'both-ok' : p1Ok ? 'p1-ok' : p2Ok ? 'p2-ok' : 'miss';
+    return _lmDotHistory[i] || 'miss'; // fix bug #1 : état réel
   });
 
   // Publier la résolution sur Firebase (révèle la bonne réponse au public)
@@ -6047,12 +6152,18 @@ function _lmEndMatch(){
   const total = _lmQuestions.length;
 
   let winnerName, resultDetail, resultIcon;
+  const isBarrage = _lmQuestions.length === 1; // mort subite = 1 question
   if(_lmP1Score > _lmP2Score){
     winnerName = `🏆 ${_lmP1.name} remporte le match !`;
     resultIcon = '🏆';
   } else if(_lmP2Score > _lmP1Score){
     winnerName = `🏆 ${_lmP2.name} remporte le match !`;
     resultIcon = '🏆';
+  } else if(isBarrage){
+    // Barrage toujours nul (les deux ont faux ou timeout) → rejouer
+    winnerName = '⚡ Aucun point — Relancer le barrage !';
+    resultIcon = '⚡';
+    resultDetail = 'Aucun joueur n\'a répondu correctement. Relancez le barrage.';
   } else {
     winnerName = '🤝 Match nul — départage par score général';
     resultIcon = '🤝';
@@ -6101,8 +6212,25 @@ function _lmSetAnsChip(id, state, text){
 }
 // ════════════════════════════════════════
 
-// ════════════════════════════════════════
-// MATCH EN DIRECT – PUBLICATION FIREBASE TEMPS RÉEL
+// ── Détection de match en cours au rechargement de la page (fix amélioration #11) ──
+function _checkResumeMatch(){
+  const ref = _lmGetLiveRef();
+  if(!ref) return;
+  ref.once('value').then(snap => {
+    const data = snap.val();
+    if(data && data.active && !data.finished && data.p1 && data.p2){
+      // Un match était en cours — afficher un badge de reprise dans le dashboard
+      const dash = document.getElementById('dash-stats');
+      if(dash){
+        const resumeDiv = document.createElement('div');
+        resumeDiv.style.cssText = 'margin-top:14px;padding:12px 16px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.4);border-radius:12px;font-size:0.88rem;color:var(--gold);display:flex;align-items:center;gap:12px;';
+        resumeDiv.innerHTML = `⚡ Un match <strong>${data.p1.name} vs ${data.p2.name}</strong> était en cours (${data.phase||''}). <button class="btn btn-gold btn-sm" onclick="this.closest('div').remove();_lmPublishClear();toast('Match annulé et réinitialisé','info');">✕ Annuler</button>`;
+        dash.parentNode.insertBefore(resumeDiv, dash.nextSibling);
+      }
+    }
+  }).catch(()=>{});
+}
+
 // ════════════════════════════════════════
 let _lmLiveRef = null;      // Firebase ref bhds_live_match
 let _specUnsubscribe = null; // listener spectateur
@@ -6135,7 +6263,7 @@ function _lmPublish(extra){
     p2Answer: _lmP2Answer,
     correctAnswer: -1,       // révélé seulement après résolution
     resolved: false,
-    timerStart: Date.now(),
+    timerStart: (typeof firebase !== 'undefined' && firebase.database) ? firebase.database.ServerValue.TIMESTAMP : Date.now(), // fix bug #4
     timerDuration: _lmTimeLeft,
     dots: [],
     finished: false,
@@ -6495,20 +6623,23 @@ function _specRenderSingleMatch(data, container){
 // LANCER TOUS LES MATCHS D'UNE PHASE EN DIRECT
 // ════════════════════════════════════════
 function launchPhaseMatches(btn){
+  if(btn.disabled) return;
+  btn.disabled = true;
+  setTimeout(()=>{ btn.disabled = false; }, 4000); // re-activer après 4s (fix bug #6)
   const rawMatches = JSON.parse(btn.getAttribute('data-matches') || '[]');
   const phaseLabel  = btn.getAttribute('data-phase')  || 'Phase';
   const level       = parseInt(btn.getAttribute('data-level'))  || 1;
 
   const d = getData();
   const allQ = d.questions.filter(q => q.level == level);
-  if(allQ.length < 3){ toast('Pas assez de questions pour ce niveau (min 3)', 'error'); return; }
+  if(allQ.length < 60){ toast('Pas assez de questions pour ce niveau (min 60)', 'error'); return; }
 
   const matchesData = rawMatches.map((m, i) => {
     const p1 = d.players.find(p => p.code === m.c1);
     const p2 = d.players.find(p => p.code === m.c2);
     if(!p1 || !p2) return null;
     // Chaque match a sa propre sélection aléatoire de questions
-    const questions = shuffle([...allQ]).slice(0, Math.min(allQ.length, 7));
+    const questions = shuffle([...allQ]).slice(0, Math.min(allQ.length, 60));
     return {
       matchIndex: i,
       phase: phaseLabel,
@@ -6528,7 +6659,7 @@ function launchPhaseMatches(btn){
       p1Score: 0,
       p2Score: 0,
       dots: [],
-      timerStart: Date.now(),
+      timerStart: firebase && firebase.database ? firebase.database.ServerValue.TIMESTAMP : Date.now(), // fix bug #4 : timestamp serveur
       timerDuration: ({ 0:45, 1:60, 2:45, 3:35, 4:25, 5:20 })[level] || 30,
       active: true,
       ts: Date.now()
@@ -6536,6 +6667,12 @@ function launchPhaseMatches(btn){
   }).filter(Boolean);
 
   if(!matchesData.length){ toast('Aucun match valide pour cette phase', 'error'); return; }
+
+  // Confirmation anti-clic accidentel (fix amélioration #10)
+  if(!confirm(`⚡ Lancer ${matchesData.length} match${matchesData.length>1?'s':''} en direct pour la phase "${phaseLabel}" ?\n\nCette action est visible immédiatement par le public.`)){
+    btn.disabled = false;
+    return;
+  }
 
   // Publier sur Firebase
   const ref = _lmGetLiveRef();
@@ -6585,33 +6722,93 @@ function launchPhaseMatches(btn){
 })();
 
 
+
+
 // ════════════════════════════════════════
-// INTRO SPLASH SCREEN
+// MATIÈRES PAR NIVEAU (programme guinéen)
 // ════════════════════════════════════════
-(function(){
-  const parts = ['📚','✏️','📖','🔬','📏','✒️','📐','💡','🔭','📝','🧪','🖊️','📊','🧮'];
-  const container = document.getElementById('intro-particles');
-  if(container){
-    for(let i=0;i<18;i++){
-      const el = document.createElement('div');
-      el.className = 'ipart';
-      el.textContent = parts[Math.floor(Math.random()*parts.length)];
-      el.style.left = Math.random()*100+'%';
-      el.style.fontSize = (1+Math.random()*1.2)+'rem';
-      el.style.animationDuration = (8+Math.random()*10)+'s';
-      el.style.animationDelay = (Math.random()*8)+'s';
-      container.appendChild(el);
-    }
-  }
-  setTimeout(()=>{
-    const btn = document.getElementById('intro-enter-btn');
-    const hint = document.getElementById('intro-scroll-hint');
-    const lbl = document.getElementById('intro-loader-label');
-    if(btn) btn.classList.add('visible');
-    if(hint) hint.classList.add('visible');
-    if(lbl) lbl.textContent = '✅ Prêt !';
-  }, 3000);
-})();
+const _MATIERES_PAR_NIVEAU = {
+  "1": [
+    "Mathématiques",
+    "Physique-Chimie",
+    "Français",
+    "Sciences de la Vie",
+    "Géographie",
+    "Histoire",
+    "Éducation Civique et Morale"
+  ],
+  "2": [
+    "Mathématiques",
+    "Géométrie",
+    "Arithmétique",
+    "Physique-Chimie",
+    "Français",
+    "Sciences de la Vie",
+    "Géographie",
+    "Histoire",
+    "Éducation Civique et Morale"
+  ],
+  "3": [
+    "Mathématiques",
+    "Géométrie",
+    "Arithmétique",
+    "Physique-Chimie",
+    "Français",
+    "Sciences de la Vie",
+    "Géographie",
+    "Histoire",
+    "Éducation Civique et Morale"
+  ],
+  "4": [
+    "Mathématiques",
+    "Physique-Chimie",
+    "Français",
+    "Sciences de la Vie",
+    "Géographie",
+    "Histoire",
+    "Philosophie",
+    "Économie",
+    "Anglais"
+  ],
+  "5": [
+    // Maths Terminale SM/SL
+    "Arithmétique",
+    "Géométrie",
+    "Fonction numérique",
+    "Fonction logarithme népérien",
+    "Fonction exponentielle",
+    "Dénombrement",
+    // Physique
+    "Mécanique",
+    "Électricité",
+    "Électromagnétisme",
+    "Physique nucléaire",
+    "Physique atomique",
+    // Lois fondamentales
+    "Lois de Newton",
+    "Loi de Kepler",
+    "Optique ondulatoire",
+    // Chimie
+    "Chimie organique",
+    "Cinétique chimique"
+  ]
+};
+
+function _updateMatieres(level) {
+  const sel = document.getElementById('aq-matiere');
+  if (!sel) return;
+  const matieres = _MATIERES_PAR_NIVEAU[String(level)] || _MATIERES_PAR_NIVEAU["1"];
+  const current = sel.value;
+  sel.innerHTML = matieres.map(m =>
+    `<option value="${m}"${m === current ? ' selected' : ''}>${m}</option>`
+  ).join('');
+}
+
+// Initialiser les matières au chargement du modal
+function openAddQuestionModal() {
+  openModal('modal-add-question');
+  _updateMatieres(document.getElementById('aq-level')?.value || '1');
+}
 
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; } return a; }
 
