@@ -1778,6 +1778,226 @@
   </div>
 </div>
 
+
+<!-- ══════════ SPECTATEUR EN DIRECT ══════════ -->
+<style>
+  #screen-spectator { padding:0; align-items:stretch; background:var(--dark); }
+  .spec-header {
+    background:linear-gradient(135deg,rgba(11,22,40,0.98),rgba(5,10,20,0.98));
+    border-bottom:1px solid var(--border);
+    padding:14px 20px;
+    display:flex; justify-content:space-between; align-items:center;
+    position:sticky; top:0; z-index:10; backdrop-filter:blur(12px);
+  }
+  .spec-title {
+    font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900;
+    background:linear-gradient(135deg,var(--gold),var(--red));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:3px; text-transform:uppercase;
+  }
+  .spec-phase-badge {
+    background:rgba(124,77,255,0.25); border:1px solid rgba(124,77,255,0.5);
+    color:#CE93D8; border-radius:20px; padding:4px 14px;
+    font-size:0.78rem; font-weight:700; letter-spacing:1px;
+  }
+  #spec-content { padding:20px; max-width:860px; margin:0 auto; width:100%; }
+  #spec-idle {
+    text-align:center; padding:60px 20px; color:var(--silver);
+  }
+  .spec-idle-icon { font-size:4rem; margin-bottom:16px; opacity:0.4;
+    animation:pulse-trophy 2.5s ease-in-out infinite; }
+  .spec-idle-msg { font-size:1rem; margin-bottom:8px; }
+  .spec-idle-sub { font-size:0.8rem; opacity:0.6; }
+  .spec-dot {
+    display:inline-block; width:10px; height:10px; border-radius:50%;
+    background:var(--green); margin-left:6px;
+    animation:blink-dot 1s ease-in-out infinite;
+  }
+  @keyframes blink-dot { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+
+  /* Scoreboard spectateur */
+  .spec-scoreboard {
+    display:grid; grid-template-columns:1fr auto 1fr; gap:12px;
+    align-items:center; margin-bottom:20px;
+  }
+  .spec-player-card {
+    background:var(--card-bg); border:2px solid var(--border);
+    border-radius:16px; padding:16px 18px;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    transition:border-color 0.4s, box-shadow 0.4s;
+  }
+  .spec-player-card.answered {
+    border-color:var(--green); box-shadow:0 0 20px rgba(0,230,118,0.25);
+  }
+  .spec-player-name {
+    font-family:'Orbitron',sans-serif; font-size:0.88rem; font-weight:700;
+    color:#E0E8FF; text-align:center; letter-spacing:1px;
+  }
+  .spec-player-school { font-size:0.72rem; color:var(--silver); text-align:center; }
+  .spec-match-score {
+    font-family:'Orbitron',sans-serif; font-size:2.2rem; font-weight:900;
+    color:var(--gold); line-height:1;
+    text-shadow:0 0 18px rgba(255,215,0,0.6);
+  }
+  .spec-match-score-label { font-size:0.6rem; color:var(--silver); text-transform:uppercase; letter-spacing:1.5px; }
+  .spec-vs-center { display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .spec-vs-text {
+    font-family:'Orbitron',sans-serif; font-size:1.6rem; font-weight:900;
+    color:var(--red); text-shadow:0 0 14px rgba(255,23,68,0.5);
+    animation:pulse-trophy 1.5s ease-in-out infinite;
+  }
+  .spec-q-counter { font-size:0.72rem; color:var(--silver); letter-spacing:1px; text-transform:uppercase; text-align:center; }
+  .spec-timer {
+    font-family:'Orbitron',sans-serif; font-size:2.5rem; font-weight:900;
+    color:var(--accent); text-align:center; margin-bottom:10px;
+    transition:color 0.3s;
+  }
+  .spec-timer.danger { color:var(--red); animation:blink-dot 0.5s ease-in-out infinite; }
+  .spec-question-box {
+    background:var(--card-bg); border:1.5px solid var(--border);
+    border-radius:20px; padding:24px 26px; margin-bottom:16px;
+  }
+  .spec-q-matiere {
+    background:rgba(0,229,255,0.12); border:1px solid rgba(0,229,255,0.3);
+    color:var(--accent); border-radius:20px; padding:3px 12px;
+    font-size:0.75rem; font-weight:700; letter-spacing:0.5px;
+    display:inline-block; margin-bottom:14px;
+  }
+  .spec-q-text {
+    font-size:1.1rem; font-weight:600; color:#E0E8FF; line-height:1.55;
+    margin-bottom:20px;
+  }
+  .spec-options-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .spec-opt {
+    padding:12px 16px; border-radius:12px; border:2px solid rgba(255,255,255,0.1);
+    background:rgba(255,255,255,0.04); color:#E0E8FF;
+    font-family:'Exo 2',sans-serif; font-size:0.92rem; font-weight:600;
+    display:flex; align-items:center; gap:10px; pointer-events:none;
+    transition:all 0.4s;
+  }
+  .spec-opt.correct { border-color:var(--green); background:rgba(0,230,118,0.15); color:var(--green); }
+  .spec-opt.p1wrong  { border-color:var(--red);   background:rgba(255,23,68,0.1);  color:#FF8A80; }
+  .spec-opt.p2wrong  { border-color:var(--red);   background:rgba(255,23,68,0.1);  color:#FF8A80; }
+  .spec-opt-letter {
+    font-family:'Orbitron',sans-serif; font-size:0.75rem; font-weight:900;
+    background:rgba(255,255,255,0.1); border-radius:6px;
+    width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; color:var(--accent);
+  }
+  .spec-opt.correct .spec-opt-letter { background:rgba(0,230,118,0.25); color:var(--green); }
+
+  /* Réponses joueurs spectateur */
+  .spec-ans-row { display:flex; gap:14px; margin-bottom:14px; }
+  .spec-ans-chip {
+    padding:6px 18px; border-radius:20px; font-size:0.8rem; font-weight:700;
+    flex:1; text-align:center; border:1px solid;
+  }
+  .spec-ans-chip.waiting { border-color:rgba(176,190,197,0.3); color:var(--silver); background:rgba(255,255,255,0.03); }
+  .spec-ans-chip.ok      { border-color:rgba(0,230,118,0.5);  color:var(--green); background:rgba(0,230,118,0.1); }
+  .spec-ans-chip.fail    { border-color:rgba(255,23,68,0.4);  color:#FF8A80;      background:rgba(255,23,68,0.08); }
+  .spec-ans-chip.timeout { border-color:rgba(255,165,0,0.4);  color:var(--gold2); background:rgba(255,165,0,0.08); }
+
+  /* Résultat final spectateur */
+  .spec-result-box {
+    background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,165,0,0.05));
+    border:1px solid rgba(255,215,0,0.4); border-radius:20px;
+    padding:30px 24px; text-align:center; margin-top:10px;
+  }
+  .spec-result-icon { font-size:3rem; margin-bottom:10px; }
+  .spec-result-title {
+    font-family:'Orbitron',sans-serif; font-size:1.3rem; font-weight:900;
+    color:var(--gold); letter-spacing:2px; margin-bottom:12px;
+  }
+  .spec-result-winner {
+    font-size:1.05rem; font-weight:700; color:#E0E8FF;
+    background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.4);
+    border-radius:12px; padding:10px 24px; display:inline-block; margin-bottom:10px;
+  }
+  .spec-result-scores { font-size:0.88rem; color:var(--silver); }
+
+  /* Dots progression spectateur */
+  .spec-dots { display:flex; gap:6px; justify-content:center; margin-bottom:16px; flex-wrap:wrap; }
+  .spec-dot-item {
+    width:12px; height:12px; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.15); background:transparent; transition:all 0.3s;
+  }
+  .spec-dot-item.active  { border-color:var(--accent); background:rgba(0,229,255,0.3); }
+  .spec-dot-item.p1-ok   { border-color:var(--green); background:var(--green); }
+  .spec-dot-item.p2-ok   { border-color:#00B0FF; background:#00B0FF; }
+  .spec-dot-item.both-ok { border-color:var(--gold); background:var(--gold); }
+  .spec-dot-item.miss    { border-color:var(--red); background:rgba(255,23,68,0.4); }
+</style>
+
+<div id="screen-spectator" class="screen">
+  <div class="spec-header">
+    <div class="spec-title">⚡ MATCH EN DIRECT</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span class="spec-phase-badge" id="spec-phase-label">—</span>
+      <button class="btn btn-outline btn-sm" onclick="showScreen('screen-landing')">✕ Quitter</button>
+    </div>
+  </div>
+
+  <div id="spec-content">
+    <!-- État idle : aucun match en cours -->
+    <div id="spec-idle">
+      <div class="spec-idle-icon">📡</div>
+      <div class="spec-idle-msg">Aucun match en cours pour l'instant</div>
+      <div class="spec-idle-sub">L'écran se mettra à jour automatiquement dès qu'un match démarre<span class="spec-dot"></span></div>
+    </div>
+
+    <!-- Match en cours -->
+    <div id="spec-match" style="display:none;">
+      <!-- Scoreboard -->
+      <div class="spec-scoreboard">
+        <div class="spec-player-card" id="spec-p1-card">
+          <div id="spec-p1-avatar" style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;overflow:hidden;"></div>
+          <div class="spec-player-name" id="spec-p1-name">—</div>
+          <div class="spec-player-school" id="spec-p1-school">—</div>
+          <div class="spec-match-score" id="spec-p1-score">0</div>
+          <div class="spec-match-score-label">pts match</div>
+        </div>
+        <div class="spec-vs-center">
+          <div class="spec-vs-text">VS</div>
+          <div class="spec-q-counter" id="spec-q-counter">Q 0 / 0</div>
+          <div style="margin-top:6px;" id="spec-timer-wrap">
+            <div class="spec-timer" id="spec-timer">—</div>
+          </div>
+        </div>
+        <div class="spec-player-card" id="spec-p2-card">
+          <div id="spec-p2-avatar" style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#FF4081,#FF6D00);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;overflow:hidden;"></div>
+          <div class="spec-player-name" id="spec-p2-name">—</div>
+          <div class="spec-player-school" id="spec-p2-school">—</div>
+          <div class="spec-match-score" id="spec-p2-score">0</div>
+          <div class="spec-match-score-label">pts match</div>
+        </div>
+      </div>
+
+      <!-- Progression dots -->
+      <div class="spec-dots" id="spec-dots"></div>
+
+      <!-- Statut réponses -->
+      <div class="spec-ans-row">
+        <div class="spec-ans-chip waiting" id="spec-ans-p1">⏳ En attente…</div>
+        <div class="spec-ans-chip waiting" id="spec-ans-p2">⏳ En attente…</div>
+      </div>
+
+      <!-- Question -->
+      <div class="spec-question-box" id="spec-question-box">
+        <div class="spec-q-matiere" id="spec-q-matiere">—</div>
+        <div class="spec-q-text" id="spec-q-text">—</div>
+        <div class="spec-options-grid" id="spec-options-grid"></div>
+      </div>
+
+      <!-- Résultat final -->
+      <div class="spec-result-box" id="spec-result-box" style="display:none;">
+        <div class="spec-result-icon" id="spec-result-icon">🏆</div>
+        <div class="spec-result-title">FIN DU MATCH</div>
+        <div class="spec-result-winner" id="spec-result-winner">—</div>
+        <div class="spec-result-scores" id="spec-result-scores">—</div>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- ══════════ PLAYER INTERFACE ══════════ -->
 <div id="screen-player" class="screen">
 
@@ -1808,6 +2028,7 @@
     <div class="levels-section-header">
       <div class="levels-section-title">⚡ Choisir un niveau</div>
       <div class="levels-section-sub">Complète les niveaux dans l'ordre pour débloquer les suivants</div>
+      <button class="btn btn-accent btn-sm" onclick="showLiveSpectator()" style="margin-top:10px;font-size:0.82rem;padding:9px 18px;letter-spacing:1px;">📡 Voir le match en direct</button>
       <!-- Barre de progression globale -->
       <div class="player-global-progress" id="pgp-wrap">
         <div class="pgp-label">
@@ -2189,6 +2410,86 @@ const firebaseConfig = {
 const DEFAULT_DATA = {
   players: [],
   questions: [
+    // ══════════════════════════════════
+    // NIVEAU 0 – QUALIFICATION (programme guinéen)
+    // ══════════════════════════════════
+
+    // -- Culture générale Guinée --
+    {id:'q0cg01', level:0, matiere:'Géographie',       text:"Quelle est la capitale de la Guinée ?",                                                                options:["Kankan","Labé","Conakry","Kindia"],                                                                                           correct:2},
+    {id:'q0cg02', level:0, matiere:'Histoire',         text:"En quelle année la Guinée a-t-elle obtenu son indépendance ?",                                         options:["1956","1958","1960","1962"],                                                                                                  correct:1},
+    {id:'q0cg03', level:0, matiere:'Histoire',         text:"Qui fut le premier président de la Guinée ?",                                                           options:["Lansana Conté","Alpha Condé","Sékou Touré","Cellou Dalein Diallo"],                                                             correct:2},
+    {id:'q0cg04', level:0, matiere:'Éducation Civique',text:"Quelles sont les couleurs du drapeau guinéen (de gauche à droite) ?",                                   options:["Vert, Jaune, Rouge","Rouge, Jaune, Vert","Jaune, Rouge, Vert","Rouge, Vert, Jaune"],                                          correct:1},
+    {id:'q0cg05', level:0, matiere:'Éducation Civique',text:"Quelle est la devise de la République de Guinée ?",                                                    options:["Liberté, Égalité, Fraternité","Unité, Foi, Discipline","Travail, Justice, Solidarité","Paix, Travail, Patrie"],              correct:2},
+    {id:'q0cg06', level:0, matiere:'Géographie',       text:"Quel est le principal minerai exporté par la Guinée ?",                                                 options:["Le pétrole","L'or","La bauxite","Le diamant"],                                                                                correct:2},
+    {id:'q0cg07', level:0, matiere:'Géographie',       text:"Quel fleuve prend sa source en Guinée et traverse plusieurs pays d'Afrique de l'Ouest ?",               options:["Le Congo","Le Nil","Le Niger","Le Sénégal"],                                                                                  correct:2},
+    {id:'q0cg08', level:0, matiere:'Géographie',       text:"Combien de régions administratives compte la Guinée ?",                                                 options:["5","6","7","8"],                                                                                                             correct:2},
+    {id:'q0cg09', level:0, matiere:'Histoire',         text:"Quel héros guinéen a résisté à la colonisation française à la fin du XIXe siècle ?",                    options:["Sékou Touré","Samory Touré","Bocar Biro","Alpha Yaya"],                                                                       correct:1},
+    {id:'q0cg10', level:0, matiere:'Géographie',       text:"Dans quelle région naturelle se trouve le Fouta-Djalon ?",                                              options:["Guinée Maritime","Haute-Guinée","Moyenne-Guinée","Guinée Forestière"],                                                        correct:2},
+
+    // -- Mathématiques --
+    {id:'q0m01',  level:0, matiere:'Mathématiques',    text:"Combien font 12 × 12 ?",                                                                                options:["124","134","144","154"],                                                                                                     correct:2},
+    {id:'q0m02',  level:0, matiere:'Mathématiques',    text:"Quel est le résultat de 25 % de 200 ?",                                                                 options:["25","40","50","75"],                                                                                                         correct:2},
+    {id:'q0m03',  level:0, matiere:'Mathématiques',    text:"Quelle est la valeur de π (pi) arrondie à deux décimales ?",                                            options:["3,12","3,14","3,16","3,18"],                                                                                                 correct:1},
+    {id:'q0m04',  level:0, matiere:'Mathématiques',    text:"Quel est le carré de 13 ?",                                                                             options:["156","169","176","196"],                                                                                                     correct:1},
+    {id:'q0m05',  level:0, matiere:'Mathématiques',    text:"Dans un triangle rectangle, le carré de l'hypoténuse est égal à :",                                     options:["La somme des deux autres côtés","La somme des carrés des deux autres côtés","Le produit des deux autres côtés","La différence des carrés"], correct:1},
+    {id:'q0m06',  level:0, matiere:'Mathématiques',    text:"Quel est le PGCD de 24 et 36 ?",                                                                        options:["6","8","12","18"],                                                                                                           correct:2},
+    {id:'q0m07',  level:0, matiere:'Mathématiques',    text:"Si x + 7 = 15, quelle est la valeur de x ?",                                                            options:["6","7","8","9"],                                                                                                             correct:2},
+    {id:'q0m08',  level:0, matiere:'Mathématiques',    text:"Combien font 2³ × 3² ?",                                                                                options:["48","72","54","36"],                                                                                                         correct:1},
+    {id:'q0m09',  level:0, matiere:'Mathématiques',    text:"Quelle est l'aire d'un cercle de rayon 7 cm ? (π ≈ 3,14)",                                              options:["43,96 cm²","87,92 cm²","153,86 cm²","219,8 cm²"],                                                                           correct:2},
+    {id:'q0m10',  level:0, matiere:'Mathématiques',    text:"Un commerçant achète à 50 000 GNF et revend avec 20 % de bénéfice. Prix de vente ?",                    options:["55 000 GNF","58 000 GNF","60 000 GNF","65 000 GNF"],                                                                         correct:2},
+
+    // -- Français --
+    {id:'q0fr01', level:0, matiere:'Français',         text:"Quel est le pluriel de 'œil' ?",                                                                        options:["œils","yeux","œilles","yeux ou œils"],                                                                                       correct:1},
+    {id:'q0fr02', level:0, matiere:'Français',         text:"Dans 'Les enfants jouent', quel est le sujet ?",                                                        options:["jouent","Les","enfants","Les enfants"],                                                                                       correct:3},
+    {id:'q0fr03', level:0, matiere:'Français',         text:"Quel temps est utilisé dans : 'Il avait mangé avant de partir' ?",                                      options:["Imparfait","Plus-que-parfait","Passé composé","Passé simple"],                                                                correct:1},
+    {id:'q0fr04', level:0, matiere:'Français',         text:"Quel est le synonyme de 'courageux' ?",                                                                 options:["Timide","Peureux","Vaillant","Faible"],                                                                                       correct:2},
+    {id:'q0fr05', level:0, matiere:'Français',         text:"Quelle figure de style est utilisée dans 'Le temps est un voleur' ?",                                   options:["Comparaison","Métaphore","Hyperbole","Allitération"],                                                                         correct:1},
+    {id:'q0fr06', level:0, matiere:'Français',         text:"Quel est l'antonyme de 'générosité' ?",                                                                 options:["Bonté","Avarice","Richesse","Douceur"],                                                                                       correct:1},
+    {id:'q0fr07', level:0, matiere:'Français',         text:"Dans 'Elle chante merveilleusement', 'merveilleusement' est :",                                         options:["Un adjectif","Un nom","Un adverbe","Un verbe"],                                                                               correct:2},
+    {id:'q0fr08', level:0, matiere:'Français',         text:"Quel est le féminin de 'acteur' ?",                                                                     options:["Acteuse","Actrice","Acteure","Acteurette"],                                                                                   correct:1},
+
+    // -- Physique-Chimie --
+    {id:'q0pc01', level:0, matiere:'Physique-Chimie',  text:"Quelle est la formule chimique de l'eau ?",                                                             options:["CO₂","H₂O","O₂","NaCl"],                                                                                                    correct:1},
+    {id:'q0pc02', level:0, matiere:'Physique-Chimie',  text:"Quelle est l'unité de mesure de l'intensité électrique ?",                                              options:["Volt","Ohm","Ampère","Watt"],                                                                                                correct:2},
+    {id:'q0pc03', level:0, matiere:'Physique-Chimie',  text:"Quel est le symbole chimique de l'or ?",                                                                options:["Ag","Fe","Au","Cu"],                                                                                                         correct:2},
+    {id:'q0pc04', level:0, matiere:'Physique-Chimie',  text:"La lumière visible appartient au spectre :",                                                            options:["Radio","Infrarouge","Électromagnétique","Sonore"],                                                                           correct:2},
+    {id:'q0pc05', level:0, matiere:'Physique-Chimie',  text:"Quelle loi exprime la relation U = R × I ?",                                                            options:["Loi de Faraday","Loi d'Ohm","Loi de Newton","Loi de Joule"],                                                                  correct:1},
+    {id:'q0pc06', level:0, matiere:'Physique-Chimie',  text:"Quel est le numéro atomique de l'hydrogène ?",                                                          options:["0","1","2","3"],                                                                                                             correct:1},
+    {id:'q0pc07', level:0, matiere:'Physique-Chimie',  text:"L'ébullition de l'eau à pression normale se produit à :",                                               options:["90°C","95°C","100°C","110°C"],                                                                                               correct:2},
+    {id:'q0pc08', level:0, matiere:'Physique-Chimie',  text:"Quelle est la formule chimique du dioxyde de carbone ?",                                                options:["CO","CO₂","C₂O","C₂O₂"],                                                                                                    correct:1},
+
+    // -- Sciences de la Vie --
+    {id:'q0sv01', level:0, matiere:'Sciences de la Vie',text:"Quel organe du corps humain produit l'insuline ?",                                                     options:["Le foie","Les reins","Le pancréas","L'estomac"],                                                                              correct:2},
+    {id:'q0sv02', level:0, matiere:'Sciences de la Vie',text:"Combien d'os compte le corps humain adulte ?",                                                         options:["186","206","226","256"],                                                                                                     correct:1},
+    {id:'q0sv03', level:0, matiere:'Sciences de la Vie',text:"Quel groupe sanguin est dit 'donneur universel' ?",                                                    options:["A","B","AB","O"],                                                                                                            correct:3},
+    {id:'q0sv04', level:0, matiere:'Sciences de la Vie',text:"Quelle molécule transporte l'oxygène dans le sang ?",                                                  options:["L'insuline","La kératine","L'hémoglobine","La mélanine"],                                                                     correct:2},
+    {id:'q0sv05', level:0, matiere:'Sciences de la Vie',text:"La photosynthèse se déroule dans :",                                                                   options:["Les racines","Les mitochondries","Les chloroplastes","Les vacuoles"],                                                          correct:2},
+    {id:'q0sv06', level:0, matiere:'Sciences de la Vie',text:"Quel est le rôle principal des globules blancs ?",                                                     options:["Transporter l'oxygène","Défendre l'organisme contre les infections","Coaguler le sang","Produire de l'énergie"],             correct:1},
+
+    // -- Histoire & Géographie générale --
+    {id:'q0geo01',level:0, matiere:'Géographie',       text:"Quel est le plus grand continent du monde ?",                                                           options:["Amérique","Afrique","Asie","Europe"],                                                                                         correct:2},
+    {id:'q0geo02',level:0, matiere:'Géographie',       text:"Quelle est la plus haute montagne du monde ?",                                                          options:["Le Kilimandjaro","Le Mont Blanc","L'Everest","Le Mont McKinley"],                                                              correct:2},
+    {id:'q0geo03',level:0, matiere:'Géographie',       text:"Quel océan sépare l'Afrique de l'Amérique ?",                                                           options:["Pacifique","Indien","Arctique","Atlantique"],                                                                                 correct:3},
+    {id:'q0hist01',level:0,matiere:'Histoire',         text:"En quelle année a eu lieu la Première Guerre mondiale ?",                                               options:["1904–1908","1914–1918","1924–1928","1939–1945"],                                                                              correct:1},
+    {id:'q0hist02',level:0,matiere:'Histoire',         text:"Qui a prononcé la célèbre phrase 'I have a dream' ?",                                                   options:["Nelson Mandela","Barack Obama","Martin Luther King","Malcolm X"],                                                              correct:2},
+    {id:'q0hist03',level:0,matiere:'Histoire',         text:"Quelle organisation regroupe les pays d'Afrique de l'Ouest ?",                                          options:["UA","ONU","CEDEAO","UNESCO"],                                                                                                 correct:2},
+    {id:'q0hist04',level:0,matiere:'Histoire',         text:"En quelle année a été fondée l'ONU ?",                                                                  options:["1939","1945","1948","1955"],                                                                                                  correct:1},
+    {id:'q0geo04',level:0, matiere:'Géographie',       text:"Quel pays est le plus peuplé du monde ?",                                                               options:["États-Unis","Inde","Chine","Russie"],                                                                                         correct:1},
+
+    // -- Éducation Civique & Culture générale --
+    {id:'q0ec01', level:0, matiere:'Éducation Civique',text:"Quel est le rôle principal de l'école ?",                                                              options:["Garder les enfants","Transmettre des connaissances et former des citoyens","Préparer aux sports","Distribuer des repas"],    correct:1},
+    {id:'q0ec02', level:0, matiere:'Éducation Civique',text:"Qu'est-ce que la démocratie ?",                                                                        options:["Le gouvernement d'un roi","Le gouvernement du peuple par le peuple","Le gouvernement des militaires","Le gouvernement des riches"], correct:1},
+    {id:'q0ec03', level:0, matiere:'Éducation Civique',text:"Que signifie ONU ?",                                                                                   options:["Organisation Nationale Unie","Organisation des Nations Unies","Office des Nations Unies","Ordre des Nations Unies"],          correct:1},
+    {id:'q0ec04', level:0, matiere:'Éducation Civique',text:"Quel document garantit les droits fondamentaux des citoyens ?",                                        options:["Le code civil","La Constitution","Le règlement intérieur","La loi de finances"],                                               correct:1},
+
+    // -- Anglais --
+    {id:'q0en01', level:0, matiere:'Anglais',          text:"What is the capital of England?",                                                                       options:["Manchester","Liverpool","Birmingham","London"],                                                                               correct:3},
+    {id:'q0en02', level:0, matiere:'Anglais',          text:"How do you say 'bonjour' in English?",                                                                  options:["Goodbye","Good night","Hello","Please"],                                                                                      correct:2},
+    {id:'q0en03', level:0, matiere:'Anglais',          text:"Which is correct: 'She ____ to school every day.'",                                                     options:["go","going","gone","goes"],                                                                                                   correct:3},
+    {id:'q0en04', level:0, matiere:'Anglais',          text:"What does 'knowledge' mean in French ?",                                                                options:["Connaissance","Courage","Bonheur","Richesse"],                                                                                correct:0},
+    {id:'q0en05', level:0, matiere:'Anglais',          text:"What is 2 + 2 in English?",                                                                             options:["Three","Four","Five","Six"],                                                                                                  correct:1},
+    {id:'q0en06', level:0, matiere:'Anglais',          text:"Which African country has English as official language?",                                               options:["Guinée","Sénégal","Mali","Ghana"],                                                                                            correct:3},
+
     // ══════════════════════════════════
     // NIVEAU 2 – CHALLENGER (programme collège guinéen)
     // ══════════════════════════════════
@@ -2959,7 +3260,12 @@ function _setupFirebaseListeners() {
 ARENA_REF.on('value',
   (snap) => {
     const remote = snap.val();
-    _cache = remote ? remote : JSON.parse(JSON.stringify(DEFAULT_DATA));
+    if (!remote) {
+      _cache = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      ARENA_REF.set(_cache); // Écrire toutes les questions sur Firebase dès le premier lancement
+    } else {
+      _cache = remote;
+    }
 
     // Normalise les tableaux (Firebase transforme [] en objet {})
     if (_cache.players && !Array.isArray(_cache.players))
@@ -4819,6 +5125,15 @@ function genCompetition(){
     const phaseDiv = document.createElement('div');
     phaseDiv.className = 'comp-phase';
 
+    // Construire la liste JSON des matchs valides pour ce bouton global
+    const validMatches = matches.filter(m => m.p1 && m.p2);
+    const matchesJsonAttr = validMatches.length
+      ? `data-matches='${JSON.stringify(validMatches.map(m=>({c1:m.p1.code,c2:m.p2.code})))}' data-phase='${phase.label}' data-level='${phase.level}'`
+      : '';
+    const globalLaunchBtn = validMatches.length
+      ? `<button class="btn btn-green btn-sm" style="margin-bottom:14px;font-size:0.82rem;letter-spacing:1px;padding:9px 20px;" ${matchesJsonAttr} onclick="launchPhaseMatches(this)">⚡ Lancer tous les matchs de la phase en direct (${validMatches.length} match${validMatches.length>1?'s':''})</button>`
+      : '';
+
     let matchesHTML = matches.map((m, mi) => {
       const w = getWinner(m.p1, m.p2);
       const renderPlayer = (p, isWinner) => {
@@ -4838,7 +5153,7 @@ function genCompetition(){
       const p1Win = w === m.p1;
       const canLaunch = m.p1 && m.p2;
       const launchBtn = canLaunch
-        ? `<button class="btn btn-green btn-sm" style="margin-top:8px;width:100%;font-size:0.78rem;letter-spacing:1px;" onclick="openLiveMatch('${m.p1.code}','${m.p2.code}','${phase.label}',${phase.level})">⚡ Lancer le match en direct</button>`
+        ? `<button class="btn btn-accent btn-sm" style="margin-top:8px;width:100%;font-size:0.75rem;letter-spacing:1px;" onclick="openLiveMatch('${m.p1.code}','${m.p2.code}','${phase.label}',${phase.level})">🎙️ Arbitrer ce match</button>`
         : '';
       return `<div class="comp-match">
         <div class="comp-match-label">Match ${mi+1}</div>
@@ -4854,6 +5169,7 @@ function genCompetition(){
         <span style="font-size:0.75rem;color:var(--silver);font-family:sans-serif;font-weight:400;">${matches.length} match${matches.length>1?'s':''} · ${winners.length} qualifié${winners.length>1?'s':''}</span>
         <span style="font-size:0.72rem;background:rgba(124,77,255,0.25);color:#CE93D8;border:1px solid rgba(124,77,255,0.4);border-radius:20px;padding:2px 10px;font-family:sans-serif;font-weight:700;margin-left:6px;">📚 Niveau ${phase.level}</span>
       </div>
+      ${globalLaunchBtn}
       <div class="comp-matches">${matchesHTML}</div>
       ${phIdx < phasesData.length-1 ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--accent);">
         ➜ Qualifiés pour <strong>${COMP_PHASES[phIdx+1]?.label||'la prochaine phase'}</strong> : ${winners.map(p=>`<strong>${p.name}</strong>`).join(', ')}
@@ -5188,12 +5504,16 @@ function openLiveMatch(code1, code2, phaseLabel, level){
   document.getElementById('modal-live-match').classList.add('open');
   document.body.style.overflow = 'hidden';
 
+  // Publier le démarrage du match sur Firebase (public en direct)
+  _lmPublish();
+
   // Charger la première question
   _lmLoadQuestion();
 }
 
 function closeLiveMatch(){
   clearInterval(_lmTimerInterval);
+  _lmPublishClear(); // Signaler au public que le match est terminé
   document.getElementById('modal-live-match').classList.remove('open');
   document.body.style.overflow = '';
 }
@@ -5271,6 +5591,9 @@ function _lmLoadQuestion(){
 
   // Progress dots
   _lmBuildProgressDots();
+
+  // Publier la question sur Firebase pour le public
+  _lmPublish();
 
   // Timer
   _lmStartTimer(_lmTimeLeft, q);
@@ -5381,6 +5704,17 @@ function _lmResolveQuestion(q){
     dot.className = 'lm-pdot ' + (p1Ok && p2Ok ? 'both-ok' : p1Ok ? 'p1-ok' : p2Ok ? 'p2-ok' : 'miss');
   }
 
+  // Construire les dots pour le public
+  const dotStates = _lmQuestions.map((_,i) => {
+    if(i > _lmQIndex) return '';
+    if(i < _lmQIndex) return 'miss'; // simplification — l'état exact est stocké localement
+    // question courante
+    return (p1Ok && p2Ok) ? 'both-ok' : p1Ok ? 'p1-ok' : p2Ok ? 'p2-ok' : 'miss';
+  });
+
+  // Publier la résolution sur Firebase (révèle la bonne réponse au public)
+  _lmPublishResolved(q, dotStates);
+
   // Bouton suivant ou fin
   const nextBtn = document.getElementById('lm-next-btn');
   if(_lmQIndex+1 >= _lmQuestions.length){
@@ -5427,6 +5761,10 @@ function _lmEndMatch(){
     `${_lmP2.name} : <strong style="color:var(--gold);">${_lmP2Score} pts</strong> (${_lmP2Correct}/${total} ✓)`;
   document.getElementById('lm-result-detail').textContent = resultDetail || '';
 
+  // Publier le résultat final sur Firebase pour le public
+  const finalScores = `${_lmP1.name} : <strong style="color:var(--gold);">${_lmP1Score} pts</strong> (${_lmP1Correct}/${total} ✓) &nbsp;·&nbsp; ${_lmP2.name} : <strong style="color:var(--gold);">${_lmP2Score} pts</strong> (${_lmP2Correct}/${total} ✓)`;
+  _lmPublishEnd(winnerName, finalScores);
+
   _sndVictory();
   document.getElementById('lm-result-overlay').classList.add('show');
 }
@@ -5454,6 +5792,459 @@ function _lmSetAnsChip(id, state, text){
   el.textContent = text;
 }
 // ════════════════════════════════════════
+
+// ════════════════════════════════════════
+// MATCH EN DIRECT – PUBLICATION FIREBASE TEMPS RÉEL
+// ════════════════════════════════════════
+let _lmLiveRef = null;      // Firebase ref bhds_live_match
+let _specUnsubscribe = null; // listener spectateur
+let _specTimerHandle = null; // setInterval du chrono spectateur
+
+function _lmGetLiveRef(){
+  if(!_lmLiveRef && typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length){
+    _lmLiveRef = firebase.database().ref('bhds_live_match');
+  }
+  return _lmLiveRef;
+}
+
+// Publier l'état courant du match sur Firebase
+function _lmPublish(extra){
+  const ref = _lmGetLiveRef();
+  if(!ref) return;
+  const q = _lmQuestions[_lmQIndex] || null;
+  const state = {
+    active: true,
+    phase: _lmPhaseLabel,
+    level: _lmLevel,
+    qIndex: _lmQIndex,
+    qTotal: _lmQuestions.length,
+    p1: { name: _lmP1 ? _lmP1.name : '', school: _lmP1 ? ((_lmP1.classe||'')+(_lmP1.school?' · '+_lmP1.school:'')) : '', photo: _lmP1 ? (_lmP1.photo||null) : null, score: _lmP1Score, correct: _lmP1Correct },
+    p2: { name: _lmP2 ? _lmP2.name : '', school: _lmP2 ? ((_lmP2.classe||'')+(_lmP2.school?' · '+_lmP2.school:'')) : '', photo: _lmP2 ? (_lmP2.photo||null) : null, score: _lmP2Score, correct: _lmP2Correct },
+    question: q ? { text: q.text, matiere: q.matiere||'—', options: q.options, correct: -1 } : null,
+    p1Answered: _lmP1Answered,
+    p2Answered: _lmP2Answered,
+    p1Answer: _lmP1Answer,
+    p2Answer: _lmP2Answer,
+    correctAnswer: -1,       // révélé seulement après résolution
+    resolved: false,
+    timerStart: Date.now(),
+    timerDuration: _lmTimeLeft,
+    dots: [],
+    finished: false,
+    ts: Date.now(),
+    ...(extra || {})
+  };
+  ref.set(state).catch(()=>{});
+}
+
+// Publier après résolution d'une question (révèle la bonne réponse)
+function _lmPublishResolved(q, dotStates){
+  const ref = _lmGetLiveRef();
+  if(!ref) return;
+  ref.update({
+    resolved: true,
+    correctAnswer: q.correct,
+    p1Answer: _lmP1Answer,
+    p2Answer: _lmP2Answer,
+    p1Answered: _lmP1Answered,
+    p2Answered: _lmP2Answered,
+    p1Score: _lmP1Score,
+    p2Score: _lmP2Score,
+    'p1.score': _lmP1Score,
+    'p2.score': _lmP2Score,
+    dots: dotStates,
+    ts: Date.now()
+  }).catch(()=>{});
+}
+
+// Publier la fin du match
+function _lmPublishEnd(winnerName, scores){
+  const ref = _lmGetLiveRef();
+  if(!ref) return;
+  ref.update({
+    finished: true,
+    active: false,
+    winnerName: winnerName,
+    finalScores: scores,
+    ts: Date.now()
+  }).catch(()=>{});
+}
+
+// Effacer le match quand on ferme
+function _lmPublishClear(){
+  const ref = _lmGetLiveRef();
+  if(!ref) return;
+  ref.set({ active: false, ts: Date.now() }).catch(()=>{});
+}
+
+// ── SPECTATEUR ────────────────────────────────────────────────
+function showLiveSpectator(){
+  showScreen('screen-spectator');
+  _specStartListening();
+}
+
+let _specLastTs = 0;
+
+function _specStartListening(){
+  const ref = _lmGetLiveRef();
+  if(!ref){
+    // Retry après 1s si Firebase pas encore prêt
+    setTimeout(_specStartListening, 1000);
+    return;
+  }
+  if(_specUnsubscribe){ _specUnsubscribe(); _specUnsubscribe = null; }
+  clearInterval(_specTimerHandle);
+
+  const handler = ref.on('value', (snap) => {
+    const data = snap.val();
+    _specApply(data);
+  });
+  _specUnsubscribe = () => ref.off('value', handler);
+}
+
+// Intervalles chrono par match (tableau)
+let _specTimerHandles = [];
+
+function _specApply(data){
+  const idle     = document.getElementById('spec-idle');
+  const matchDiv = document.getElementById('spec-match');
+
+  if(!data || !data.active){
+    if(idle) idle.style.display = '';
+    if(matchDiv) matchDiv.style.display = 'none';
+    _specTimerHandles.forEach(h => clearInterval(h));
+    _specTimerHandles = [];
+    clearInterval(_specTimerHandle);
+    return;
+  }
+
+  if(idle) idle.style.display = 'none';
+  if(matchDiv) matchDiv.style.display = '';
+
+  // Phase label
+  const phEl = document.getElementById('spec-phase-label');
+  if(phEl) phEl.textContent = (data.phase || '—') + ' · Niveau ' + (data.level || '');
+
+  // Arrêter les anciens chronos
+  _specTimerHandles.forEach(h => clearInterval(h));
+  _specTimerHandles = [];
+  clearInterval(_specTimerHandle);
+
+  // ── Cas : plusieurs matchs simultanés (launchPhaseMatches) ──
+  if(data.matches && Array.isArray(data.matches)){
+    _specRenderMultiMatch(data.matches, matchDiv);
+    return;
+  }
+
+  // ── Cas legacy : match unique (openLiveMatch) ──
+  _specRenderSingleMatch(data, matchDiv);
+}
+
+function _specRenderMultiMatch(matches, container){
+  const letters = ['A','B','C','D'];
+
+  // Construire la grille de matchs
+  let html = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:4px 0;">`;
+
+  matches.forEach((m, mi) => {
+    if(!m) return;
+    const p1name = (m.p1 && m.p1.name) ? m.p1.name.split(' ')[0] : 'J1';
+    const p2name = (m.p2 && m.p2.name) ? m.p2.name.split(' ')[0] : 'J2';
+    const q = m.questions ? m.questions[m.qIndex || 0] : null;
+
+    // Chips réponses
+    let chip1Html, chip2Html;
+    if(m.resolved){
+      const ok1 = m.p1Answer === m.correctAnswer;
+      const ok2 = m.p2Answer === m.correctAnswer;
+      const t1  = m.p1Answer === -1;
+      const t2  = m.p2Answer === -1;
+      chip1Html = `<div class="spec-ans-chip ${t1?'timeout':ok1?'ok':'fail'}">${t1?'⏰ '+p1name+' : temps':ok1?'✅ '+p1name+' : ✓':'❌ '+p1name+' : ✗'}</div>`;
+      chip2Html = `<div class="spec-ans-chip ${t2?'timeout':ok2?'ok':'fail'}">${t2?'⏰ '+p2name+' : temps':ok2?'✅ '+p2name+' : ✓':'❌ '+p2name+' : ✗'}</div>`;
+    } else {
+      chip1Html = `<div class="spec-ans-chip ${m.p1Answered?'ok':'waiting'}">${m.p1Answered?'✅ '+p1name+' a répondu':'⏳ '+p1name+'…'}</div>`;
+      chip2Html = `<div class="spec-ans-chip ${m.p2Answered?'ok':'waiting'}">${m.p2Answered?'✅ '+p2name+' a répondu':'⏳ '+p2name+'…'}</div>`;
+    }
+
+    // Options
+    let optsHtml = '';
+    if(q && q.options){
+      optsHtml = q.options.map((opt, i) => {
+        let cls = 'spec-opt';
+        if(m.resolved){
+          if(i === m.correctAnswer) cls += ' correct';
+          else if(i === m.p1Answer && m.p1Answer !== m.correctAnswer) cls += ' p1wrong';
+          else if(i === m.p2Answer && m.p2Answer !== m.correctAnswer) cls += ' p2wrong';
+        }
+        return `<div class="${cls}" style="margin-bottom:4px;"><span class="spec-opt-letter">${letters[i]}</span><span style="font-size:0.8rem;">${opt}</span></div>`;
+      }).join('');
+    }
+
+    // Résultat final du match
+    let finalHtml = '';
+    if(m.finished){
+      let winTxt = '🤝 Match nul';
+      if(m.p1Score > m.p2Score) winTxt = `🏆 ${m.p1 ? m.p1.name : 'J1'} gagne`;
+      else if(m.p2Score > m.p1Score) winTxt = `🏆 ${m.p2 ? m.p2.name : 'J2'} gagne`;
+      finalHtml = `<div style="margin-top:8px;padding:8px 12px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.4);border-radius:10px;text-align:center;font-weight:700;color:var(--gold);font-size:0.85rem;">${winTxt}</div>`;
+    }
+
+    // Chrono id unique
+    const timerId = `spec-timer-m${mi}`;
+
+    html += `
+      <div style="background:var(--card-bg);border:1.5px solid var(--border);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;">
+        <!-- Titre match -->
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;color:var(--gold);letter-spacing:1px;">Match ${mi+1}</span>
+          <span style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;color:${m.finished?'var(--silver)':(m.resolved?'var(--green)':'var(--accent)')};min-width:32px;text-align:right;" id="${timerId}">—</span>
+        </div>
+        <!-- Joueurs & scores -->
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <div style="flex:1;text-align:center;">
+            <div style="font-weight:700;font-size:0.85rem;color:#E0E8FF;">${m.p1 ? m.p1.name : '—'}</div>
+            <div style="font-size:0.65rem;color:var(--silver);">${m.p1 ? (m.p1.school||'') : ''}</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:var(--gold);">${m.p1Score||0} – ${m.p2Score||0}</div>
+            <div style="font-size:0.6rem;color:var(--silver);">Q ${(m.qIndex||0)+1}/${m.qTotal||0}</div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div style="font-weight:700;font-size:0.85rem;color:#E0E8FF;">${m.p2 ? m.p2.name : '—'}</div>
+            <div style="font-size:0.65rem;color:var(--silver);">${m.p2 ? (m.p2.school||'') : ''}</div>
+          </div>
+        </div>
+        <!-- Chips réponses -->
+        <div style="display:flex;gap:6px;">${chip1Html}${chip2Html}</div>
+        <!-- Question -->
+        ${q ? `
+        <div style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.15);border-radius:10px;padding:10px;">
+          <div style="font-size:0.65rem;color:var(--accent);font-weight:700;margin-bottom:6px;">${q.matiere||'—'}</div>
+          <div style="font-size:0.82rem;font-weight:600;color:#E0E8FF;margin-bottom:8px;line-height:1.4;">${q.text}</div>
+          ${optsHtml}
+        </div>` : ''}
+        ${finalHtml}
+      </div>`;
+  });
+
+  html += `</div>`;
+
+  // Vider et remplir spec-match (en gardant les éléments fixes en haut)
+  const specMatchEl = document.getElementById('spec-match');
+  // On utilise un conteneur dynamique dans spec-match
+  let dynEl = document.getElementById('spec-multi-matches');
+  if(!dynEl){
+    dynEl = document.createElement('div');
+    dynEl.id = 'spec-multi-matches';
+    specMatchEl.appendChild(dynEl);
+    // Masquer les éléments du mode single-match
+    ['spec-scoreboard','spec-dots','spec-ans-row','spec-question-box','spec-result-box'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = 'none';
+    });
+  }
+  dynEl.innerHTML = html;
+
+  // Lancer les chronos par match
+  matches.forEach((m, mi) => {
+    if(!m || m.finished || m.resolved) return;
+    const el = document.getElementById(`spec-timer-m${mi}`);
+    if(!el) return;
+    const elapsed = Math.floor((Date.now() - (m.timerStart||Date.now())) / 1000);
+    let left = Math.max(0, (m.timerDuration||30) - elapsed);
+    el.textContent = left;
+    el.style.color = left <= 8 ? 'var(--red)' : 'var(--accent)';
+    const h = setInterval(() => {
+      left = Math.max(0, left - 1);
+      const e2 = document.getElementById(`spec-timer-m${mi}`);
+      if(e2){ e2.textContent = left; e2.style.color = left <= 8 ? 'var(--red)' : 'var(--accent)'; }
+      if(left <= 0) clearInterval(h);
+    }, 1000);
+    _specTimerHandles.push(h);
+  });
+}
+
+function _specRenderSingleMatch(data, container){
+  // Rétablir les éléments du mode single-match si besoin
+  ['spec-scoreboard','spec-dots','spec-ans-row','spec-question-box','spec-result-box'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = '';
+  });
+  const dynEl = document.getElementById('spec-multi-matches');
+  if(dynEl) dynEl.innerHTML = '';
+
+  const resultBox = document.getElementById('spec-result-box');
+  const qBox = document.getElementById('spec-question-box');
+
+  // Avatars & noms
+  const setAvatar = (idAvatar, idName, idSchool, pData) => {
+    const av = document.getElementById(idAvatar);
+    if(av){
+      if(pData.photo){ av.innerHTML = `<img src="${pData.photo}" style="width:100%;height:100%;object-fit:cover;" alt="">`; }
+      else { av.textContent = (pData.name||'?').charAt(0).toUpperCase(); }
+    }
+    const nm = document.getElementById(idName); if(nm) nm.textContent = pData.name || '—';
+    const sc = document.getElementById(idSchool); if(sc) sc.textContent = pData.school || '';
+  };
+  if(data.p1) setAvatar('spec-p1-avatar','spec-p1-name','spec-p1-school', data.p1);
+  if(data.p2) setAvatar('spec-p2-avatar','spec-p2-name','spec-p2-school', data.p2);
+
+  const s1 = document.getElementById('spec-p1-score'); if(s1) s1.textContent = data.p1 ? (data.p1.score||0) : 0;
+  const s2 = document.getElementById('spec-p2-score'); if(s2) s2.textContent = data.p2 ? (data.p2.score||0) : 0;
+
+  const qc = document.getElementById('spec-q-counter');
+  if(qc) qc.textContent = `Q ${(data.qIndex||0)+1} / ${data.qTotal||0}`;
+
+  // Chrono
+  const timerEl = document.getElementById('spec-timer');
+  if(timerEl && !data.finished && !data.resolved){
+    const elapsed = Math.floor((Date.now() - (data.timerStart||Date.now())) / 1000);
+    let left = Math.max(0, (data.timerDuration||30) - elapsed);
+    timerEl.textContent = left;
+    timerEl.className = 'spec-timer' + (left <= 8 ? ' danger' : '');
+    _specTimerHandle = setInterval(()=>{
+      left = Math.max(0, left - 1);
+      if(timerEl){ timerEl.textContent = left; timerEl.className = 'spec-timer' + (left <= 8 ? ' danger' : ''); }
+      if(left <= 0) clearInterval(_specTimerHandle);
+    }, 1000);
+  } else if(timerEl){
+    timerEl.textContent = data.resolved ? '✓' : '—';
+    timerEl.className = 'spec-timer';
+  }
+
+  // Dots
+  const dotsEl = document.getElementById('spec-dots');
+  if(dotsEl && data.qTotal){
+    let html = '';
+    const dots = data.dots || [];
+    for(let i = 0; i < data.qTotal; i++){
+      const cls = i < (data.qIndex||0) ? (dots[i] || 'miss') : i === (data.qIndex||0) ? 'active' : '';
+      html += `<div class="spec-dot-item ${cls}"></div>`;
+    }
+    dotsEl.innerHTML = html;
+  }
+
+  // Chips réponses
+  const setChip = (id, state, text) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.className = 'spec-ans-chip ' + state;
+    el.textContent = text;
+  };
+  const p1name = (data.p1 && data.p1.name) ? data.p1.name.split(' ')[0] : 'J1';
+  const p2name = (data.p2 && data.p2.name) ? data.p2.name.split(' ')[0] : 'J2';
+
+  if(data.resolved){
+    const ok1 = data.p1Answer === data.correctAnswer;
+    const ok2 = data.p2Answer === data.correctAnswer;
+    const t1 = data.p1Answer === -1;
+    const t2 = data.p2Answer === -1;
+    setChip('spec-ans-p1', t1?'timeout':ok1?'ok':'fail', t1?`⏰ ${p1name} : temps`:ok1?`✅ ${p1name} : ✓`:`❌ ${p1name} : ✗`);
+    setChip('spec-ans-p2', t2?'timeout':ok2?'ok':'fail', t2?`⏰ ${p2name} : temps`:ok2?`✅ ${p2name} : ✓`:`❌ ${p2name} : ✗`);
+    const c1 = document.getElementById('spec-p1-card'); if(c1) c1.className = 'spec-player-card' + (ok1?' answered':'');
+    const c2 = document.getElementById('spec-p2-card'); if(c2) c2.className = 'spec-player-card' + (ok2?' answered':'');
+  } else {
+    setChip('spec-ans-p1', data.p1Answered?'ok':'waiting', data.p1Answered?`✅ ${p1name} a répondu`:`⏳ ${p1name}…`);
+    setChip('spec-ans-p2', data.p2Answered?'ok':'waiting', data.p2Answered?`✅ ${p2name} a répondu`:`⏳ ${p2name}…`);
+    const c1 = document.getElementById('spec-p1-card'); if(c1) c1.className = 'spec-player-card' + (data.p1Answered?' answered':'');
+    const c2 = document.getElementById('spec-p2-card'); if(c2) c2.className = 'spec-player-card' + (data.p2Answered?' answered':'');
+  }
+
+  // Question
+  const letters = ['A','B','C','D'];
+  if(data.question && qBox){
+    const mat = document.getElementById('spec-q-matiere'); if(mat) mat.textContent = data.question.matiere||'—';
+    const qt  = document.getElementById('spec-q-text');   if(qt)  qt.textContent  = data.question.text||'—';
+    const og  = document.getElementById('spec-options-grid');
+    if(og){
+      og.innerHTML = (data.question.options||[]).map((opt,i)=>{
+        let cls = 'spec-opt';
+        if(data.resolved){
+          if(i === data.correctAnswer) cls += ' correct';
+          else if(i === data.p1Answer && data.p1Answer !== data.correctAnswer) cls += ' p1wrong';
+          else if(i === data.p2Answer && data.p2Answer !== data.correctAnswer) cls += ' p2wrong';
+        }
+        return `<div class="${cls}"><span class="spec-opt-letter">${letters[i]}</span><span>${opt}</span></div>`;
+      }).join('');
+    }
+    qBox.style.display = '';
+  }
+
+  // Résultat final
+  if(data.finished && resultBox){
+    resultBox.style.display = '';
+    const ri = document.getElementById('spec-result-icon');   if(ri) ri.textContent = data.winnerName&&data.winnerName.includes('nul')?'🤝':'🏆';
+    const rw = document.getElementById('spec-result-winner'); if(rw) rw.textContent = data.winnerName||'—';
+    const rs = document.getElementById('spec-result-scores'); if(rs) rs.innerHTML = data.finalScores||'—';
+    if(qBox) qBox.style.display = 'none';
+  } else if(resultBox){
+    resultBox.style.display = 'none';
+  }
+}
+
+
+// ════════════════════════════════════════
+// LANCER TOUS LES MATCHS D'UNE PHASE EN DIRECT
+// ════════════════════════════════════════
+function launchPhaseMatches(btn){
+  const rawMatches = JSON.parse(btn.getAttribute('data-matches') || '[]');
+  const phaseLabel  = btn.getAttribute('data-phase')  || 'Phase';
+  const level       = parseInt(btn.getAttribute('data-level'))  || 1;
+
+  const d = getData();
+  const allQ = d.questions.filter(q => q.level == level);
+  if(allQ.length < 3){ toast('Pas assez de questions pour ce niveau (min 3)', 'error'); return; }
+
+  const matchesData = rawMatches.map((m, i) => {
+    const p1 = d.players.find(p => p.code === m.c1);
+    const p2 = d.players.find(p => p.code === m.c2);
+    if(!p1 || !p2) return null;
+    // Chaque match a sa propre sélection aléatoire de questions
+    const questions = shuffle([...allQ]).slice(0, Math.min(allQ.length, 7));
+    return {
+      matchIndex: i,
+      phase: phaseLabel,
+      level: level,
+      p1: { name: p1.name, school: (p1.classe||'') + (p1.school ? ' · ' + p1.school : ''), photo: p1.photo||null, score: 0, correct: 0 },
+      p2: { name: p2.name, school: (p2.classe||'') + (p2.school ? ' · ' + p2.school : ''), photo: p2.photo||null, score: 0, correct: 0 },
+      questions: questions.map(q => ({ text: q.text, matiere: q.matiere||'—', options: q.options, correct: q.correct })),
+      qIndex: 0,
+      qTotal: questions.length,
+      resolved: false,
+      finished: false,
+      p1Answered: false,
+      p2Answered: false,
+      p1Answer: -1,
+      p2Answer: -1,
+      correctAnswer: -1,
+      p1Score: 0,
+      p2Score: 0,
+      dots: [],
+      timerStart: Date.now(),
+      timerDuration: ({ 0:45, 1:60, 2:45, 3:35, 4:25, 5:20 })[level] || 30,
+      active: true,
+      ts: Date.now()
+    };
+  }).filter(Boolean);
+
+  if(!matchesData.length){ toast('Aucun match valide pour cette phase', 'error'); return; }
+
+  // Publier sur Firebase
+  const ref = _lmGetLiveRef();
+  if(!ref){ toast('Firebase non disponible', 'error'); return; }
+
+  ref.set({
+    active: true,
+    phase: phaseLabel,
+    level: level,
+    matchCount: matchesData.length,
+    matches: matchesData,
+    ts: Date.now()
+  }).then(() => {
+    toast(`⚡ ${matchesData.length} match${matchesData.length>1?'s':''} lancé${matchesData.length>1?'s':''} en direct !`, 'success');
+  }).catch(() => toast('Erreur Firebase', 'error'));
+}
+
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; } return a; }
 
 function logActivity(msg){
