@@ -1370,7 +1370,9 @@
         <circle cx="340" cy="25" r="2" fill="#FF80AB" opacity="0.7"><animate attributeName="opacity" values="0.7;0.2;0.7" dur="1.6s" repeatCount="indefinite"/></circle>
       </svg>
     </div>
-    <div class="intro-sub">Olympiade Éducative · Guinée</div>
+    <div class="intro-sub" style="font-size:0.9rem;letter-spacing:4px;">
+      Olympiade Éducative · République de Guinée 🇬🇳 · BHDS 2026
+    </div>
     <div class="intro-badges">
       <span class="intro-badge" style="animation-delay:0.1s">📐 Maths</span>
       <span class="intro-badge" style="animation-delay:0.2s">⚗️ Physique-Chimie</span>
@@ -1397,9 +1399,35 @@
 </div>
 
 <div id="screen-landing" class="screen">
-  <div class="arena-header">
-    <div class="arena-logo">🧠 OLYMPIADE DES CERVEAUX</div>
-    <div class="arena-sub">Compétition Éducative · République de Guinée 🇬🇳</div>
+  <div class="arena-header" style="position:relative;overflow:hidden;">
+    <!-- Bande lumineuse animée derrière le header -->
+    <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;">
+      <div style="position:absolute;top:-30px;left:-10%;width:120%;height:3px;
+        background:linear-gradient(90deg,transparent,var(--gold),var(--accent),var(--gold),transparent);
+        animation:shine-line 3s linear infinite;"></div>
+    </div>
+    <style>
+      @keyframes shine-line {
+        0%{ transform:translateX(-100%); } 100%{ transform:translateX(100%); }
+      }
+    </style>
+    <div style="position:relative;z-index:1;">
+      <div class="arena-logo" style="font-size:clamp(1.2rem,4vw,2rem);letter-spacing:6px;">
+        🧠 OLYMPIADE DES CERVEAUX
+      </div>
+      <div class="arena-sub" style="margin-top:6px;">
+        Compétition Éducative · République de Guinée 🇬🇳 · Édition 2026
+      </div>
+    </div>
+    <!-- Bouton spectateur en haut à droite -->
+    <button class="btn btn-outline btn-sm" onclick="showScreen('screen-spectator')"
+      style="position:absolute;top:50%;right:20px;transform:translateY(-50%);
+        border-color:rgba(0,230,118,0.5);color:#00E676;font-size:0.72rem;z-index:2;
+        display:flex;align-items:center;gap:6px;">
+      <span style="width:7px;height:7px;border-radius:50%;background:#00E676;
+        animation:blink-dot 1.4s ease-in-out infinite;display:inline-block;"></span>
+      Direct
+    </button>
   </div>
   <div class="landing-content" style="padding-top:32px; padding-bottom:40px;">
 
@@ -1561,8 +1589,15 @@
       </div>
     </div>
 
-    <div class="landing-btns">
-      <button class="btn btn-gold" onclick="showAdminLogin()" style="font-size:1rem;padding:14px 32px;">🔐 Accès Administrateur</button>
+    <div class="landing-btns" style="gap:12px;">
+      <button class="landing-admin-btn" onclick="showAdminLogin()">
+        🔐 Accès Administrateur
+      </button>
+      <button class="btn btn-outline" onclick="showScreen('screen-spectator')"
+        style="border-color:rgba(0,230,118,0.5);color:#00E676;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#00E676;animation:blink-dot 1.4s ease-in-out infinite;display:inline-block;"></span>
+        Voir les matchs en direct
+      </button>
     </div>
 
     <p class="landing-footer-txt">
@@ -1590,12 +1625,36 @@
 
 <!-- ══════════ ADMIN PANEL ══════════ -->
 <div id="screen-admin" class="screen">
-  <div class="arena-header" style="display:flex;justify-content:space-between;align-items:center;padding:20px 28px;">
-    <div>
-      <div class="arena-logo">🧠 OLYMPIADE DES CERVEAUX – ADMIN</div>
-      <div class="arena-sub">Collection BHDS / Boubacar Diallo Édition 2026</div>
+  <div class="arena-header" style="display:flex;justify-content:space-between;align-items:center;padding:14px 28px;
+    background:linear-gradient(135deg,rgba(5,10,20,0.98),rgba(13,27,46,0.98));
+    border-bottom:2px solid rgba(255,215,0,0.2);position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,0.5);">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="width:38px;height:38px;border-radius:10px;flex-shrink:0;
+        background:linear-gradient(135deg,var(--gold),var(--gold2));
+        display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+        box-shadow:0 0 16px rgba(255,215,0,0.4);">🧠</div>
+      <div>
+        <div class="arena-logo" style="font-size:clamp(0.8rem,2.5vw,1rem);letter-spacing:3px;">
+          OLYMPIADE — PANNEAU ADMIN
+        </div>
+        <div class="arena-sub" style="font-size:0.65rem;letter-spacing:1.5px;margin-top:2px;">
+          Collection BHDS · Boubacar Diallo · Édition 2026
+        </div>
+      </div>
     </div>
-    <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn-admin" title="Mode clair / sombre">🌙</button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="display:inline-flex;align-items:center;gap:6px;
+        background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.3);
+        border-radius:20px;padding:4px 12px;font-size:0.68rem;color:#00E676;font-weight:700;letter-spacing:1px;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#00E676;
+          animation:auto-pulse 1.4s ease-in-out infinite;display:inline-block;"></span>
+        ADMIN ACTIF
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn-admin" title="Mode clair / sombre">🌙</button>
+      <button class="btn btn-sm" onclick="adminLogout()"
+        style="background:rgba(255,23,68,0.15);border:1px solid rgba(255,23,68,0.4);color:#FF8A80;
+          border-radius:8px;padding:6px 12px;font-size:0.72rem;cursor:pointer;">🚪</button>
+    </div>
   </div>
   <div class="admin-layout">
     <div class="admin-sidebar">
@@ -1649,10 +1708,36 @@
       <!-- QUESTIONS -->
       <div id="s-questions" class="admin-section">
         <div class="section-title">❓ GESTION DES QUESTIONS</div>
-        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+
+        <!-- Barre d'actions + lien vers aperçu joueur -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
           <button class="btn btn-gold" onclick="openAddQuestion()">➕ Nouvelle question</button>
           <button class="btn btn-accent btn-sm" onclick="loadSampleQuestions()">📚 Charger questions guinéennes</button>
+          <!-- LIEN VERS VUE JOUEUR -->
+          <button class="btn btn-sm" onclick="previewQuizAsPlayer()"
+            style="background:linear-gradient(135deg,rgba(124,77,255,0.2),rgba(0,229,255,0.15));
+              border:1.5px solid rgba(124,77,255,0.5);color:#CE93D8;
+              display:flex;align-items:center;gap:8px;padding:7px 16px;border-radius:10px;cursor:pointer;">
+            👁 Aperçu vue joueur
+          </button>
         </div>
+
+        <!-- Info lien vers joueur -->
+        <div id="admin-q-player-info" style="display:none;margin-bottom:14px;padding:12px 16px;
+          background:linear-gradient(135deg,rgba(124,77,255,0.1),rgba(0,229,255,0.08));
+          border:1px solid rgba(124,77,255,0.3);border-radius:12px;
+          font-size:0.82rem;color:#CE93D8;line-height:1.6;">
+          <strong style="color:var(--accent);">📌 Lien Admin ↔ Joueur :</strong>
+          Les questions ajoutées ici sont automatiquement utilisées dans les quiz joueurs.
+          Chaque niveau joueur pioche 60 questions au hasard parmi celles du niveau correspondant.
+          <span id="admin-q-count-msg" style="color:var(--gold);"></span>
+          <button onclick="document.getElementById('admin-q-player-info').style.display='none'"
+            style="float:right;background:none;border:none;color:var(--silver);cursor:pointer;font-size:1rem;">✕</button>
+        </div>
+
+        <!-- Stats par niveau -->
+        <div id="q-stats-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
+
         <div class="tabs">
           <div class="tab active" onclick="filterQuestions('all',this)">Toutes</div>
           <div class="tab" onclick="filterQuestions('1',this)">Niveau 1</div>
@@ -2262,33 +2347,60 @@
 <!-- ══════════ PLAYER INTERFACE ══════════ -->
 <div id="screen-player" class="screen">
 
-  <!-- Header sticky -->
-  <div class="player-header">
+  <!-- Header sticky amélioré -->
+  <div class="player-header" style="position:sticky;top:0;z-index:50;
+    background:linear-gradient(135deg,rgba(5,10,20,0.97),rgba(13,27,46,0.97));
+    border-bottom:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.5);
+    backdrop-filter:blur(16px);">
+    <!-- Ligne décorative top -->
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,var(--accent2),var(--gold),var(--accent));"></div>
     <div style="display:flex;align-items:center;gap:12px;">
-      <div id="ph-avatar" style="
-        width:40px;height:40px;border-radius:12px;flex-shrink:0;
-        background:linear-gradient(135deg,var(--accent2),var(--accent));
-        display:flex;align-items:center;justify-content:center;
-        font-weight:900;font-size:1.1rem;color:#fff;
-        box-shadow:0 0 14px rgba(0,229,255,0.3);
-      ">?</div>
+      <!-- Avatar avec ring lumineux -->
+      <div style="position:relative;flex-shrink:0;">
+        <div style="position:absolute;inset:-2px;border-radius:14px;
+          background:linear-gradient(135deg,var(--accent),var(--gold));
+          animation:pulse-trophy 2.5s ease-in-out infinite;opacity:0.6;"></div>
+        <div id="ph-avatar" style="
+          position:relative;width:40px;height:40px;border-radius:12px;
+          background:linear-gradient(135deg,var(--accent2),var(--accent));
+          display:flex;align-items:center;justify-content:center;
+          font-weight:900;font-size:1.1rem;color:#fff;
+          overflow:hidden;
+        ">?</div>
+      </div>
       <div>
         <div class="player-hname" id="ph-name">—</div>
-        <div class="player-hclass" id="ph-class">—</div>
+        <div class="player-hclass" id="ph-class" style="display:flex;align-items:center;gap:6px;">
+          <span style="width:5px;height:5px;border-radius:50%;background:var(--green);
+            animation:blink-dot 2s ease-in-out infinite;display:inline-block;"></span>
+          <span id="ph-class-txt">—</span>
+        </div>
       </div>
     </div>
-    <div class="player-hscore">
-      <div class="score-num" id="ph-score">0</div>
-      <div class="score-label">points</div>
+    <!-- Score avec effet glow -->
+    <div class="player-hscore" style="text-align:center;">
+      <div class="score-num" id="ph-score" style="
+        text-shadow:0 0 20px rgba(255,215,0,0.7);
+        transition:transform 0.3s;
+      ">0</div>
+      <div class="score-label" style="font-size:0.6rem;letter-spacing:2px;">POINTS</div>
     </div>
     <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn-player" title="Mode clair / sombre">🌙</button>
   </div>
 
   <!-- Niveaux -->
   <div id="pv-levels">
-    <div class="levels-section-header">
-      <div class="levels-section-title">⚡ Choisir un niveau</div>
-      <div class="levels-section-sub">Complète les niveaux dans l'ordre pour débloquer les suivants</div>
+    <div class="levels-section-header" style="position:relative;overflow:hidden;">
+      <!-- Ligne déco -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:1px;
+        background:linear-gradient(90deg,transparent,var(--accent),var(--gold),transparent);opacity:0.5;"></div>
+      <div class="levels-section-title" style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.3rem;">⚡</span> Choisir un niveau
+      </div>
+      <div class="levels-section-sub">
+        Complète les niveaux dans l'ordre pour débloquer les suivants · 60 questions par niveau
+      </div>
 
       <!-- Barre de progression globale -->
       <div class="player-global-progress" id="pgp-wrap">
@@ -3832,7 +3944,7 @@ function _doLogin(code){
   }
   currentPlayer = p;
   document.getElementById('ph-name').textContent = p.name;
-  document.getElementById('ph-class').textContent = (p.classe||'') + (p.school?' • '+p.school:'');
+  const phClassEl=document.getElementById('ph-class-txt')||document.getElementById('ph-class'); if(phClassEl){ phClassEl.textContent=(p.classe||'')+(p.school?' • '+p.school:''); }
   document.getElementById('ph-score').textContent = p.score || 0;
   // Avatar initiale
   const av = document.getElementById('ph-avatar');
@@ -4588,6 +4700,33 @@ function renderQuestions(){
   if(_qFilter!=='all') qs=qs.filter(q=>q.level==_qFilter);
   const letters=['A','B','C','D'];
   const list=document.getElementById('questions-list');
+
+  // Stats par niveau
+  const statsBar=document.getElementById('q-stats-bar');
+  if(statsBar){
+    const lvLabels={'1':'Niv.1','2':'Niv.2','3':'Niv.3','4':'Niv.4','5':'Boss'};
+    const lvColors={'1':'#00E676','2':'#00B0FF','3':'#FFD740','4':'#FF6D00','5':'#FF1744'};
+    const lvCounts={};
+    d.questions.forEach(q=>{ const k=String(q.level); lvCounts[k]=(lvCounts[k]||0)+1; });
+    const total=d.questions.length;
+    statsBar.innerHTML=Object.entries(lvLabels).map(([k,lbl])=>{
+      const cnt=lvCounts[k]||0;
+      const ok=cnt>=60;
+      const col=lvColors[k]||'#aaa';
+      return `<div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);
+        border:1px solid ${ok?'rgba(0,230,118,0.3)':'rgba(255,255,255,0.08)'};
+        border-radius:8px;padding:5px 12px;font-size:0.75rem;">
+        <span style="color:${col};font-weight:700;">${lbl}</span>
+        <span style="color:${ok?'#00E676':'#FF8A80'};font-weight:700;">${cnt}</span>
+        <span style="color:var(--silver);font-size:0.65rem;">${ok?'✅':'(min 60)'}</span>
+      </div>`;
+    }).join('')+`<div style="display:flex;align-items:center;gap:6px;background:rgba(255,215,0,0.07);
+      border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:5px 12px;font-size:0.75rem;">
+      <span style="color:var(--gold);font-weight:700;">Total</span>
+      <span style="color:var(--gold);font-weight:900;">${total}</span>
+    </div>`;
+  }
+
   if(!qs.length){ list.innerHTML='<div style="color:var(--silver);text-align:center;padding:40px;">Aucune question. Ajoutez-en ou chargez les questions du programme guinéen.</div>'; return; }
   list.innerHTML=qs.map((q,i)=>`
     <div class="question-card">
@@ -4602,11 +4741,84 @@ function renderQuestions(){
       <div class="q-options">
         ${q.options.map((o,j)=>`<div class="q-option ${j===q.correct?'correct':''}">${letters[j]}. ${o}</div>`).join('')}
       </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+        <button class="btn btn-sm" onclick="previewSingleQuestion('${q.id}')"
+          style="background:rgba(124,77,255,0.12);border:1px solid rgba(124,77,255,0.35);
+            color:#CE93D8;border-radius:8px;padding:5px 12px;font-size:0.72rem;cursor:pointer;">
+          👁 Vue joueur
+        </button>
         <button class="btn btn-danger btn-sm" onclick="deleteQuestion(${q.id})">🗑 Supprimer</button>
       </div>
     </div>
   `).join('');
+}
+
+// Prévisualiser toutes les questions (info admin↔joueur)
+function previewQuizAsPlayer(){
+  const info=document.getElementById('admin-q-player-info');
+  const d=getData();
+  const counts={};
+  d.questions.forEach(q=>{ const k=String(q.level); counts[k]=(counts[k]||0)+1; });
+  const msg=document.getElementById('admin-q-count-msg');
+  if(msg){
+    const parts=Object.entries(counts).map(([k,c])=>`N${k}: ${c} questions`).join(' · ');
+    msg.textContent=' — '+parts;
+  }
+  if(info) info.style.display='block';
+  toast('💡 Chaque niveau joueur pioche 60 questions aléatoires parmi celles du niveau correspondant','info');
+}
+
+// Aperçu d'une question en vue joueur
+function previewSingleQuestion(id){
+  const d=getData();
+  const q=d.questions.find(q=>String(q.id)===String(id));
+  if(!q) return;
+  const letters=['A','B','C','D'];
+  const existing=document.getElementById('modal-preview-question');
+  if(existing) existing.remove();
+  const m=document.createElement('div');
+  m.id='modal-preview-question';
+  m.className='modal-overlay open';
+  m.style.zIndex='2000';
+  m.innerHTML=`
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-title" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span>👁 Aperçu — Vue Joueur</span>
+        <span style="font-size:0.68rem;color:var(--silver);font-family:'Exo 2',sans-serif;font-weight:400;
+          letter-spacing:1px;background:rgba(124,77,255,0.15);border:1px solid rgba(124,77,255,0.3);
+          border-radius:20px;padding:2px 10px;">Lien Admin ↔ Joueur</span>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:14px;padding:20px;margin-bottom:14px;border:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:0.75rem;flex-wrap:wrap;gap:6px;">
+          <span style="background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.3);
+            color:var(--accent);border-radius:20px;padding:3px 12px;font-weight:700;">${q.matiere||'—'}</span>
+          <span style="color:var(--silver);">N${q.level} · +${LEVELS.find(l=>l.id==q.level)?.pts||10} pts</span>
+        </div>
+        <div style="font-size:1rem;font-weight:700;color:#E0E8FF;line-height:1.55;margin-bottom:16px;">${q.text}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          ${q.options.map((o,j)=>`
+          <div style="padding:10px 14px;border-radius:10px;font-size:0.86rem;font-weight:600;
+            border:2px solid ${j===q.correct?'var(--green)':'rgba(255,255,255,0.1)'};
+            background:${j===q.correct?'rgba(0,230,118,0.12)':'rgba(255,255,255,0.04)'};
+            color:${j===q.correct?'var(--green)':'#C8D8F0'};
+            display:flex;align-items:center;gap:8px;">
+            <span style="font-family:'Orbitron',sans-serif;font-size:0.7rem;font-weight:900;
+              background:rgba(255,255,255,0.1);border-radius:6px;width:22px;height:22px;
+              display:flex;align-items:center;justify-content:center;flex-shrink:0;
+              color:${j===q.correct?'var(--green)':'var(--accent)'}">${letters[j]}</span>
+            ${o}${j===q.correct?' <span style="margin-left:auto;font-size:0.8rem;">✅</span>':''}</div>`).join('')}
+        </div>
+      </div>
+      <p style="font-size:0.75rem;color:var(--silver);text-align:center;margin-bottom:14px;line-height:1.5;">
+        ℹ️ La bonne réponse est surlignée en vert ci-dessus.<br>
+        <strong style="color:var(--accent);">Les joueurs ne voient ce surlignage qu'après avoir répondu.</strong>
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="document.getElementById('modal-preview-question').remove()">Fermer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click',e=>{ if(e.target===m) m.remove(); });
 }
 
 function deleteQuestion(id){
