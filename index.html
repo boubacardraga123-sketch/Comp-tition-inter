@@ -1649,7 +1649,6 @@
         </div>
         <div class="tabs">
           <div class="tab active" onclick="filterQuestions('all',this)">Toutes</div>
-          <div class="tab" onclick="filterQuestions('0',this)">🎯 Qualif</div>
           <div class="tab" onclick="filterQuestions('1',this)">Niveau 1</div>
           <div class="tab" onclick="filterQuestions('2',this)">Niveau 2</div>
           <div class="tab" onclick="filterQuestions('3',this)">Niveau 3</div>
@@ -2593,7 +2592,6 @@
         <div>
           <label>Niveau (1-5)</label>
           <select id="aq-level">
-            <option value="0">🎯 Qualification – Phase qualificative</option>
             <option value="1">🟢 Niveau 1 – Facile</option>
             <option value="2">🔵 Niveau 2 – Moyen</option>
             <option value="3">🟡 Niveau 3 – Difficile</option>
@@ -3437,7 +3435,8 @@ const DEFAULT_DATA = {
     { id:'q5em08', level:"5", matiere:'Physique-Chimie', text:'L\'effet Joule dans un conducteur de résistance R parcouru par un courant I pendant un temps t produit une énergie :', options:['Q = RI²','Q = RI','Q = RI²t','Q = R²It'], correct:2 }
   ],
   settings: { compname: 'Olympiade des Cerveaux Guinée 2026', adminPass: 'bhds2026', timer: 30, baseUrl: '', colorTheme: '', bgTheme: '' },
-  activity: []
+  activity: [],
+  levelQuestions: {}
 };
 
 let _cache = null;
@@ -3539,6 +3538,14 @@ ARENA_REF.on('value',
     if (!_cache.players)  _cache.players  = [];
     if (!_cache.questions) _cache.questions = [];
     if (!_cache.activity) _cache.activity  = [];
+    if (!_cache.levelQuestions) _cache.levelQuestions = {};
+    // Normaliser chaque tableau de questions par niveau (Firebase peut les convertir en objet)
+    if (_cache.levelQuestions){
+      Object.keys(_cache.levelQuestions).forEach(k=>{
+        if(_cache.levelQuestions[k] && !Array.isArray(_cache.levelQuestions[k]))
+          _cache.levelQuestions[k] = Object.values(_cache.levelQuestions[k]);
+      });
+    }
 
     _fbReady = true;
     setFbStatus('connected', '🔥 Firebase sync');
@@ -3631,12 +3638,11 @@ function saveData(d) {
 
 // LEVELS CONFIG
 const LEVELS = [
-  { id:"0", name:'Qualification', icon:'🎯', label:'Phase Qualif', pts:5,   color:'#B0BEC5' },
-  { id:"1", name:'Niveau 1', icon:'🟢', label:'Starter',      pts:10,  color:'#00E676' },
-  { id:"2", name:'Niveau 2', icon:'🔵', label:'Challenger',   pts:20,  color:'#00B0FF' },
-  { id:"3", name:'Niveau 3', icon:'🟡', label:'Expert',       pts:30,  color:'#FFD740' },
-  { id:"4", name:'Niveau 4', icon:'🟠', label:'Maître',       pts:50,  color:'#FF6D00' },
-  { id:"5", name:'Boss',     icon:'🔴', label:'Boss Final',   pts:100, color:'#FF1744' },
+  { id:"1", name:'Qualification',   icon:'🎯', label:'Phase de groupes', pts:10,  color:'#00E676' },
+  { id:"2", name:'16ème de finale', icon:'⚔️', label:'16ème de finale',  pts:20,  color:'#00B0FF' },
+  { id:"3", name:'Quart de finale', icon:'🔥', label:'Quart de finale',  pts:30,  color:'#FFD740' },
+  { id:"4", name:'Demi-finale',     icon:'⭐', label:'Demi-finale',      pts:50,  color:'#FF6D00' },
+  { id:"5", name:'Finale',          icon:'🏆', label:'Finale',           pts:100, color:'#FF1744' },
 ];
 
 // ════════════════════════════════════════
@@ -3870,17 +3876,35 @@ function renderLevels(){
   if(pgpTxt) { pgpTxt.textContent = `${completed.length} / ${LEVELS.length} niveaux complétés`; }
   if(pgpPct) { pgpPct.textContent = pct+'%'; }
 
-  // Couleurs par niveau (0 à 5)
-  const lvColors = ['#B0BEC5','#00E676','#00B0FF','#FFD740','#FF6D00','#FF1744'];
+  // Couleurs par niveau (1 à 5)
+  const lvColors = ['#00E676','#00B0FF','#FFD740','#FF6D00','#FF1744'];
 
   grid.innerHTML = LEVELS.map((lv,idx)=>{
     const qs = d.questions.filter(q=>String(q.level)===String(lv.id));
     const done = completed.map(String).includes(String(lv.id));
-    // Niveau 0 toujours déverrouillé ; les suivants nécessitent le précédent
-    const locked = Number(lv.id) > 0 && !completed.map(String).includes(String(Number(lv.id)-1));
+    // Niveau 1 toujours déverrouillé ; les suivants nécessitent d'être qualifié puis le niveau précédent
+    const allSorted = d.players.slice().sort((a,b)=>(b.score||0)-(a.score||0));
+    const top16codes = new Set(allSorted.slice(0,16).map(p=>p.code));
+    const top8codes  = new Set(allSorted.slice(0,8).map(p=>p.code));
+    const top4codes  = new Set(allSorted.slice(0,4).map(p=>p.code));
+    const top2codes  = new Set(allSorted.slice(0,2).map(p=>p.code));
+    const inTop16 = top16codes.has(currentPlayer.code);
+    const inTop8  = top8codes.has(currentPlayer.code);
+    const inTop4  = top4codes.has(currentPlayer.code);
+    const inTop2  = top2codes.has(currentPlayer.code);
+    const qualifOk = Number(lv.id) === 2 ? inTop16 : Number(lv.id) === 3 ? inTop8 : Number(lv.id) === 4 ? inTop4 : (Number(lv.id) >= 5 ? inTop2 : true);
+    const locked = Number(lv.id) > 1 && (!qualifOk || !completed.map(String).includes(String(Number(lv.id)-1)));
     const col = lvColors[idx];
+    const notQualifMsg = Number(lv.id) === 2
+      ? `toast('🔒 Tu dois être dans le top 16 pour accéder au niveau 2.','info')`
+      : Number(lv.id) === 3
+        ? `toast('🔒 Tu dois être dans le top 8 pour accéder au niveau 3.','info')`
+        : Number(lv.id) === 4
+          ? `toast('🔒 Tu dois être dans le top 4 pour accéder au niveau 4.','info')`
+          : `toast('🔒 Tu dois être dans le top 2 pour accéder au niveau 5 (Boss Final).','info')`;
+    const notPrevMsg = `toast('🔒 Complète le niveau précédent d\\'abord','info')`;
     const onclick = locked
-      ? `toast('🔒 Complète le niveau précédent d\\'abord','info')`
+      ? (!qualifOk ? notQualifMsg : notPrevMsg)
       : done
         ? `toast('✅ Niveau déjà complété ! Tu ne peux plus y revenir. Continue vers le suivant.','info')`
         : `startLevel(${lv.id})`;
@@ -3910,15 +3934,39 @@ function startLevel(levelId){
   if(qs.length===0){ toast('Aucune question pour ce niveau. L\'admin doit en ajouter.','info'); return; }
   currentLevelId = levelId;
   const lv = LEVELS.find(l=>String(l.id)===String(levelId));
-  // Mélange aléatoire puis sélection des 60 questions du niveau
-  quizQuestions = shuffle([...qs]).slice(0,60);
-  quizIndex = 0; quizScore = 0;
 
-  document.getElementById('pv-levels').style.display='none';
-  document.getElementById('pv-quiz').style.display='block';
-  document.getElementById('pv-result').style.display='none';
-  document.getElementById('ql-level').textContent = `${lv.icon} ${lv.name}`;
-  loadQuestion();
+  // Questions partagées : tous les joueurs voient les mêmes 60 questions par niveau
+  if(!d.levelQuestions) d.levelQuestions = {};
+  const key = String(levelId);
+
+  function _launch(){
+    quizQuestions = d.levelQuestions[key];
+    quizIndex = 0; quizScore = 0;
+    document.getElementById('pv-levels').style.display='none';
+    document.getElementById('pv-quiz').style.display='block';
+    document.getElementById('pv-result').style.display='none';
+    document.getElementById('ql-level').textContent = `${lv.icon} ${lv.name}`;
+    loadQuestion();
+  }
+
+  if(!d.levelQuestions[key] || d.levelQuestions[key].length === 0){
+    // Premier joueur : tirer les 60 questions, sauvegarder sur Firebase, puis lancer
+    d.levelQuestions[key] = shuffle([...qs]).slice(0,60);
+    // Sauvegarder uniquement levelQuestions sur Firebase pour éviter les conflits
+    if(ARENA_REF){
+      ARENA_REF.child('levelQuestions').child(key).set(d.levelQuestions[key])
+        .then(()=>{ _cache.levelQuestions = _cache.levelQuestions||{}; _cache.levelQuestions[key]=d.levelQuestions[key]; _launch(); })
+        .catch(()=>{ _launch(); }); // en cas d'erreur Firebase, on lance quand même
+    } else {
+      // Mode hors-ligne : sauvegarder en local et lancer
+      if(_cache) { if(!_cache.levelQuestions) _cache.levelQuestions={}; _cache.levelQuestions[key]=d.levelQuestions[key]; }
+      try{ const loc=JSON.parse(localStorage.getItem('bhds_arena_fallback')||'{}'); if(!loc.levelQuestions) loc.levelQuestions={}; loc.levelQuestions[key]=d.levelQuestions[key]; localStorage.setItem('bhds_arena_fallback',JSON.stringify(loc)); }catch(e){}
+      _launch();
+    }
+  } else {
+    // Questions déjà fixées : tous les joueurs reçoivent les mêmes
+    _launch();
+  }
 }
 
 function loadQuestion(){
@@ -5314,7 +5362,7 @@ function genCompetition(){
   const info = document.getElementById('comp-info');
   info.innerHTML = `<span style="color:var(--accent);">👥 ${total} joueur${total>1?'s':''} inscrits</span> · <span style="color:var(--gold);">${top16.length} qualifiés pour les 16es</span> · <span style="color:var(--silver);font-size:0.8rem;">Qualifications basées sur les scores actuels</span>
     <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:0.75rem;">
-      <span style="background:rgba(176,190,197,0.12);border:1px solid rgba(176,190,197,0.3);border-radius:8px;padding:3px 10px;color:#B0BEC5;">🎯 Qualifs → <strong>Niveau Qualif</strong></span>
+      <span style="background:rgba(0,230,118,0.12);border:1px solid rgba(0,230,118,0.3);border-radius:8px;padding:3px 10px;color:#00E676;">🎯 Qualifs → <strong>Niveau 1</strong></span>
       <span style="background:rgba(0,230,118,0.12);border:1px solid rgba(0,230,118,0.3);border-radius:8px;padding:3px 10px;color:#00E676;">⚔️ 16es → <strong>Niveau 1</strong></span>
       <span style="background:rgba(0,176,255,0.12);border:1px solid rgba(0,176,255,0.3);border-radius:8px;padding:3px 10px;color:#00B0FF;">🥊 8es → <strong>Niveau 2</strong></span>
       <span style="background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:3px 10px;color:#FFD740;">🔥 Quarts → <strong>Niveau 3</strong></span>
@@ -5354,7 +5402,7 @@ function genCompetition(){
   qualifDiv.innerHTML = `
     <div class="comp-phase-title">🎯 Qualifications
       <span style="font-size:0.75rem;color:var(--silver);font-family:sans-serif;font-weight:400;">${total} joueur${total>1?'s':''} classés · ${top16.length} retenu${top16.length>1?'s':''}</span>
-      <span style="font-size:0.72rem;background:rgba(176,190,197,0.2);color:#B0BEC5;border:1px solid rgba(176,190,197,0.35);border-radius:20px;padding:2px 10px;font-family:sans-serif;font-weight:700;margin-left:6px;">🎯 Niveau Qualif</span>
+      <span style="font-size:0.72rem;background:rgba(0,230,118,0.2);color:#00E676;border:1px solid rgba(0,230,118,0.35);border-radius:20px;padding:2px 10px;font-family:sans-serif;font-weight:700;margin-left:6px;">🟢 Niveau 1</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:2px;">${qualifRows}</div>
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
@@ -5370,7 +5418,7 @@ function genCompetition(){
                 <div class="comp-player qualifie"><span>${top16[i].name} <span style="font-size:0.75rem;color:var(--silver);">${top16[i].classe||''}</span></span><span class="comp-player-score">${top16[i].score||0} pts</span></div>
                 <div style="text-align:center;color:var(--silver);font-size:0.75rem;padding:2px 0;">VS</div>
                 <div class="comp-player qualifie"><span>${top16[i+1].name} <span style="font-size:0.75rem;color:var(--silver);">${top16[i+1].classe||''}</span></span><span class="comp-player-score">${top16[i+1].score||0} pts</span></div>
-                <button class="btn btn-green btn-sm" style="margin-top:8px;width:100%;font-size:0.78rem;letter-spacing:1px;" onclick="openLiveMatch('${top16[i].code}','${top16[i+1].code}','Qualification',0)">⚡ Lancer le match en direct</button>
+                <button class="btn btn-green btn-sm" style="margin-top:8px;width:100%;font-size:0.78rem;letter-spacing:1px;" onclick="openLiveMatch('${top16[i].code}','${top16[i+1].code}','Qualification',1)">⚡ Lancer le match en direct</button>
               </div>`);
           }
         }
