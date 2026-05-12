@@ -1717,6 +1717,14 @@
           </button>
           <input type="file" id="import-json-input" accept=".json,application/json" style="display:none"
             onchange="importQuestionsFromJSON(this)">
+          <!-- RESET TIRAGE JOUEURS -->
+          <button class="btn btn-sm" onclick="resetLevelQuestions()"
+            style="background:linear-gradient(135deg,rgba(255,23,68,0.18),rgba(255,109,0,0.15));
+              border:1.5px solid rgba(255,23,68,0.45);color:#FF8A80;
+              display:flex;align-items:center;gap:8px;padding:7px 16px;border-radius:10px;cursor:pointer;"
+            title="A faire apres chaque import JSON pour que les joueurs voient les nouvelles questions">
+            &#x1F504; Reset tirage joueurs
+          </button>
           <!-- LIEN VERS VUE JOUEUR -->
           <button class="btn btn-sm" onclick="previewQuizAsPlayer()"
             style="background:linear-gradient(135deg,rgba(124,77,255,0.2),rgba(0,229,255,0.15));
@@ -7069,10 +7077,17 @@ function importQuestionsFromJSON(input){
 
       if(added === 0){ toast('Aucune question valide importée ('+skipped+' ignorée'+(skipped>1?'s':'')+')','error'); }
       else {
+        // ── RESET levelQuestions pour que les nouvelles questions soient visibles côté joueur ──
+        // Sans ce reset, Firebase garde l'ancien tirage figé et ignore les nouvelles questions.
+        d.levelQuestions = {};
+        if(ARENA_REF){
+          ARENA_REF.child('levelQuestions').remove().catch(()=>{});
+        }
         saveData(d);
         renderQuestions();
         toast('✅ '+added+' question'+(added>1?'s':'')+' importée'+(added>1?'s':'')+
-          (skipped?' ('+skipped+' ignorée'+(skipped>1?'s':'')+')'  :''), 'success');
+          (skipped?' ('+skipped+' ignorée'+(skipped>1?'s':'')+')'  :'')+
+          ' — tirage joueurs réinitialisé', 'success');
       }
     } catch(err){
       toast('Fichier JSON invalide : '+err.message,'error');
@@ -7081,6 +7096,28 @@ function importQuestionsFromJSON(input){
     input.value = '';
   };
   reader.readAsText(file, 'utf-8');
+}
+
+function resetLevelQuestions(){
+  if(!confirm('⚠️ Réinitialiser le tirage de questions pour tous les niveaux ?\n\nLes joueurs verront les nouvelles questions importées dès leur prochain démarrage de niveau.\n(Les scores et progressions ne sont pas affectés)')){
+    return;
+  }
+  const d = getData();
+  d.levelQuestions = {};
+  _cache.levelQuestions = {};
+  if(ARENA_REF){
+    ARENA_REF.child('levelQuestions').remove()
+      .then(()=>{ toast('✅ Tirage réinitialisé — les joueurs verront les nouvelles questions', 'success'); })
+      .catch(()=>{ toast('⚠️ Erreur Firebase lors du reset', 'error'); });
+  } else {
+    try{
+      const loc = JSON.parse(localStorage.getItem('bhds_arena_fallback')||'{}');
+      loc.levelQuestions = {};
+      localStorage.setItem('bhds_arena_fallback', JSON.stringify(loc));
+    }catch(e){}
+    toast('✅ Tirage réinitialisé (mode local)', 'success');
+  }
+  saveData(d);
 }
 
 function logActivity(msg){
