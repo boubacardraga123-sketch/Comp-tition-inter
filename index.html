@@ -1593,11 +1593,7 @@
       <button class="landing-admin-btn" onclick="showAdminLogin()">
         🔐 Accès Administrateur
       </button>
-      <button class="btn btn-outline" onclick="showScreen('screen-spectator')"
-        style="border-color:rgba(0,230,118,0.5);color:#00E676;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;">
-        <span style="width:8px;height:8px;border-radius:50%;background:#00E676;animation:blink-dot 1.4s ease-in-out infinite;display:inline-block;"></span>
-        Voir les matchs en direct
-      </button>
+
     </div>
 
     <p class="landing-footer-txt">
@@ -1713,6 +1709,14 @@
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
           <button class="btn btn-gold" onclick="openAddQuestion()">➕ Nouvelle question</button>
           <button class="btn btn-accent btn-sm" onclick="loadSampleQuestions()">📚 Charger questions guinéennes</button>
+          <button class="btn btn-sm" onclick="document.getElementById('import-json-input').click()"
+            style="background:linear-gradient(135deg,rgba(0,230,118,0.18),rgba(0,188,212,0.15));
+              border:1.5px solid rgba(0,230,118,0.45);color:#00E676;
+              display:flex;align-items:center;gap:8px;padding:7px 16px;border-radius:10px;cursor:pointer;">
+            📂 Importer JSON
+          </button>
+          <input type="file" id="import-json-input" accept=".json,application/json" style="display:none"
+            onchange="importQuestionsFromJSON(this)">
           <!-- LIEN VERS VUE JOUEUR -->
           <button class="btn btn-sm" onclick="previewQuizAsPlayer()"
             style="background:linear-gradient(135deg,rgba(124,77,255,0.2),rgba(0,229,255,0.15));
@@ -4076,7 +4080,7 @@ function startLevel(levelId){
 
   if(!d.levelQuestions[key] || !Array.isArray(d.levelQuestions[key]) || d.levelQuestions[key].length === 0){
     // Premier joueur : tirer exactement 60 questions (ou toutes si moins de 60)
-    const _picked = shuffle([...qs]).slice(0, Math.min(qs.length, 60));
+    const _picked = shuffle([...qs]);
     // Mettre à jour _cache IMMÉDIATEMENT avant _launch() pour éviter un tableau vide
     if(!_cache.levelQuestions) _cache.levelQuestions = {};
     _cache.levelQuestions[key] = _picked;
@@ -7023,6 +7027,61 @@ function openAddQuestionModal() {
 }
 
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+// ════════════════════════════════════════
+// IMPORT QUESTIONS DEPUIS FICHIER JSON
+// ════════════════════════════════════════
+function importQuestionsFromJSON(input){
+  const file = input.files[0];
+  if(!file){ return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      let raw = JSON.parse(e.target.result);
+      // Accepte un tableau direct ou un objet { questions: [...] }
+      const arr = Array.isArray(raw) ? raw : (Array.isArray(raw.questions) ? raw.questions : null);
+      if(!arr){ toast('Format JSON invalide : tableau attendu','error'); return; }
+
+      let added=0, skipped=0;
+      const d = getData();
+      const now = Date.now();
+
+      arr.forEach(function(q, i){
+        // Champs obligatoires
+        if(!q.text || !Array.isArray(q.options) || q.options.length<2){
+          skipped++; return;
+        }
+        const correct = (typeof q.correct === 'number') ? q.correct : parseInt(q.correct);
+        if(isNaN(correct) || correct<0 || correct>=q.options.length){
+          skipped++; return;
+        }
+        d.questions.push({
+          id: now + i,
+          text: String(q.text).trim(),
+          options: q.options.map(function(o){ return String(o).trim(); }),
+          correct: correct,
+          level: q.level !== undefined ? String(q.level) : '1',
+          matiere: q.matiere ? String(q.matiere).trim() : 'Général',
+          createdAt: new Date().toISOString()
+        });
+        added++;
+      });
+
+      if(added === 0){ toast('Aucune question valide importée ('+skipped+' ignorée'+(skipped>1?'s':'')+')','error'); }
+      else {
+        saveData(d);
+        renderQuestions();
+        toast('✅ '+added+' question'+(added>1?'s':'')+' importée'+(added>1?'s':'')+
+          (skipped?' ('+skipped+' ignorée'+(skipped>1?'s':'')+')'  :''), 'success');
+      }
+    } catch(err){
+      toast('Fichier JSON invalide : '+err.message,'error');
+    }
+    // Réinitialiser l'input pour permettre un nouvel import du même fichier
+    input.value = '';
+  };
+  reader.readAsText(file, 'utf-8');
+}
 
 function logActivity(msg){
   const d=getData();
