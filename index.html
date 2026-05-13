@@ -201,116 +201,220 @@
   /* ════════════════════════════════════
      ÉCRAN INTRO / SPLASH
   ════════════════════════════════════ */
+  /* ════════════════════════════════════
+     ÉCRAN INTRO – REDESIGN PREMIUM
+  ════════════════════════════════════ */
   #screen-intro {
     justify-content:center; align-items:center;
-    background: radial-gradient(ellipse at 50% 40%, #1a2f50 0%, #0D1B2E 60%, #060e1c 100%);
+    background: #080f1e;
     overflow:hidden; position:relative;
   }
-  .intro-wrap {
-    display:flex; flex-direction:column; align-items:center;
-    gap:0; z-index:2; position:relative; width:100%; max-width:520px; padding:20px;
+
+  /* Fond animé aurora */
+  #screen-intro::after {
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 60%, rgba(124,77,255,0.22) 0%, transparent 70%),
+      radial-gradient(ellipse 70% 50% at 80% 30%, rgba(0,229,255,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 55% 85%, rgba(255,215,0,0.12) 0%, transparent 65%);
+    animation: aurora-shift 8s ease-in-out infinite alternate;
+  }
+  @keyframes aurora-shift {
+    0%  { opacity:.7; transform:scale(1)   translateY(0px); }
+    100%{ opacity:1;  transform:scale(1.06) translateY(-12px); }
   }
 
-  /* Particules flottantes */
-  .intro-particles {
-    position:absolute; inset:0; pointer-events:none; overflow:hidden;
+  /* Grille de points (ambiance techno) */
+  #screen-intro::before {
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image: radial-gradient(circle, rgba(0,229,255,0.12) 1px, transparent 1px);
+    background-size: 38px 38px;
+    animation: grid-drift 20s linear infinite;
   }
+  @keyframes grid-drift { to { background-position: 38px 38px; } }
+
+  .intro-particles { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:1; }
   .ipart {
     position:absolute; font-size:1.4rem; opacity:0;
     animation: ipart-float linear infinite;
+    filter: drop-shadow(0 0 6px rgba(255,215,0,0.4));
   }
   @keyframes ipart-float {
     0%   { transform:translateY(110vh) rotate(0deg);   opacity:0; }
-    5%   { opacity:0.7; }
-    90%  { opacity:0.5; }
+    5%   { opacity:0.75; }
+    90%  { opacity:0.45; }
     100% { transform:translateY(-10vh) rotate(360deg); opacity:0; }
   }
 
-  /* Scène SVG principale */
-  .intro-scene { width:100%; max-width:420px; margin:0 auto 10px; }
+  .intro-wrap {
+    display:flex; flex-direction:column; align-items:center;
+    gap:0; z-index:2; position:relative; width:100%; max-width:560px;
+    padding:24px 20px 28px;
+  }
 
-  /* Titre intro */
+  /* Logo principal intro */
+  .intro-logo-ring {
+    position:relative; width:110px; height:110px; margin:0 auto 18px;
+  }
+  .intro-logo-ring svg { position:absolute; inset:0; width:100%; height:100%; }
+  .intro-logo-emoji {
+    position:absolute; inset:0; display:flex; align-items:center;
+    justify-content:center; font-size:3rem;
+    filter:drop-shadow(0 0 16px rgba(255,215,0,0.7));
+    animation: logo-pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes logo-pulse {
+    0%,100%{ transform:scale(1);   filter:drop-shadow(0 0 12px rgba(255,215,0,0.6)); }
+    50%    { transform:scale(1.1); filter:drop-shadow(0 0 28px rgba(255,215,0,1));   }
+  }
+
   .intro-brand {
     font-family:'Orbitron',sans-serif; font-weight:900;
-    font-size:clamp(1.6rem,6vw,2.6rem);
-    background:linear-gradient(135deg,#FFD700,#00E5FF,#FFD700);
-    background-size:200% auto;
+    font-size:clamp(1.7rem,6vw,2.8rem);
+    background:linear-gradient(135deg,#FFD700 0%,#FFFDE7 40%,#00E5FF 70%,#FFD700 100%);
+    background-size:250% auto;
     -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    animation: shine-text 3s linear infinite;
-    letter-spacing:4px; text-align:center; line-height:1.1;
+    animation: shine-text 3.5s linear infinite;
+    letter-spacing:5px; text-align:center; line-height:1.08;
     margin-bottom:4px;
+    text-shadow:none;
   }
-  @keyframes shine-text {
-    0%{background-position:0%} 100%{background-position:200%}
-  }
-  .intro-sub {
-    font-size:0.88rem; color:#90CAF9; letter-spacing:3px;
-    text-transform:uppercase; text-align:center; margin-bottom:18px;
+  @keyframes shine-text { 0%{background-position:0%} 100%{background-position:250%} }
+
+  .intro-subtitle {
+    font-size:0.82rem; color:#90CAF9; letter-spacing:3.5px;
+    text-transform:uppercase; text-align:center; margin-bottom:20px;
+    opacity:.85;
   }
 
-  /* Badges matières */
+  /* Flag Guinée */
+  .intro-flag {
+    display:flex; border-radius:4px; overflow:hidden;
+    width:42px; height:24px; margin:0 auto 20px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.5);
+  }
+  .intro-flag-band { flex:1; }
+
+  /* Badges matières — nouveau style */
   .intro-badges {
-    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:22px;
+    display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-bottom:22px;
+    max-width:480px;
   }
   .intro-badge {
-    background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15);
-    border-radius:20px; padding:5px 14px; font-size:0.78rem; color:#CFD8DC;
-    animation: badge-pop 0.5s ease backwards;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:20px; padding:4px 13px;
+    font-size:0.74rem; color:#B0BEC5;
+    backdrop-filter:blur(6px);
+    animation: badge-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) backwards;
+    transition: all 0.2s;
   }
-  @keyframes badge-pop {
-    from{transform:scale(0.5);opacity:0;} to{transform:scale(1);opacity:1;}
+  .intro-badge:hover {
+    background:rgba(0,229,255,0.12);
+    border-color:rgba(0,229,255,0.4);
+    color:var(--accent);
+    transform:translateY(-2px);
+  }
+  @keyframes badge-pop { from{transform:scale(0.4);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+  /* Stats rapides sur l'intro */
+  .intro-stats {
+    display:flex; gap:24px; justify-content:center; margin-bottom:22px;
+  }
+  .intro-stat {
+    text-align:center;
+  }
+  .intro-stat-num {
+    font-family:'Orbitron',sans-serif; font-size:1.5rem; font-weight:900;
+    background:linear-gradient(135deg,var(--gold),var(--accent));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    line-height:1;
+  }
+  .intro-stat-lbl {
+    font-size:0.65rem; color:var(--silver); letter-spacing:1.5px;
+    text-transform:uppercase; margin-top:3px;
+  }
+  .intro-stat-sep {
+    width:1px; background:rgba(255,255,255,0.12); align-self:stretch;
   }
 
   /* Barre de chargement */
-  .intro-loader-wrap {
-    width:260px; margin:0 auto 20px;
-  }
+  .intro-loader-wrap { width:280px; margin:0 auto 20px; }
   .intro-loader-track {
-    height:5px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;
+    height:4px; background:rgba(255,255,255,0.08); border-radius:10px; overflow:hidden;
   }
   .intro-loader-fill {
     height:100%; width:0%; border-radius:10px;
-    background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent));
+    background:linear-gradient(90deg,var(--accent2),var(--accent),var(--gold));
     background-size:200% auto;
     animation: loader-progress 2.8s ease forwards, shine-text 1.5s linear infinite;
   }
   @keyframes loader-progress {
-    0%{width:0%} 40%{width:55%} 70%{width:78%} 85%{width:90%} 100%{width:100%}
+    0%{width:0%} 40%{width:55%} 70%{width:80%} 90%{width:93%} 100%{width:100%}
   }
   .intro-loader-label {
-    text-align:center; font-size:0.72rem; color:var(--silver);
-    letter-spacing:1.5px; margin-top:7px; text-transform:uppercase;
+    text-align:center; font-size:0.7rem; color:var(--silver);
+    letter-spacing:2px; margin-top:8px; text-transform:uppercase;
   }
 
-  /* Bouton Entrer */
+  /* Bouton Entrer — premium */
   .intro-enter-btn {
-    display:none; padding:14px 48px; font-size:1rem; font-weight:700;
-    font-family:'Orbitron',sans-serif; letter-spacing:2px;
-    background:linear-gradient(135deg,var(--gold),#FF8F00);
-    color:#000; border:none; border-radius:50px; cursor:pointer;
-    box-shadow:0 0 30px rgba(255,215,0,0.5);
-    animation:pulse-trophy 2s ease-in-out infinite;
-    transition:transform 0.2s;
+    display:none;
+    padding:16px 52px; font-size:1rem; font-weight:800;
+    font-family:'Orbitron',sans-serif; letter-spacing:3px;
+    background:linear-gradient(135deg,#FFD700,#FF8F00,#FFD700);
+    background-size:200% auto;
+    color:#050A14; border:none; border-radius:50px; cursor:pointer;
+    box-shadow:0 0 0 0 rgba(255,215,0,0.5), 0 8px 32px rgba(255,143,0,0.4);
+    animation:btn-pulse 2s ease-in-out infinite, shine-text 3s linear infinite;
+    transition:transform 0.2s, box-shadow 0.2s;
+    position:relative; overflow:hidden;
   }
-  .intro-enter-btn:hover { transform:scale(1.05); }
+  .intro-enter-btn::before {
+    content:''; position:absolute; top:0; left:-100%;
+    width:60%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);
+    animation:btn-shine 2.5s ease-in-out infinite;
+  }
+  @keyframes btn-shine { 0%{left:-100%} 60%,100%{left:140%} }
+  @keyframes btn-pulse {
+    0%,100%{ box-shadow:0 0 0 0 rgba(255,215,0,0.5), 0 8px 32px rgba(255,143,0,0.4); }
+    50%    { box-shadow:0 0 0 12px rgba(255,215,0,0), 0 12px 40px rgba(255,143,0,0.6); }
+  }
+  .intro-enter-btn:hover { transform:scale(1.05) translateY(-2px); }
   .intro-enter-btn.visible { display:inline-block; }
 
-  /* Scroll hint */
   .intro-scroll-hint {
-    font-size:0.7rem; color:rgba(255,255,255,0.3); letter-spacing:2px;
-    margin-top:14px; text-transform:uppercase; display:none;
+    font-size:0.68rem; color:rgba(255,255,255,0.25); letter-spacing:2.5px;
+    margin-top:14px; text-transform:uppercase; display:none; text-align:center;
   }
   .intro-scroll-hint.visible { display:block; }
 
   /* ════════════════════════════════════
-     LANDING PAGE
+     LANDING PAGE — REDESIGN PREMIUM
   ════════════════════════════════════ */
   #screen-landing {
-    justify-content:center; padding:20px;
+    justify-content:flex-start; padding:0; min-height:100vh;
+    background:#080f1e;
+    position:relative; overflow-x:hidden;
   }
+
+  /* Fond dégradé landing */
+  #screen-landing::before {
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 90% 55% at 15% 70%, rgba(124,77,255,0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 75% 45% at 85% 25%, rgba(0,229,255,0.14) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 35% at 50% 100%, rgba(255,215,0,0.09) 0%, transparent 60%);
+  }
+
   .landing-content {
-    max-width:480px; width:100%; text-align:center;
+    max-width:520px; width:100%; text-align:center;
+    padding:0 20px 56px; margin:0 auto;
+    position:relative; z-index:1;
   }
+
+  /* Trophée & podium existants — on garde, on améliore juste le titre */
   .trophy-icon {
     font-size:5rem; margin-bottom:16px;
     filter: drop-shadow(0 0 24px rgba(255,215,0,0.6));
@@ -320,18 +424,117 @@
     0%,100%{ transform:scale(1) rotate(-3deg); filter:drop-shadow(0 0 24px rgba(255,215,0,0.6)); }
     50%{ transform:scale(1.08) rotate(3deg); filter:drop-shadow(0 0 40px rgba(255,215,0,0.9)); }
   }
+
   .landing-title {
     font-family:'Orbitron',sans-serif;
-    font-size:clamp(1.8rem,7vw,3rem);
-    font-weight:900;
+    font-size:clamp(1.9rem,7vw,3.2rem);
+    font-weight:900; line-height:1.05; margin-bottom:10px;
+    background:linear-gradient(135deg,#FFD700 0%,#FFFDE7 35%,#00E5FF 65%,#FFD700 100%);
+    background-size:250% auto;
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    animation:shine-text 4s linear infinite;
+  }
+
+  .landing-desc {
+    color:#90A4AE; font-size:0.92rem; margin-bottom:28px;
+    line-height:1.7; max-width:400px; margin-left:auto; margin-right:auto;
+  }
+
+  /* Stats row */
+  .landing-stats-row {
+    display:flex; justify-content:center; align-items:center;
+    gap:0; margin-bottom:28px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px; padding:16px 8px;
+    backdrop-filter:blur(10px);
+  }
+  .landing-stat { flex:1; text-align:center; padding:0 6px; }
+  .landing-stat-num {
+    font-family:'Orbitron',sans-serif; font-size:1.5rem; font-weight:900;
     background:linear-gradient(135deg,var(--gold),var(--accent));
     -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    line-height:1.1; margin-bottom:8px;
+    line-height:1;
   }
-  .landing-desc {
-    color:var(--silver); font-size:0.95rem; margin-bottom:36px; line-height:1.6;
+  .landing-stat-lbl { font-size:0.62rem; color:var(--silver); letter-spacing:1.5px; text-transform:uppercase; margin-top:4px; }
+  .landing-divider { width:1px; height:40px; background:rgba(255,255,255,0.1); flex-shrink:0; }
+
+  /* Features grid */
+  .landing-features {
+    display:grid; grid-template-columns:1fr 1fr; gap:8px;
+    margin-bottom:28px; text-align:left;
   }
-  .landing-btns { display:flex; gap:14px; flex-direction:column; }
+  .landing-feature {
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:12px; padding:10px 14px;
+    font-size:0.8rem; color:#B0BEC5;
+    display:flex; align-items:center; gap:8px;
+    backdrop-filter:blur(6px);
+    transition:all 0.2s;
+  }
+  .landing-feature:hover {
+    background:rgba(0,229,255,0.07);
+    border-color:rgba(0,229,255,0.25);
+    color:#E0F7FA;
+    transform:translateY(-2px);
+  }
+  .landing-feature span { font-size:1.1rem; flex-shrink:0; }
+
+  /* Bouton admin */
+  .landing-admin-btn {
+    width:100%; padding:16px; font-size:1rem; font-weight:700;
+    font-family:'Exo 2',sans-serif; letter-spacing:2px;
+    background:linear-gradient(135deg,rgba(124,77,255,0.25),rgba(0,229,255,0.18));
+    border:1.5px solid rgba(0,229,255,0.4); color:#E0F7FA;
+    border-radius:14px; cursor:pointer;
+    transition:all 0.25s;
+    backdrop-filter:blur(10px);
+    box-shadow:0 4px 24px rgba(0,229,255,0.12);
+  }
+  .landing-admin-btn:hover {
+    background:linear-gradient(135deg,rgba(124,77,255,0.4),rgba(0,229,255,0.3));
+    border-color:var(--accent); color:#fff;
+    transform:translateY(-2px);
+    box-shadow:0 8px 32px rgba(0,229,255,0.25);
+  }
+
+  /* Badge actif */
+  .landing-badge {
+    display:inline-flex; align-items:center; gap:7px;
+    background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.35);
+    border-radius:20px; padding:5px 14px; font-size:0.74rem;
+    color:#69F0AE; letter-spacing:1px; text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .landing-badge .dot {
+    width:7px; height:7px; border-radius:50%; background:#00E676;
+    box-shadow:0 0 8px #00E676;
+    animation:blink-dot 1.4s ease-in-out infinite;
+  }
+  @keyframes blink-dot { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+
+  /* Drapeau Guinée */
+  .landing-flag {
+    display:flex; border-radius:5px; overflow:hidden;
+    width:48px; height:28px; margin:0 auto 16px;
+    box-shadow:0 3px 12px rgba(0,0,0,0.5);
+  }
+  .flag-band { flex:1; }
+
+  /* Footer texte */
+  .landing-footer-txt {
+    font-size:0.76rem; color:rgba(255,255,255,0.3);
+    margin-top:28px; line-height:1.7; letter-spacing:0.3px;
+  }
+  .landing-footer-txt strong { color:rgba(255,255,255,0.55); }
+
+  .landing-btns { display:flex; gap:12px; flex-direction:column; }
+
+  /* Countdown — conservé, juste ajustement couleurs */
+  .countdown-wrap {
+    margin-bottom:24px;
+  }
 
   /* ════════════════════════════════════
      ADMIN – LAYOUT
@@ -1243,183 +1446,118 @@
 <div id="screen-intro" class="screen active">
   <div class="intro-particles" id="intro-particles"></div>
   <div class="intro-wrap">
-    <div class="intro-scene">
-      <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;filter:drop-shadow(0 8px 32px rgba(0,0,0,0.5));">
+
+    <!-- Logo animé -->
+    <div class="intro-logo-ring">
+      <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Anneau extérieur tournant -->
+        <circle cx="55" cy="55" r="52" stroke="url(#ringGrad1)" stroke-width="1.5" stroke-dasharray="8 5" opacity="0.6">
+          <animateTransform attributeName="transform" type="rotate" from="0 55 55" to="360 55 55" dur="12s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Anneau intérieur -->
+        <circle cx="55" cy="55" r="44" stroke="url(#ringGrad2)" stroke-width="1" stroke-dasharray="4 8" opacity="0.4">
+          <animateTransform attributeName="transform" type="rotate" from="360 55 55" to="0 55 55" dur="8s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Halo central -->
+        <circle cx="55" cy="55" r="36" fill="url(#haloGrad)" opacity="0.15"/>
         <defs>
-          <radialGradient id="glow1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFD700" stop-opacity="0.3"/><stop offset="100%" stop-color="#FFD700" stop-opacity="0"/></radialGradient>
-          <linearGradient id="desk1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a4a7f"/><stop offset="100%" stop-color="#1a3060"/></linearGradient>
-          <linearGradient id="book1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#E53935"/><stop offset="100%" stop-color="#B71C1C"/></linearGradient>
-          <linearGradient id="book2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#1565C0"/><stop offset="100%" stop-color="#0D47A1"/></linearGradient>
-          <linearGradient id="book3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2E7D32"/><stop offset="100%" stop-color="#1B5E20"/></linearGradient>
-          <linearGradient id="skin1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8D5524"/><stop offset="100%" stop-color="#6D4C41"/></linearGradient>
-          <linearGradient id="skin2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A0522D"/><stop offset="100%" stop-color="#7B3F00"/></linearGradient>
-          <filter id="soft-glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="ringGrad1" x1="0" y1="0" x2="110" y2="110">
+            <stop offset="0%" stop-color="#FFD700"/>
+            <stop offset="100%" stop-color="#00E5FF"/>
+          </linearGradient>
+          <linearGradient id="ringGrad2" x1="110" y1="0" x2="0" y2="110">
+            <stop offset="0%" stop-color="#7C4DFF"/>
+            <stop offset="100%" stop-color="#FFD700"/>
+          </linearGradient>
+          <radialGradient id="haloGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FFD700" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+          </radialGradient>
         </defs>
-        <!-- Fond -->
-        <rect width="420" height="260" fill="#0f1e35" rx="16"/>
-        <rect x="0" y="200" width="420" height="60" fill="#0a1628"/>
-        <!-- Tableau -->
-        <rect x="120" y="12" width="180" height="90" fill="#1a3a2a" rx="6"/>
-        <rect x="123" y="15" width="174" height="84" fill="#1e4a34" rx="4"/>
-        <text x="140" y="40" fill="rgba(255,255,255,0.7)" font-size="10" font-family="monospace">E = mc²</text>
-        <text x="155" y="58" fill="rgba(255,255,255,0.6)" font-size="9" font-family="monospace">F = ma</text>
-        <text x="145" y="75" fill="rgba(255,255,255,0.55)" font-size="8" font-family="monospace">a² + b² = c²</text>
-        <text x="162" y="90" fill="rgba(0,229,255,0.7)" font-size="8" font-family="monospace">∑Fx = 0</text>
-        <line x1="130" y1="87" x2="290" y2="87" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
-        <!-- Halos -->
-        <ellipse cx="140" cy="160" rx="60" ry="40" fill="rgba(0,229,255,0.08)"/>
-        <ellipse cx="280" cy="165" rx="55" ry="35" fill="rgba(255,215,0,0.07)"/>
-        <!-- Bureau gauche -->
-        <rect x="60" y="175" width="100" height="8" fill="url(#desk1)" rx="3"/>
-        <rect x="72" y="183" width="6" height="22" fill="#1a3060" rx="2"/>
-        <rect x="146" y="183" width="6" height="22" fill="#1a3060" rx="2"/>
-        <!-- Livre ouvert gauche -->
-        <path d="M75 165 Q110 158 110 165 L110 178 Q110 172 75 178 Z" fill="#E8F5E9" opacity="0.9"/>
-        <path d="M110 165 Q145 158 145 165 L145 178 Q145 172 110 178 Z" fill="#FFF9E6" opacity="0.9"/>
-        <line x1="110" y1="165" x2="110" y2="178" stroke="#CCC" stroke-width="1"/>
-        <line x1="80" y1="169" x2="105" y2="169" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>
-        <line x1="80" y1="173" x2="103" y2="173" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
-        <line x1="115" y1="169" x2="140" y2="169" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>
-        <line x1="115" y1="173" x2="138" y2="173" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
-        <!-- Élève gauche -->
-        <rect x="88" y="138" width="26" height="32" fill="#1565C0" rx="5"/>
-        <rect x="97" y="138" width="8" height="8" fill="#FFF" rx="1"/>
-        <ellipse cx="101" cy="130" rx="13" ry="14" fill="url(#skin1)"/>
-        <path d="M88 122 Q101 112 114 122 Q114 118 101 116 Q88 118 88 122 Z" fill="#1a0a00"/>
-        <ellipse cx="96" cy="129" rx="2.5" ry="2" fill="#FFF"/>
-        <ellipse cx="106" cy="129" rx="2.5" ry="2" fill="#FFF"/>
-        <circle cx="97" cy="129" r="1.5" fill="#2c1810"/>
-        <circle cx="107" cy="129" r="1.5" fill="#2c1810"/>
-        <path d="M97 135 Q101 133 105 135" fill="none" stroke="#5D4037" stroke-width="1.2"/>
-        <ellipse cx="101" cy="143" rx="5" ry="4" fill="url(#skin1)"/>
-        <path d="M88 148 Q80 158 83 168" stroke="#8D5524" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <path d="M114 148 Q120 155 115 168" stroke="#8D5524" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <!-- Bulle pensée -->
-        <circle cx="120" cy="110" r="3" fill="rgba(255,215,0,0.5)"/>
-        <circle cx="127" cy="104" r="4.5" fill="rgba(255,215,0,0.4)"/>
-        <circle cx="136" cy="97" r="7" fill="rgba(255,215,0,0.35)"/>
-        <text x="130" y="100" fill="#FFD700" font-size="9" text-anchor="middle">?</text>
-        <!-- Bureau droit -->
-        <rect x="260" y="175" width="100" height="8" fill="url(#desk1)" rx="3"/>
-        <rect x="272" y="183" width="6" height="22" fill="#1a3060" rx="2"/>
-        <rect x="346" y="183" width="6" height="22" fill="#1a3060" rx="2"/>
-        <!-- Cahier + stylo -->
-        <rect x="272" y="162" width="50" height="16" fill="#FFF9C4" rx="3"/>
-        <line x1="275" y1="167" x2="319" y2="167" stroke="rgba(0,0,0,0.2)" stroke-width="0.8"/>
-        <line x1="275" y1="171" x2="319" y2="171" stroke="rgba(0,0,0,0.2)" stroke-width="0.8"/>
-        <line x1="275" y1="175" x2="319" y2="175" stroke="rgba(0,0,0,0.2)" stroke-width="0.8"/>
-        <line x1="281" y1="162" x2="281" y2="178" stroke="rgba(255,0,0,0.4)" stroke-width="0.8"/>
-        <rect x="324" y="160" width="4" height="22" fill="#1565C0" rx="2" transform="rotate(-20,326,171)"/>
-        <polygon points="329,178 327,185 325,178" fill="#FFD700" transform="rotate(-20,326,178)"/>
-        <!-- Élève droit -->
-        <rect x="285" y="138" width="26" height="32" fill="#6A1B9A" rx="5"/>
-        <rect x="294" y="138" width="8" height="8" fill="#FFF" rx="1"/>
-        <ellipse cx="298" cy="130" rx="13" ry="14" fill="url(#skin2)"/>
-        <path d="M285 122 Q298 110 311 122 Q311 116 298 114 Q285 116 285 122 Z" fill="#0d0500"/>
-        <path d="M293 114 Q293 108 298 106 Q303 108 303 114" fill="#0d0500"/>
-        <ellipse cx="293" cy="129" rx="2.5" ry="2" fill="#FFF"/>
-        <ellipse cx="303" cy="129" rx="2.5" ry="2" fill="#FFF"/>
-        <circle cx="294" cy="129" r="1.5" fill="#1a0a00"/>
-        <circle cx="304" cy="129" r="1.5" fill="#1a0a00"/>
-        <line x1="290" y1="125" x2="296" y2="126" stroke="#3d1f00" stroke-width="1.5"/>
-        <line x1="300" y1="126" x2="306" y2="125" stroke="#3d1f00" stroke-width="1.5"/>
-        <line x1="293" y1="136" x2="303" y2="136" stroke="#7B3F00" stroke-width="1.2"/>
-        <path d="M311 155 Q322 162 320 172" stroke="#A0522D" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <path d="M285 155 Q278 162 280 172" stroke="#A0522D" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <rect x="317" y="166" width="3" height="14" fill="#1565C0" rx="1.5" transform="rotate(-30,318,173)"/>
-        <!-- Règle -->
-        <rect x="20" y="95" width="55" height="10" fill="#FFD54F" rx="3" transform="rotate(-15,47,100)" opacity="0.85"/>
-        <line x1="28" y1="98" x2="28" y2="105" stroke="rgba(0,0,0,0.4)" stroke-width="0.8" transform="rotate(-15,47,100)"/>
-        <line x1="38" y1="98" x2="38" y2="103" stroke="rgba(0,0,0,0.3)" stroke-width="0.8" transform="rotate(-15,47,100)"/>
-        <line x1="48" y1="98" x2="48" y2="103" stroke="rgba(0,0,0,0.3)" stroke-width="0.8" transform="rotate(-15,47,100)"/>
-        <!-- Compas -->
-        <line x1="370" y1="55" x2="360" y2="100" stroke="#90CAF9" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="370" y1="55" x2="382" y2="100" stroke="#90CAF9" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="370" cy="55" r="3" fill="#FFD700"/>
-        <circle cx="360" cy="100" r="2" fill="#CFD8DC"/>
-        <circle cx="382" cy="100" r="2" fill="#CFD8DC"/>
-        <!-- Rapporteur -->
-        <path d="M22 220 A35 35 0 0 1 92 220 Z" fill="none" stroke="#80DEEA" stroke-width="2" opacity="0.7"/>
-        <line x1="57" y1="220" x2="57" y2="185" stroke="#80DEEA" stroke-width="1" opacity="0.5"/>
-        <!-- Livres gauche -->
-        <rect x="14" y="170" width="38" height="10" fill="url(#book1)" rx="2"/>
-        <rect x="16" y="160" width="34" height="10" fill="url(#book2)" rx="2"/>
-        <rect x="12" y="150" width="40" height="10" fill="url(#book3)" rx="2"/>
-        <text x="18" y="179" fill="rgba(255,255,255,0.6)" font-size="5">MATHS</text>
-        <text x="20" y="169" fill="rgba(255,255,255,0.6)" font-size="5">PHYSIQUE</text>
-        <text x="16" y="159" fill="rgba(255,255,255,0.6)" font-size="5">HISTOIRE</text>
-        <!-- Livres droite -->
-        <rect x="368" y="170" width="38" height="10" fill="url(#book3)" rx="2"/>
-        <rect x="370" y="160" width="34" height="10" fill="url(#book1)" rx="2"/>
-        <rect x="366" y="150" width="40" height="10" fill="url(#book2)" rx="2"/>
-        <text x="372" y="179" fill="rgba(255,255,255,0.6)" font-size="5">SCIENCES</text>
-        <text x="374" y="169" fill="rgba(255,255,255,0.6)" font-size="5">FRANÇAIS</text>
-        <text x="370" y="159" fill="rgba(255,255,255,0.6)" font-size="5">GÉO/CIVIQ</text>
-        <!-- Ampoule -->
-        <ellipse cx="210" cy="33" rx="10" ry="12" fill="#FFD700" opacity="0.9" filter="url(#soft-glow)"/>
-        <rect x="206" y="44" width="8" height="4" fill="#FFD700" rx="1"/>
-        <line x1="205" y1="49" x2="215" y2="49" stroke="#FFD700" stroke-width="1.5"/>
-        <line x1="206" y1="51" x2="214" y2="51" stroke="#FFD700" stroke-width="1.5"/>
-        <line x1="210" y1="18" x2="210" y2="13" stroke="#FFD700" stroke-width="1.5" opacity="0.7"/>
-        <line x1="222" y1="22" x2="225" y2="18" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
-        <line x1="198" y1="22" x2="195" y2="18" stroke="#FFD700" stroke-width="1.5" opacity="0.6"/>
-        <!-- Étoiles -->
-        <circle cx="50" cy="40" r="2" fill="#FFD700" opacity="0.8"><animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite"/></circle>
-        <circle cx="380" cy="60" r="1.5" fill="#00E5FF" opacity="0.7"><animate attributeName="opacity" values="0.7;0.1;0.7" dur="1.8s" repeatCount="indefinite"/></circle>
-        <circle cx="200" cy="15" r="1.5" fill="#FFD700" opacity="0.6"><animate attributeName="opacity" values="0.6;0.15;0.6" dur="2.5s" repeatCount="indefinite"/></circle>
-        <circle cx="340" cy="25" r="2" fill="#FF80AB" opacity="0.7"><animate attributeName="opacity" values="0.7;0.2;0.7" dur="1.6s" repeatCount="indefinite"/></circle>
       </svg>
+      <div class="intro-logo-emoji">🧠</div>
     </div>
-    <div class="intro-sub" style="font-size:0.9rem;letter-spacing:4px;">
-      Olympiade Éducative · République de Guinée 🇬🇳 · BHDS 2026
+
+    <!-- Titre -->
+    <div class="intro-brand">OLYMPIADE<br>DES CERVEAUX</div>
+    <div class="intro-subtitle">Collection BHDS · République de Guinée · 2026</div>
+
+    <!-- Drapeau -->
+    <div class="intro-flag">
+      <div class="intro-flag-band" style="background:#CE1126;"></div>
+      <div class="intro-flag-band" style="background:#FCD116;"></div>
+      <div class="intro-flag-band" style="background:#009460;"></div>
     </div>
+
+    <!-- Stats rapides -->
+    <div class="intro-stats">
+      <div class="intro-stat">
+        <div class="intro-stat-num">5</div>
+        <div class="intro-stat-lbl">Niveaux</div>
+      </div>
+      <div class="intro-stat-sep"></div>
+      <div class="intro-stat">
+        <div class="intro-stat-num">1000+</div>
+        <div class="intro-stat-lbl">Questions</div>
+      </div>
+      <div class="intro-stat-sep"></div>
+      <div class="intro-stat">
+        <div class="intro-stat-num">17</div>
+        <div class="intro-stat-lbl">Matières</div>
+      </div>
+    </div>
+
+    <!-- Badges -->
     <div class="intro-badges">
-      <span class="intro-badge" style="animation-delay:0.1s">📐 Maths</span>
-      <span class="intro-badge" style="animation-delay:0.2s">⚗️ Physique-Chimie</span>
-      <span class="intro-badge" style="animation-delay:0.3s">🌿 Sciences de la Vie</span>
-      <span class="intro-badge" style="animation-delay:0.4s">✍️ Français</span>
-      <span class="intro-badge" style="animation-delay:0.5s">🌍 Histoire</span>
-      <span class="intro-badge" style="animation-delay:0.6s">🧭 Géographie</span>
-      <span class="intro-badge" style="animation-delay:0.7s">🏛️ Éducation Civique</span>
-      <span class="intro-badge" style="animation-delay:0.8s">📏 Géométrie</span>
-      <span class="intro-badge" style="animation-delay:0.9s">🔢 Arithmétique</span>
-      <span class="intro-badge" style="animation-delay:1.0s">🌐 Anglais</span>
-      <span class="intro-badge" style="animation-delay:1.1s">💡 Philosophie</span>
-      <span class="intro-badge" style="animation-delay:1.2s">📈 Économie</span>
-      <span class="intro-badge" style="animation-delay:1.3s">⚡ Électricité</span>
-      <span class="intro-badge" style="animation-delay:1.4s">☢️ Physique nucléaire</span>
+      <span class="intro-badge" style="animation-delay:0.05s">📐 Maths</span>
+      <span class="intro-badge" style="animation-delay:0.10s">⚗️ Physique</span>
+      <span class="intro-badge" style="animation-delay:0.15s">🧪 Chimie</span>
+      <span class="intro-badge" style="animation-delay:0.20s">🌿 Sciences de la Vie</span>
+      <span class="intro-badge" style="animation-delay:0.25s">✍️ Français</span>
+      <span class="intro-badge" style="animation-delay:0.30s">🌍 Histoire</span>
+      <span class="intro-badge" style="animation-delay:0.35s">🧭 Géographie</span>
+      <span class="intro-badge" style="animation-delay:0.40s">🏛️ Philosophie</span>
+      <span class="intro-badge" style="animation-delay:0.45s">📈 Économie</span>
+      <span class="intro-badge" style="animation-delay:0.50s">🌐 Anglais</span>
+      <span class="intro-badge" style="animation-delay:0.55s">⚡ Électricité</span>
+      <span class="intro-badge" style="animation-delay:0.60s">☢️ Physique nucléaire</span>
+      <span class="intro-badge" style="animation-delay:0.65s">🔭 Optique</span>
+      <span class="intro-badge" style="animation-delay:0.70s">💫 Mécanique</span>
     </div>
+
+    <!-- Loader -->
     <div class="intro-loader-wrap">
       <div class="intro-loader-track"><div class="intro-loader-fill" id="intro-loader"></div></div>
-      <div class="intro-loader-label" id="intro-loader-label">Chargement en cours…</div>
+      <div class="intro-loader-label" id="intro-loader-label">Initialisation…</div>
     </div>
-    <button class="intro-enter-btn" id="intro-enter-btn" onclick="showScreen('screen-landing')">⚡ ENTRER DANS L'ARÈNE</button>
+
+    <button class="intro-enter-btn" id="intro-enter-btn" onclick="showScreen('screen-landing')">
+      ⚡ ENTRER DANS L'ARÈNE
+    </button>
     <div class="intro-scroll-hint" id="intro-scroll-hint">appuie pour continuer</div>
   </div>
 </div>
 
 <div id="screen-landing" class="screen">
-  <div class="arena-header" style="position:relative;overflow:hidden;">
-    <!-- Bande lumineuse animée derrière le header -->
+  <div class="arena-header" style="position:relative;overflow:hidden;z-index:2;">
+    <!-- Bande lumineuse animée -->
     <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;">
       <div style="position:absolute;top:-30px;left:-10%;width:120%;height:3px;
         background:linear-gradient(90deg,transparent,var(--gold),var(--accent),var(--gold),transparent);
         animation:shine-line 3s linear infinite;"></div>
     </div>
     <style>
-      @keyframes shine-line {
-        0%{ transform:translateX(-100%); } 100%{ transform:translateX(100%); }
-      }
+      @keyframes shine-line { 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
     </style>
     <div style="position:relative;z-index:1;">
-      <div class="arena-logo" style="font-size:clamp(1.2rem,4vw,2rem);letter-spacing:6px;">
+      <div class="arena-logo" style="font-size:clamp(1.1rem,4vw,1.9rem);letter-spacing:5px;">
         🧠 OLYMPIADE DES CERVEAUX
       </div>
       <div class="arena-sub" style="margin-top:6px;">
         Compétition Éducative · République de Guinée 🇬🇳 · Édition 2026
       </div>
     </div>
-    <!-- Bouton spectateur en haut à droite -->
+    <!-- Bouton spectateur -->
     <button class="btn btn-outline btn-sm" onclick="showScreen('screen-spectator')"
       style="position:absolute;top:50%;right:20px;transform:translateY(-50%);
         border-color:rgba(0,230,118,0.5);color:#00E676;font-size:0.72rem;z-index:2;
@@ -1429,20 +1567,23 @@
       Direct
     </button>
   </div>
-  <div class="landing-content" style="padding-top:32px; padding-bottom:40px;">
 
+  <div class="landing-content" style="padding-top:36px;">
+
+    <!-- Drapeau Guinée -->
     <div class="landing-flag">
-      <div class="flag-band"></div>
-      <div class="flag-band"></div>
-      <div class="flag-band"></div>
+      <div class="flag-band" style="background:#CE1126;"></div>
+      <div class="flag-band" style="background:#FCD116;"></div>
+      <div class="flag-band" style="background:#009460;"></div>
     </div>
 
+    <!-- Badge actif -->
     <div class="landing-badge"><div class="dot"></div>Plateforme active</div>
 
+    <!-- Podium / Trophée existant — inchangé -->
     <div class="trophy-icon" style="font-size:0; position:relative; width:120px; height:120px; margin:0 auto 8px;">
       <style>
         .podium-wrap { position:relative; width:120px; height:120px; }
-        /* Particules tournantes */
         .p-ring {
           position:absolute; inset:0; border-radius:50%;
           border:2px dashed rgba(255,215,0,0.25);
@@ -1454,8 +1595,6 @@
           animation:spin-ring 5s linear infinite reverse;
         }
         @keyframes spin-ring { to{ transform:rotate(360deg); } }
-
-        /* Éclairs orbitaux */
         .orb-dot {
           position:absolute; width:8px; height:8px; border-radius:50%;
           top:50%; left:50%; margin:-4px;
@@ -1468,15 +1607,11 @@
           from{ transform:rotate(0deg) translateX(var(--r)) rotate(0deg); }
           to  { transform:rotate(360deg) translateX(var(--r)) rotate(-360deg); }
         }
-
-        /* Podium SVG */
         .podium-svg {
           position:absolute; inset:0; width:100%; height:100%;
           filter:drop-shadow(0 0 20px rgba(255,215,0,0.6));
           animation:pulse-trophy 2.5s ease-in-out infinite;
         }
-
-        /* Médailles flottantes */
         .medal-float {
           position:absolute; font-size:1.1rem; animation:float-medal 3s ease-in-out infinite;
         }
@@ -1497,41 +1632,30 @@
         <svg class="podium-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="cup1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#FFF176"/>
-              <stop offset="100%" stop-color="#FF8C00"/>
+              <stop offset="0%" stop-color="#FFF176"/><stop offset="100%" stop-color="#FF8C00"/>
             </linearGradient>
             <linearGradient id="pod1" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#FFD700"/>
-              <stop offset="100%" stop-color="#B8860B"/>
+              <stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#B8860B"/>
             </linearGradient>
             <linearGradient id="pod2" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#B0BEC5"/>
-              <stop offset="100%" stop-color="#607D8B"/>
+              <stop offset="0%" stop-color="#B0BEC5"/><stop offset="100%" stop-color="#607D8B"/>
             </linearGradient>
             <linearGradient id="pod3" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#FFAB40"/>
-              <stop offset="100%" stop-color="#8D4B00"/>
+              <stop offset="0%" stop-color="#FFAB40"/><stop offset="100%" stop-color="#8D4B00"/>
             </linearGradient>
           </defs>
-          <!-- Podium blocs -->
           <rect x="36" y="62" width="28" height="28" rx="3" fill="url(#pod1)"/>
           <rect x="10" y="72" width="24" height="18" rx="3" fill="url(#pod2)"/>
           <rect x="66" y="78" width="24" height="12" rx="3" fill="url(#pod3)"/>
-          <!-- Numéros podium -->
           <text x="50" y="80" text-anchor="middle" fill="#050A14" font-size="10" font-weight="900" font-family="Orbitron,sans-serif">1</text>
           <text x="22" y="86" text-anchor="middle" fill="#fff" font-size="8" font-weight="900" font-family="Orbitron,sans-serif">2</text>
           <text x="78" y="88" text-anchor="middle" fill="#fff" font-size="8" font-weight="900" font-family="Orbitron,sans-serif">3</text>
-          <!-- Coupe sur le 1er -->
           <path d="M42,55 Q42,44 50,42 Q58,44 58,55 Q55,58 50,59 Q45,58 42,55Z" fill="url(#cup1)"/>
           <rect x="47" y="59" width="6" height="4" fill="#FFD700"/>
           <rect x="44" y="63" width="12" height="2.5" rx="1" fill="#FFA000"/>
-          <!-- Étoile sur la coupe -->
           <polygon points="50,38 51.5,43 56,43 52.5,46 54,51 50,48 46,51 47.5,46 44,43 48.5,43" fill="#FFF176" opacity="0.95"/>
-          <!-- Confettis -->
           <rect x="20" y="30" width="3" height="3" rx="0.5" fill="#FF4081" transform="rotate(25,21,31)" opacity="0.8"/>
           <rect x="72" y="25" width="3" height="3" rx="0.5" fill="#00E5FF" transform="rotate(-15,73,26)" opacity="0.8"/>
-          <rect x="15" y="50" width="2.5" height="2.5" rx="0.5" fill="#FFD700" transform="rotate(40,16,51)" opacity="0.7"/>
-          <rect x="78" y="48" width="2.5" height="2.5" rx="0.5" fill="#69F0AE" transform="rotate(-30,79,49)" opacity="0.7"/>
           <circle cx="30" cy="22" r="2" fill="#FFD700" opacity="0.6"/>
           <circle cx="68" cy="18" r="1.5" fill="#FF4081" opacity="0.6"/>
           <circle cx="82" cy="35" r="1.5" fill="#00E5FF" opacity="0.6"/>
@@ -1541,12 +1665,14 @@
         <div class="medal-float">🥉</div>
       </div>
     </div>
-    <h1 class="landing-title">BHDS<br><span style="font-size:0.65em;letter-spacing:6px;background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ARENA ÉDUCATIVE</span></h1>
-    <p class="landing-desc">Quiz interclasse / interécole — programme guinéen.<br>6 niveaux · 60 questions par niveau · Qualification → 16es → Finale · Matchs en direct · Classement en temps réel.</p>
 
+    <h1 class="landing-title">BHDS<br><span style="font-size:0.6em;letter-spacing:6px;">ARENA ÉDUCATIVE</span></h1>
+    <p class="landing-desc">Quiz interclasse · interécole · programme guinéen.<br>5 niveaux · 60 questions par niveau · Qualification → Finale · Matchs en direct · Classement temps réel.</p>
+
+    <!-- Stats -->
     <div class="landing-stats-row">
       <div class="landing-stat">
-        <div class="landing-stat-num">6</div>
+        <div class="landing-stat-num">5</div>
         <div class="landing-stat-lbl">Niveaux</div>
       </div>
       <div class="landing-divider"></div>
@@ -1556,7 +1682,7 @@
       </div>
       <div class="landing-divider"></div>
       <div class="landing-stat">
-        <div class="landing-stat-num">1010+</div>
+        <div class="landing-stat-num">1000+</div>
         <div class="landing-stat-lbl">Questions</div>
       </div>
       <div class="landing-divider"></div>
@@ -1566,16 +1692,17 @@
       </div>
     </div>
 
+    <!-- Features -->
     <div class="landing-features">
       <div class="landing-feature"><span>🎯</span> Qualification · Phase d'accès</div>
       <div class="landing-feature"><span>⚔️</span> 16es → Quarts → Demis → Finale</div>
-      <div class="landing-feature"><span>📐</span> Maths · Physique-Chimie · Sciences</div>
+      <div class="landing-feature"><span>📐</span> Maths · Physique · Sciences</div>
       <div class="landing-feature"><span>✍️</span> Français · Histoire · Géographie</div>
-      <div class="landing-feature"><span>💡</span> Civique · Économie · Anglais</div>
+      <div class="landing-feature"><span>💡</span> Philosophie · Économie · Anglais</div>
       <div class="landing-feature"><span>⚡</span> Matchs en direct · Arbitrage admin</div>
     </div>
 
-    <!-- COMPTE À REBOURS -->
+    <!-- Compte à rebours — inchangé -->
     <div class="countdown-wrap" id="countdown-wrap">
       <div class="countdown-label" id="cd-label">🏁 Début de la compétition dans</div>
       <div class="countdown-units" id="cd-units">
@@ -1593,7 +1720,6 @@
       <button class="landing-admin-btn" onclick="showAdminLogin()">
         🔐 Accès Administrateur
       </button>
-
     </div>
 
     <p class="landing-footer-txt">
@@ -1602,7 +1728,6 @@
     </p>
   </div>
 </div>
-
 <!-- ══════════ ADMIN LOGIN ══════════ -->
 <div id="screen-admin-login" class="screen" style="justify-content:center;padding:20px;">
   <div class="admin-login card">
@@ -1731,6 +1856,31 @@
               border:1.5px solid rgba(124,77,255,0.5);color:#CE93D8;
               display:flex;align-items:center;gap:8px;padding:7px 16px;border-radius:10px;cursor:pointer;">
             👁 Aperçu vue joueur
+          </button>
+        </div>
+
+        <!-- BOUTONS AJOUT PAR NIVEAU -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+          <span style="font-size:0.78rem;color:var(--silver);letter-spacing:1px;text-transform:uppercase;align-self:center;">➕ Ajouter pour le niveau :</span>
+          <button class="btn btn-sm" onclick="openAddQuestionForLevel(1)"
+            style="background:linear-gradient(135deg,rgba(0,230,118,0.22),rgba(0,188,212,0.15));border:1.5px solid #00E676;color:#00E676;padding:6px 14px;border-radius:9px;cursor:pointer;font-weight:700;">
+            🟢 Niv.1
+          </button>
+          <button class="btn btn-sm" onclick="openAddQuestionForLevel(2)"
+            style="background:linear-gradient(135deg,rgba(0,176,255,0.22),rgba(0,229,255,0.12));border:1.5px solid #00B0FF;color:#00B0FF;padding:6px 14px;border-radius:9px;cursor:pointer;font-weight:700;">
+            🔵 Niv.2
+          </button>
+          <button class="btn btn-sm" onclick="openAddQuestionForLevel(3)"
+            style="background:linear-gradient(135deg,rgba(255,215,64,0.22),rgba(255,160,0,0.12));border:1.5px solid #FFD740;color:#FFD740;padding:6px 14px;border-radius:9px;cursor:pointer;font-weight:700;">
+            🟡 Niv.3
+          </button>
+          <button class="btn btn-sm" onclick="openAddQuestionForLevel(4)"
+            style="background:linear-gradient(135deg,rgba(255,109,0,0.22),rgba(255,87,34,0.12));border:1.5px solid #FF6D00;color:#FF9800;padding:6px 14px;border-radius:9px;cursor:pointer;font-weight:700;">
+            🟠 Niv.4
+          </button>
+          <button class="btn btn-sm" onclick="openAddQuestionForLevel(5)"
+            style="background:linear-gradient(135deg,rgba(255,23,68,0.22),rgba(255,109,0,0.12));border:1.5px solid #FF1744;color:#FF5252;padding:6px 14px;border-radius:9px;cursor:pointer;font-weight:700;">
+            🔴 Niv.5
           </button>
         </div>
 
@@ -3691,6 +3841,23 @@ ARENA_REF.on('value',
       }
     }
 
+    // ── Sync temps réel des questions pendant un quiz actif ──
+    // Si l'admin ajoute une question pendant que le joueur joue, on l'injecte dans quizQuestions
+    if (currentLevelId && quizQuestions && quizQuestions.length > 0 &&
+        document.getElementById('pv-quiz') &&
+        document.getElementById('pv-quiz').style.display !== 'none') {
+      const _lqLive = _cache.levelQuestions && _cache.levelQuestions[String(currentLevelId)];
+      const _lqArr = Array.isArray(_lqLive) ? _lqLive : (_lqLive ? Object.values(_lqLive) : null);
+      if (_lqArr && _lqArr.length > quizQuestions.length) {
+        // Nouvelles questions disponibles : ajouter celles manquantes à la fin
+        const _existingIds = new Set(quizQuestions.map(q => q.id));
+        _lqArr.forEach(q => { if (!_existingIds.has(q.id)) quizQuestions.push(q); });
+        // Mettre à jour le compteur total si affiché
+        const _qcEl = document.getElementById('q-count');
+        if (_qcEl && !answered) _qcEl.textContent = 'Question ' + (quizIndex+1) + ' / ' + quizQuestions.length;
+      }
+    }
+
     // Mettre à jour le score affiché si joueur connecté
     if (currentPlayer) {
       const p = _cache.players.find(pl => pl.code === currentPlayer.code);
@@ -4678,6 +4845,13 @@ function openAddQuestion(){
   _updateMatieres(lv);
 }
 
+function openAddQuestionForLevel(levelNum){
+  const sel = document.getElementById('aq-level');
+  if(sel){ sel.value = String(levelNum); }
+  _updateMatieres(String(levelNum));
+  document.getElementById('modal-add-question').classList.add('open');
+}
+
 function addQuestion(){
   const text=document.getElementById('aq-text').value.trim();
   const a=document.getElementById('aq-a').value.trim();
@@ -4691,7 +4865,21 @@ function addQuestion(){
   const matiere=document.getElementById('aq-matiere').value;
   if(!text||!a||!b||!c||!dv){ toast('Remplis tous les champs','error'); return; }
   const d=getData();
-  d.questions.push({ id:Date.now(), text, options:[a,b,c,dv], correct, level, matiere, createdAt:new Date().toISOString() });
+  const _newQ = { id:Date.now(), text, options:[a,b,c,dv], correct, level, matiere, createdAt:new Date().toISOString() };
+  d.questions.push(_newQ);
+
+  // ── Injection temps réel côté joueur ──
+  // Si un joueur joue actuellement CE niveau, on injecte la question directement dans sa session
+  if(currentLevelId && String(currentLevelId) === String(level) && quizQuestions && document.getElementById('pv-quiz').style.display !== 'none'){
+    quizQuestions.push(_newQ);
+  }
+  // Pousser aussi dans levelQuestions[level] sur Firebase (pool partagé)
+  if(!d.levelQuestions) d.levelQuestions = {};
+  const _lqKey = String(level);
+  if(!Array.isArray(d.levelQuestions[_lqKey])) d.levelQuestions[_lqKey] = [];
+  d.levelQuestions[_lqKey].push(_newQ);
+  if(ARENA_REF){ ARENA_REF.child('levelQuestions').child(_lqKey).set(d.levelQuestions[_lqKey]).catch(()=>{}); }
+
   saveData(d);
   closeModal('modal-add-question');
   renderQuestions();
