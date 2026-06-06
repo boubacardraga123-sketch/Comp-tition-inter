@@ -4058,6 +4058,8 @@ function showScreen(id){
 function showAdminLogin(){ showScreen('screen-admin-login'); }
 
 function checkAdminPass(){
+  const ADMIN_EMAIL = 'boubacardraga123@gmail.com';
+  const ADMIN_PASS  = 'Bhds123@';
   const email = (document.getElementById('admin-email').value||'').trim();
   const pass  = document.getElementById('admin-pass').value;
   const errEl = document.getElementById('admin-login-error');
@@ -4069,26 +4071,15 @@ function checkAdminPass(){
     return;
   }
 
-  const btn = document.querySelector('#screen-admin-login .btn-gold');
-  btn.textContent='Connexion…'; btn.disabled=true;
-
-  firebase.auth().signInWithEmailAndPassword(email, pass)
-    .then(() => {
-      btn.textContent='Connexion'; btn.disabled=false;
-      showScreen('screen-admin');
-      renderDashboard(); renderPlayers(); renderQuestions(); renderClassement();
-      toast('Bienvenue Admin !','success');
-    })
-    .catch(err => {
-      btn.textContent='Connexion'; btn.disabled=false;
-      let msg = 'Identifiants incorrects.';
-      if(err.code==='auth/invalid-email') msg='Adresse email invalide.';
-      if(err.code==='auth/user-not-found') msg='Aucun compte avec cet email.';
-      if(err.code==='auth/wrong-password') msg='Mot de passe incorrect.';
-      if(err.code==='auth/too-many-requests') msg='Trop de tentatives. Réessayez plus tard.';
-      errEl.textContent=msg; errEl.style.display='block';
-      document.getElementById('admin-pass').value='';
-    });
+  if(email === ADMIN_EMAIL && pass === ADMIN_PASS){
+    showScreen('screen-admin');
+    renderDashboard(); renderPlayers(); renderQuestions(); renderClassement();
+    toast('Bienvenue Admin !','success');
+  } else {
+    errEl.textContent='Email ou mot de passe incorrect.';
+    errEl.style.display='block';
+    document.getElementById('admin-pass').value='';
+  }
 }
 
 function adminLogout(){
