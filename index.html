@@ -355,6 +355,7 @@ function renderElevesListDOM(){
           </select>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="copyEleveLink('${e.token}')">🔗 Copier</button>
+        <button class="btn btn-ghost btn-sm" onclick="setEleveTel('${e.token}','${esc(e.tel||'').replace(/'/g,"\\'")}')" title="${e.tel?'Modifier le numéro : '+esc(e.tel):'Ajouter un numéro WhatsApp'}">${e.tel?'✏️':'⚠️ N°'}</button>
         <button class="btn btn-green btn-sm" onclick="sendEleveWA('${e.token}','${esc(e.nom).replace(/'/g,"\\'")}','${e.tel||''}')">📲</button>
         <button class="btn btn-dark btn-sm" onclick="sendEleveMail('${e.token}','${esc(e.nom).replace(/'/g,"\\'")}','${e.email||''}')">✉️</button>
         <button class="btn btn-danger btn-sm" onclick="deleteEleve('${e.token}','${esc(e.nom).replace(/'/g,"\\'")}')">🗑️</button>
@@ -447,6 +448,12 @@ window.sendEleveMail = function(token, nom, email){
 };
 window.setEleveFiliere = async function(token, val){
   try{ await updateDoc(doc(fbDB, C_ELEVES, token), { filiere: val||null }); toast('✅ Filière mise à jour.'); }
+  catch(e){ toast('❌ Erreur.'); }
+};
+window.setEleveTel = async function(token, currentTel){
+  const val = prompt('Numéro WhatsApp de l\'élève (ex : 622000000) :', currentTel||'');
+  if(val===null) return;
+  try{ await updateDoc(doc(fbDB, C_ELEVES, token), { tel: val.trim()||null }); toast('✅ Numéro mis à jour.'); }
   catch(e){ toast('❌ Erreur.'); }
 };
 window.deleteEleve = async function(token, nom){
